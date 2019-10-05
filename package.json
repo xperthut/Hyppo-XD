@@ -1,0 +1,31 @@
+{
+  "name": "interface",
+  "version": "1.0.1",
+  "description": "Hypotheses extraction tool using visualization",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "rebuild": "electron-rebuild -f -w interface"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xperthut/Hyppo-X-desktop.git"
+  },
+  "author": "Methun",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xperthut/Hyppo-X-desktop/issues"
+  },
+  "homepage": "https://github.com/xperthut/Hyppo-X-desktop#readme",
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "nan": "^2.14.0"
+  },
+  "devDependencies": {
+    "electron": "^6.0.10",
+    "electron-rebuild": "^1.8.6",
+    "jquery": "^3.4.1",
+    "rebuild": "^0.1.2"
+  },
+  "gypfile": true
+}
