@@ -14,28 +14,9 @@ function createWindow () {
     height: height,
     //fullscreen: true,
     webPreferences: {
-      nodeIntegration: true,
-			nativeWindowOpen:true
+      nodeIntegration: true
     }
   });
-
-	win.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
-  if (frameName === 'modal') {
-    // open window as modal
-    event.preventDefault();
-    Object.assign(options, {
-      modal: true,
-      parent: win,
-      width: 800,
-      height: 600,
-			autoHideMenuBar: true,
-			frame: false,
-			alwaysOnTop:true,
-			center: true
-    })
-    event.newGuest = new BrowserWindow(options)
-  }
-});
 
   // and load the index.html of the app.
   win.loadFile('topoview.html');
@@ -61,9 +42,9 @@ app.on('ready', createWindow);
 app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  //if (process.platform !== 'darwin') {
+  if (process.platform !== 'darwin') {
     app.quit();
-  //}
+  }
 });
 
 app.on('activate', () => {

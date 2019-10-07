@@ -1,18 +1,12 @@
-<script src='./assets/js/d3/html.js?t=kjhjbhgj'></script>
 <script>
+if(!navigator.onLine){
+  alert("No internet connection");
+}
 setInterval(function(){
   if(!navigator.onLine){
     alert("No internet connection");
   }
 }, 3000);
-
-//let randV = Math.round(Math.random()*1000000+1);
-let _html = new Html();
-
-// Global variables
-var fl = _html.getAllCsvFiles();
-var jfl = _html.getAllJsonFiles();
-
 </script>
 <!DOCTYPE HTML>
 <html>
@@ -47,6 +41,14 @@ var jfl = _html.getAllJsonFiles();
         <div id="tooltip"></div>
         <!-- Main -->
         <div id="main">
+          <!-- Create new mapper object -->
+          <section id="mapperheader">
+              <div class="logohead">
+                  <div class="dropdown">
+                      <button class="dropbtn" id="mapperModalBtn">New mapper</button>
+                  </div>
+              </div>
+          </section>
             <!-- Select csv file -->
             <section id="header">
                 <div class="logohead">

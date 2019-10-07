@@ -46,13 +46,15 @@ $(function () {
     };
 
 // Graph management class
-    function Graph(_fl, _jfl) {
+    function Graph() {
+        this._electron = require('electron');
         this._fs = require('fs');
         this._path = require("path");
         this._dataDir = this._path.resolve("./Data/");
+        this._browserWindow = this._electron.remote.BrowserWindow;
 
-        this.fl = _fl;
-        this.jfl = _jfl;
+        this.fl = this.getAllCsvFiles();
+        this.jfl = this.getAllJsonFiles();
         this.svg = d3.select("svg").on("click", function () {
             $("#top-nav").css("display", "none");
             $("#tooltip").css("display", "none");
@@ -116,6 +118,55 @@ $(function () {
 
     Graph.prototype = {
         constructor: Graph,
+
+        // Get all JSON files
+        getAllFiles: function(_folder){
+          try {
+            var files = this._fs.readdirSync(_folder);
+            return files;
+          }
+          catch(err) {alert(err); return [];}
+        },
+
+        // Function to get all file names in a directory
+        getAllCsvFiles: function(){
+        	var _dir = this._dataDir + "/csv";
+          var files = this.getAllFiles(_dir);
+          var flist = [];
+          for(var i=0; i<files.length; i++){
+            if(files[i].indexOf('.csv')>=0 || files[i].indexOf('.CSV')>=0){
+                flist.push(files[i]);
+            }
+          }
+
+          return flist;
+        },
+
+        // Get all JSON files
+        getAllJsonFiles: function(){
+          var _dir = this._dataDir + "/json";
+          var _folderList = this.getAllFiles(_dir);
+          var _fList = [];
+          for(var i=0; i<_folderList.length; i++){
+            if(_folderList[i].indexOf(".")===-1){
+              var _f={name:"", files:[]};
+              _f.name = _folderList[i];
+              _f.files = [];
+
+              var _jList = this.getAllFiles(_dir+"/"+_folderList[i]);
+
+              for(var j=0; j<_jList.length; j++){
+                if(_jList[j].substring(0, 6)!="coord_" && (_jList[j].indexOf('.json')>=0 || _jList[j].indexOf('.JSON')>=0)){
+                    _f.files.push(_jList[j]);
+                }
+              }
+
+              _fList.push(_f);
+            }
+          }
+
+          return _fList;
+        },
 
         zoom_actions: function () {
             $("#top-nav").css("display", "none");
@@ -2757,7 +2808,7 @@ $(function () {
             for (var i = 0; i < this.jfl.length; i++) {
                 if (this.jfl[i].name === filename) {
                     s = "";
-                    for (var j = 0; j < jfl[i].files.length; j++) {
+                    for (var j = 0; j < this.jfl[i].files.length; j++) {
                         //s += "<a href='javascript:void(0)' class='file-json-select' row='" + i + "' seq='" + j + "' title='" + this.jfl[i].files[j] + "'>" + this.jfl[i].files[j] + "</a>";
                         s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.jfl[i].files[j] + "</option>";
                     }
@@ -2784,6 +2835,30 @@ $(function () {
         },
 
         loadFiles: function () {
+          /*this._electron = require('electron');
+          this._fs = require('fs');
+          this._path = require("path");
+          this._dataDir = this._path.resolve("./Data/");
+          this._browserWindow = electron.remote.BrowserWindow;
+*/
+            $("#mapperModalBtn").on("click", ()=>{
+              const modalPath = this._path.join('file://', __dirname, 'mapper.html');
+              let cWin = new this._browserWindow({
+                width: 800,
+                height: 600,
+                parent: this._electron.remote.getCurrentWindow(),
+                webPreferences: {
+                  nodeIntegration: true
+                }
+              });
+              // Open the DevTools.
+              //cWin.webContents.openDevTools();
+
+              cWin.on('close', function () { cWin = null });
+              cWin.loadURL(modalPath);
+              cWin.show();
+            });
+
             $("#top-nav").css("display", "none");
             var s = "";
             for (var i = 0; i < this.fl.length; i++) {
@@ -2899,7 +2974,7 @@ $(function () {
         });
     });
 
-    var gInstance = new Graph(fl, jfl);
+    var gInstance = new Graph();//(fl, jfl);
     gInstance.loadFiles();
 
 });
