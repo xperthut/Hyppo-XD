@@ -2852,12 +2852,14 @@ $(function () {
                 }
               });
               // Open the DevTools.
-              //cWin.webContents.openDevTools();
+              cWin.webContents.openDevTools();
 
               cWin.on('close', function () { cWin = null });
               cWin.loadURL(modalPath);
               cWin.show();
             });
+
+
 
             $("#top-nav").css("display", "none");
             var s = "";

@@ -18,8 +18,41 @@
 
 #include <math.h>
 #include <string>
+#include <fstream>
 
 #include "hyppox/hyppox.h"
+
+namespace file_handler{
+  class File_Handler{
+  public:
+    File_Handler() = default;
+    ~File_Handler() = default;
+
+    void setFile(std::string filePath){this->fileNameWithPath = filePath;}
+
+    std::string getFileHeader(){
+      std::string line="";
+
+      try {
+          std::ifstream fileReader(this->fileNameWithPath);
+
+          if(fileReader.is_open()){
+            getline(fileReader, line);
+          }else{
+              line = "Error to read file. Please check the file name and path.";
+          }
+
+      } catch (std::exception &e) {
+          line = "Error to read file: " + std::string(e.what());
+      }
+
+      return line;
+    }
+
+  private:
+    std::string fileNameWithPath;
+  };
+}
 
 namespace hyppox_interface{
   class Hyppox_Interface{
@@ -46,6 +79,15 @@ namespace hyppox_interface{
 
       return std::to_string(sqrt(num));
     }
+
+    std::string getFileHeader(std::string fileNameWithPath){
+      this->fh.setFile(fileNameWithPath);
+
+      return this->fh.getFileHeader();
+    }
+
+  private:
+    file_handler::File_Handler fh;
   };
 }
 

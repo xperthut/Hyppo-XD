@@ -19,7 +19,7 @@ function createWindow () {
   });
 
   // and load the index.html of the app.
-  win.loadFile('topoview.html');
+  win.loadFile('view/topoview.html');
 
   // Open the DevTools.
   win.webContents.openDevTools();

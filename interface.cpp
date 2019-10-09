@@ -11,6 +11,9 @@ toLocalHandle(v8::MaybeLocal<C> handle)
     return handle.ToLocalChecked();
 }
 
+// For details reference, search here: https://v8docs.nodesource.com/node-10.15/
+// v8 version: node -p process.versions.v8
+
 void GetMessage(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   v8::Isolate* isolate = info.GetIsolate();
 
@@ -20,19 +23,50 @@ void GetMessage(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     return;
   }
 
-  // Validate the type of the first argument.
-  if (!info[0]->IsNumber()) {
-    Nan::ThrowTypeError("Argument must be a number");
-    return;
-  }
+  // First argument is always an instruction string
+  //v8::Local<v8::String> tvs = v8::Local<v8::String>::Cast(info[0]);
+  v8::String::Utf8Value vs(isolate, info[0]); // take the string arg and convert it to v8::string
+  std::string str(*vs); // take the v8::string convert it to c++ class string
 
-  // Get the number value of the first argument. A JavaScript `number` will be a `double` in C++.
-  //double arg = info[0]->NumberValue();
-  int32_t arg = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
-
+  // Variables for operation
+  std::string s = "Invalid arguments";
   hyppox_interface::Hyppox_Interface hi;
 
-  std::string s = hi.getSrt(arg);
+  /* Instruction codes are:
+      SQRT: compute squre root
+      RCSVH: Read the csv file headerNames
+      CCSVADD: Copy CSV file after adding the first row as index columns
+      CRTMAPR: Create mapper object
+  */
+  if(str.compare("SQRT")==0){
+    // Validate the type of the second argument.
+    if (!info[1]->IsNumber()) {
+      Nan::ThrowTypeError("Argument must be a number");
+      return;
+    }
+
+    // Get the number value of the first argument. A JavaScript `number` will be a `double` in C++.
+    //double arg = info[0]->NumberValue();
+    int32_t arg = info[1]->Int32Value(Nan::GetCurrentContext()).FromJust();
+    s = hi.getSrt(arg);
+
+  }else if(str.compare("RCSVH")==0){
+    // Validate the type of the second argument.
+    if (!info[1]->IsString()) {
+      Nan::ThrowTypeError("Argument must be a string");
+      return;
+    }
+
+    v8::String::Utf8Value tfnwp(isolate, info[1]); // take the string arg and convert it to v8::string
+    std::string fnwp(*tfnwp);
+
+    s = hi.getFileHeader(fnwp);
+  }else if(str.compare("CCSVADD")==0){
+
+  }else if(str.compare("CRTMAPR")==0){
+
+  }
+
   v8::MaybeLocal<v8::String> retval = v8::String::NewFromUtf8(isolate, s.c_str());
 
   // Set the return value.
