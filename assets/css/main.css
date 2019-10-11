@@ -1155,6 +1155,97 @@ fieldset{
 #pw,#fw{display: inline; width: 7em; color: white; background-color: transparent;}
 #pwl,#fwl{display: inline; color: white; float: right; background-color: transparent;}
 
+
+/* Mapper css */
+#mapperBody,#mapperHTML{
+  background-color: #3A3C47;
+}
+
+#mapperBody{overflow: scroll;}
+
+#mapperBody fieldset{
+  width: 98%;
+  border: 1px solid darkgray;
+  margin: auto;
+}
+
+#mapperBody fieldset legend{
+  text-align: center;
+  font-weight: bolder;
+  font-size: large;
+}
+
+#mapperBody label{color: wheat;}
+
+#file-input{
+  color: wheat;
+  margin-left: 1em;
+  margin-bottom: 1em;
+}
+
+#lblFileName{
+  font-family: sans-serif;
+  display: inline;
+  color: wheat;
+}
+
+#fsFilterParams{display: none;}
+#filterContainer{display: none;}
+#filterContainer .rowDiv{border-bottom: 1px solid #101010;}
+
+#addFilter{margin-left: 1em; color:wheat; cursor: pointer; font-size: 18px;}
+#addFilter i{font-size: 18px; color: wheat;}
+
+.delFilter{margin-left: 1em; color:crimson; cursor: pointer; font-size: 18px;}
+.delFilter i{font-size: 18px; color: crimson;}
+
+#filterContainer label{color: wheat;}
+
+#filterContainer .rowDiv{
+    display:flex;
+    flex-direction:row;
+    justify-content: space-around;
+    margin: 1%;
+}
+
+#filterContainer .selCol{
+    display:flex;
+    flex-direction:column;
+    width: 30%;
+}
+
+#filterContainer .winCol{
+    display:flex;
+    flex-direction:column;
+    width: 28%;
+}
+
+#filterContainer .ovCol{
+  display:flex;
+  flex-direction:column;
+  width: 28%;
+}
+
+#filterContainer .delCol{
+  display:flex;
+  flex-direction:column;
+  width: 10%;
+}
+
+#myRangeWin, #myRangeOv{width: 80%;}
+#winLabel, #ovLabel{width: 18%; display: contents;}
+
+#ceWin label, #ceOv label{
+  width: 20%;
+  float: left;
+  padding-top: 8pt;
+}
+
+#txtWin, #txtOv{
+  width: 60%;
+  float: left;
+}
+
 /*Chrome*/
 @media screen and (-webkit-min-device-pixel-ratio:0) {
     input[type='range'] {

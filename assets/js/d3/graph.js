@@ -2843,9 +2843,11 @@ $(function () {
 */
             $("#mapperModalBtn").on("click", ()=>{
               const modalPath = this._path.join('file://', __dirname, 'mapper.html');
+              const {width, height, x, y} = this._electron.remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
+              //alert("w="+width + ", h=" + height);
               let cWin = new this._browserWindow({
-                width: 800,
-                height: 600,
+                width: width-50,
+                height: height-50,
                 parent: this._electron.remote.getCurrentWindow(),
                 webPreferences: {
                   nodeIntegration: true
