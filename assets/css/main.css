@@ -1196,9 +1196,6 @@ fieldset{
 #addFilter{margin-left: 1em; color:wheat; cursor: pointer; font-size: 18px;}
 #addFilter i{font-size: 18px; color: wheat;}
 
-.delFilter{margin-left: 1em; color:crimson; cursor: pointer; font-size: 18px;}
-.delFilter i{font-size: 18px; color: crimson;}
-
 #filterContainer label{color: wheat;}
 
 #filterContainer .rowDiv{
@@ -1206,6 +1203,7 @@ fieldset{
     flex-direction:row;
     justify-content: space-around;
     margin: 1%;
+    min-height: 120px;
 }
 
 #filterContainer .selCol{
@@ -1230,20 +1228,6 @@ fieldset{
   display:flex;
   flex-direction:column;
   width: 10%;
-}
-
-#myRangeWin, #myRangeOv{width: 80%;}
-#winLabel, #ovLabel{width: 18%; display: contents;}
-
-#ceWin label, #ceOv label{
-  width: 20%;
-  float: left;
-  padding-top: 8pt;
-}
-
-#txtWin, #txtOv{
-  width: 60%;
-  float: left;
 }
 
 /*Chrome*/

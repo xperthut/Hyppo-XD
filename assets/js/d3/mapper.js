@@ -67,27 +67,27 @@ Mapper.prototype = {
               "<div class='winCol'>" +
                 "<div>" +
                   "<label>Select windows</label>" +
-                  "<input type='range' min='1' max='100' value='50' step='1' class='slider' id='myRangeWin' />&nbsp;" +
-                  "<label id='winLabel'>50</label>" +
+                  "<input type='range' min='1' max='100' value='50' step='1' class='slider' id='myRangeWin_" + this.filterCount + "' index='" + this.filterCount + "'/>&nbsp;" +
+                  "<label id='winLabel_" + this.filterCount + "'>50</label>" +
                 "</div>" +
-                "<div id='ceWin'>" +
+                "<div id='ceWin_" + this.filterCount + "'>" +
                   "<label>Custom entry</label>" +
-                  "<input type='text' id='txtWin' />" +
+                  "<input type='text' id='txtWin_" + this.filterCount + "' />" +
                 "</div>" +
               "</div>" +
               "<div class='ovCol'>" +
                 "<div>" +
                   "<label>Select overlaps</label>" +
-                  "<input type='range' min='1' max='50' value='25' step='1' class='slider' id='myRangeOv' />&nbsp;" +
-                  "<label id='ovLabel'>25%</label>" +
+                  "<input type='range' min='1' max='50' value='25' step='1' class='slider' id='myRangeOv_" + this.filterCount + "' index='" + this.filterCount + "'/>&nbsp;" +
+                  "<label id='ovLabel_" + this.filterCount + "'>25%</label>" +
                 "</div>" +
-                "<div id='ceOv'>" +
+                "<div id='ceOv_" + this.filterCount + "'>" +
                   "<label>Custom entry</label>" +
-                  "<input type='text' id='txtOv' />" +
+                  "<input type='text' id='txtOv_" + this.filterCount + "' />" +
                 "</div>" +
               "</div>" +
               "<div class='delCol'>" +
-                "<span class='delFilter' index='" + this.filterCount + "'><i class='fas fa-minus-square' aria-hidden='true'></i>&nbsp;Delete</span>" +
+                "<span id='delFilter_" + this.filterCount + "' index='" + this.filterCount + "'><i class='fas fa-minus-square' aria-hidden='true'></i>&nbsp;Delete</span>" +
               "</div>" +
             "</div>";
 
@@ -121,16 +121,29 @@ $("#addFilter").on("click", (e)=>{
   $("#filterContainer").css("display", "block");
   var s = _mapper.addFilter(2);
   if(s.length>0) $("#filterContainer").append(s);
-});
 
-$("#myRangeWin").change(function(){
-  $("#winLabel").html($(this).val());
-});
+  // Custom css
+  $("#myRangeWin_" + _mapper.filterCount + "").css({"width": "80%", "background-color": "burlywood"});
+  $("#myRangeOv_" + _mapper.filterCount + "").css({"width": "80%", "background-color": "burlywood"});
+  $("#winLabel_" + _mapper.filterCount + "").css({"width": "18%", "display": "contents"});
+  $("#ovLabel_" + _mapper.filterCount + "").css({"width": "18%", "display": "contents"});
+  $("#ceWin_" + _mapper.filterCount + " label").css({"width": "30%", "float": "left", "padding-top": "8pt"});
+  $("#ceOv_" + _mapper.filterCount + " label").css({"width": "30%", "float": "left", "padding-top": "8pt"});
+  $("#txtWin_" + _mapper.filterCount + "").css({"width": "50%", "float": "left"});
+  $("#txtOv_" + _mapper.filterCount + "").css({"width": "50%", "float": "left"});
+  $("#delFilter_" + _mapper.filterCount + "").css({"margin-left": "1em", "cursor": "pointer", "font-size": "18px", "color": "sandybrown"});
+  $("#delFilter_" + _mapper.filterCount + " i").css({"font-size": "18px", "color": "sandybrown"});
 
-$("#myRangeOv").change(function(){
-  $("#ovLabel").html($(this).val() + "%");
-});
+  // Custom events
+  $("#myRangeWin_" + _mapper.filterCount + "").change(function(){
+    $("#winLabel_" + $(this).attr("index") + "").html($(this).val());
+  });
 
-$(".delFilter").on("click", function(){
-  alert("x=" + $(this).attr("index"));
+  $("#myRangeOv_" + _mapper.filterCount + "").change(function(){
+    $("#ovLabel_" + $(this).attr("index") + "").html($(this).val() + "%");
+  });
+
+  $("#delFilter_" + _mapper.filterCount + "").on("click", function(){
+    alert("x=" + $(this).attr("index"));
+  });
 });
