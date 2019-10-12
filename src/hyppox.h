@@ -20,29 +20,35 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <unordered_set>
 
 #include "hyppox/hyppox.h"
 
 namespace file_handler{
   class File_Handler{
   public:
-    File_Handler() = default;
+    File_Handler():fileNameWithPath(""),hasIndexColumn(false){}
     ~File_Handler() = default;
 
     void setFile(std::string filePath){this->fileNameWithPath = filePath;}
 
     std::string getFileHeader(){
-      std::string header="", firstRow="", line="";
+      std::string header="", line="";
+      std::vector<std::string> rows;
+      this->hasIndexColumn = this->isFirstColumnAnIndexColumn();
 
       try {
           std::ifstream fileReader(this->fileNameWithPath);
 
           if(fileReader.is_open()){
             getline(fileReader, header);
-            getline(fileReader, firstRow);
 
+            short rCnt = 0;
+            while(getline(fileReader, line)){
+              if(rCnt == 500) break;
 
-            line = this->getHeaderOfNumericColumns(header, firstRow);
+              rows.push_back(line);
+            }
 
             fileReader.close();
           }else{
@@ -53,15 +59,21 @@ namespace file_handler{
           line = "[\"Error to read file: " + std::string(e.what()) + "\"]";
       }
 
+      if(header.length()>0 && rows.size()>0){
+        line = this->getHeaderOfNumericColumns(header, rows);
+      }
+
       return line;
     }
 
   private:
     std::string fileNameWithPath;
+    bool hasIndexColumn;
 
     void getData(std::string lineData, std::vector<std::string>& line){
       bool start = false;
       std::string s="";
+      line.clear();
 
       for(char ch:lineData){
         if(ch=='\n'||ch=='\r'){
@@ -73,6 +85,30 @@ namespace file_handler{
             if(start) s+= ch;
             else{
               line.push_back((this->isValidNumber(s))?s:"\"" + s + "\"");
+              s="";
+            }
+        }else{
+            s += ch;
+        }
+      }
+    }
+
+    void getRowData(std::string lineData, std::vector<bool>& line){
+      bool start = false;
+      std::string s="";
+      short col = -1;
+
+      for(char ch:lineData){
+        if(ch=='\n'||ch=='\r'){
+            break;
+        }else if(ch=='"'){
+            if(start) start=false;
+            else start = true;
+        }else if(ch==','){
+            if(start) s+= ch;
+            else{
+              col++;
+              if(line[col]) line[col]= (this->isValidNumber(s))?true:false;
               s="";
             }
         }else{
@@ -97,54 +133,91 @@ namespace file_handler{
       }
     }
 
-    std::string getHeaderOfNumericColumns(std::string header, std::string firstRow){
-      std::vector<std::string> vHeader, vFirstRow;
-      std::string line = "[";
-
-      //std::cout<<header<<std::endl;
-      //std::cout<<firstRow<<std::endl;
-
-      this->getData(header, vHeader);
-      this->getData(firstRow, vFirstRow);
-
-      for(size_t i=0; i<vHeader.size(); i++){
-        //std::cout<<vHeader[i]<<std::endl;
-        if(this->isValidNumber(vFirstRow[i])){
-          //std::cout<<"valid"<<std::endl;
-          if(line.length()>1) line += ", ";
-          line += "\"" + std::to_string(i+1) + "\"" + "," + vHeader[i];
-        }
-        //std::cout<<vFirstRow[i]<<std::endl;
-      }
-
-      line += "]";
-
-      //std::cout<<line<<std::endl;
-
-      return line;
-    }
-
-    bool hasIndexColumn(){
-      std::string line="";
-
+    bool isFirstColumnAnIndexColumn(){
+      bool start = false;
+      std::string line="", s="";
       try {
           std::ifstream fileReader(this->fileNameWithPath);
 
           if(fileReader.is_open()){
             getline(fileReader, line);
 
+            std::unordered_set<size_t> fSet;
+            while(getline(fileReader, line)){
+              for(char ch:line){
+                if(ch=='\n'||ch=='\r'){
+                    break;
+                }else if(ch=='"'){
+                    if(start) start=false;
+                    else start = true;
+                }else if(ch==','){
+                    if(start) s+= ch;
+                    else{
+                      if(!this->isValidNumber(s)) return false;
 
+                      std::stringstream sstream(s);
+                      size_t index;
+                      sstream >> index;
+
+                      if(fSet.find(index)!=fSet.end()) return false;
+                      fSet.insert(index);
+
+                      s="";
+
+                      break;
+                    }
+                }else{
+                    s += ch;
+                }
+              }
+            }
 
             fileReader.close();
           }else{
-              return false;
+              line = "[\"Error to read file. Please check the file name and path.\"]";
           }
 
       } catch (std::exception &e) {
-          return false;
+          line = "[\"Error to read file: " + std::string(e.what()) + "\"]";
       }
 
       return true;
+    }
+
+    std::string getHeaderOfNumericColumns(const std::string& header, const std::vector<std::string>& firstRow){
+      std::vector<std::string> vHeader, vFirstRow;
+      std::string line = "{\"index\":";
+
+      //std::cout<<header<<std::endl;
+      //std::cout<<firstRow<<std::endl;
+
+      this->getData(header, vHeader);
+      std::vector<bool> numericHeader(vHeader.size(), true);
+
+      for(size_t i=0; i<firstRow.size(); i++){
+        this->getRowData(firstRow[i], numericHeader);
+      }
+
+      line += (this->hasIndexColumn)?"true":"false";
+      line += ", \"header\":[";
+
+      bool f=true;
+      for(size_t i=0; i<vHeader.size(); i++){
+        //std::cout<<vHeader[i]<<std::endl;
+        if(numericHeader[i]){
+          //std::cout<<"valid"<<std::endl;
+          if(f) f = false;
+          else if(line.length()>1) line += ", ";
+          line += "\"" + std::to_string(i+1) + "\"" + "," + vHeader[i];
+        }
+        //std::cout<<vFirstRow[i]<<std::endl;
+      }
+
+      line += "]}";
+
+      //std::cout<<line<<std::endl;
+
+      return line;
     }
 
   };

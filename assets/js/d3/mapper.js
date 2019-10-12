@@ -6,6 +6,7 @@ function Mapper(){
   this.colIndex = [];
   this.selectedFilter = [];
   this.filterCount = 0;
+  this.hasIndexColumn = false;
 }
 
 Mapper.prototype = {
@@ -18,6 +19,7 @@ Mapper.prototype = {
     this.colIndex = [];
     this.selectedFilter = [];
     this.filterCount = 0;
+    this.hasIndexColumn = false;
   },
 
   extractFileName: function(){
@@ -32,9 +34,10 @@ Mapper.prototype = {
     var addon = require('bindings')('interface');
     var srt = JSON.parse(addon.invoke("RCSVH", this.fileNameWithPath));
 
-    for(var i=0; i<srt.length; i+=2){
-      this.colIndex.push(parseInt(srt[i]));
-      this.colNames.push(srt[i+1]);
+    this.hasIndexColumn = srt.index;
+    for(var i=0; i<srt.header.length; i+=2){
+      this.colIndex.push(parseInt(srt.header[i]));
+      this.colNames.push(srt.header[i+1]);
     }
   },
 
