@@ -35,7 +35,7 @@ namespace file_handler{
     std::string getFileHeader(){
       std::string header="", line="";
       std::vector<std::string> rows;
-      this->hasIndexColumn = this->isFirstColumnAnIndexColumn();
+      this->hasIndexColumn = true;//this->isFirstColumnAnIndexColumn();
 
       try {
           std::ifstream fileReader(this->fileNameWithPath);
@@ -45,7 +45,7 @@ namespace file_handler{
 
             short rCnt = 0;
             while(getline(fileReader, line)){
-              if(rCnt == 500) break;
+              if(rCnt == 100) break;
 
               rows.push_back(line);
             }
@@ -60,7 +60,7 @@ namespace file_handler{
       }
 
       if(header.length()>0 && rows.size()>0){
-        line = this->getHeaderOfNumericColumns(header, rows);
+        line = this->getHeaderWithColumns(header, rows);
       }
 
       return line;
@@ -184,7 +184,7 @@ namespace file_handler{
       return true;
     }
 
-    std::string getHeaderOfNumericColumns(const std::string& header, const std::vector<std::string>& firstRow){
+    std::string getHeaderWithColumns(const std::string& header, const std::vector<std::string>& firstRow){
       std::vector<std::string> vHeader, vFirstRow;
       std::string line = "{\"index\":";
 
@@ -203,14 +203,9 @@ namespace file_handler{
 
       bool f=true;
       for(size_t i=0; i<vHeader.size(); i++){
-        //std::cout<<vHeader[i]<<std::endl;
-        if(numericHeader[i]){
-          //std::cout<<"valid"<<std::endl;
-          if(f) f = false;
-          else if(line.length()>1) line += ", ";
-          line += "\"" + std::to_string(i+1) + "\"" + "," + vHeader[i];
-        }
-        //std::cout<<vFirstRow[i]<<std::endl;
+        if(f) f = false;
+        else if(line.length()>1) line += ", ";
+        line += "{\"index\":\"" + std::to_string(i+1) + "\",\"name\":" + vHeader[i] + ",\"numeric\":" + (numericHeader[i]?"true":"false") + "}";
       }
 
       line += "]}";
@@ -229,12 +224,12 @@ namespace hyppox_interface{
     Hyppox_Interface()=default;
     ~Hyppox_Interface()=default;
 
-    std::string callHyppoX(int argc, const char * argv[]){
+    std::string callHyppoX(const std::vector<std::string> argv){
       hyppox::HInterface* _hyppox = new hyppox::Hyppox();
       if(_hyppox==nullptr){
           std::cout<<"There has no enough memory"<<std::endl;
       }
-      std::string _p = _hyppox->getD3GraphObject(argc, argv);
+      std::string _p = _hyppox->getD3GraphObject(argv);
       delete _hyppox;
 
       return _p;

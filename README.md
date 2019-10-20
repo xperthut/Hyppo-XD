@@ -175,6 +175,22 @@ npm install --save-dev jquery
 
 ```
 
+# Packaging and distribution
+```R
+// for use in npm scripts
+npm install electron-packager --save-dev
+
+// for use from cli
+npm install electron-packager -g
+
+// For use in npm scripts
+npm install electron-installer-dmg --save-dev
+
+// For use from cli
+npm install electron-installer-dmg -g
+
+```
+
 # Remove npm modules
 ```R
 1. rm -rf node_modules

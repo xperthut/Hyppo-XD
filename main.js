@@ -12,7 +12,7 @@ function createWindow () {
   win = new BrowserWindow({
     width: width,
     height: height,
-    //fullscreen: true,
+    icon: __dirname + "/logo/Icon.icns",
     webPreferences: {
       nodeIntegration: true
     }

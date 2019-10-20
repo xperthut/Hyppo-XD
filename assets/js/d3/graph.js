@@ -50,11 +50,14 @@ $(function () {
         this._electron = require('electron');
         this._fs = require('fs');
         this._path = require("path");
-        this._dataDir = this._path.resolve("./Data/");
-        this._browserWindow = this._electron.remote.BrowserWindow;
+        //this._browserWindow = this._electron.remote.BrowserWindow;
+
+        this.workspace = "";
+        this.getWorkSpace();
 
         this.fl = this.getAllCsvFiles();
         this.jfl = this.getAllJsonFiles();
+
         this.svg = d3.select("svg").on("click", function () {
             $("#top-nav").css("display", "none");
             $("#tooltip").css("display", "none");
@@ -114,10 +117,18 @@ $(function () {
         this.piePattern = false;
         this.grayNode = false;
         this.fileName = "";
+        this.autoLoadData = [];
     }
 
     Graph.prototype = {
         constructor: Graph,
+
+        // Load the getWorkSpace
+        getWorkSpace: function(){
+          try {
+            this.workspace = this._fs.readFileSync(this._path.resolve(__dirname + "/wp.sp"), 'utf-8');
+          }catch(err) {this.workspace = "";}
+        },
 
         // Get all JSON files
         getAllFiles: function(_folder){
@@ -130,12 +141,15 @@ $(function () {
 
         // Function to get all file names in a directory
         getAllCsvFiles: function(){
-        	var _dir = this._dataDir + "/csv";
-          var files = this.getAllFiles(_dir);
           var flist = [];
-          for(var i=0; i<files.length; i++){
-            if(files[i].indexOf('.csv')>=0 || files[i].indexOf('.CSV')>=0){
-                flist.push(files[i]);
+
+          if(this.workspace.length>0 && this._fs.existsSync(this.workspace)){
+            var _dir = this._path.join(this.workspace, "Data", "csv");
+            var files = this.getAllFiles(_dir);
+            for(var i=0; i<files.length; i++){
+              if(files[i].indexOf('.csv')>=0 || files[i].indexOf('.CSV')>=0){
+                  flist.push(files[i]);
+              }
             }
           }
 
@@ -144,24 +158,28 @@ $(function () {
 
         // Get all JSON files
         getAllJsonFiles: function(){
-          var _dir = this._dataDir + "/json";
-          var _folderList = this.getAllFiles(_dir);
           var _fList = [];
-          for(var i=0; i<_folderList.length; i++){
-            if(_folderList[i].indexOf(".")===-1){
-              var _f={name:"", files:[]};
-              _f.name = _folderList[i];
-              _f.files = [];
 
-              var _jList = this.getAllFiles(_dir+"/"+_folderList[i]);
+          if(this.workspace.length>0 && this._fs.existsSync(this.workspace)){
+            var _dir = this._path.join(this.workspace, "Data", "json");
+            var _folderList = this.getAllFiles(_dir);
 
-              for(var j=0; j<_jList.length; j++){
-                if(_jList[j].substring(0, 6)!="coord_" && (_jList[j].indexOf('.json')>=0 || _jList[j].indexOf('.JSON')>=0)){
-                    _f.files.push(_jList[j]);
+            for(var i=0; i<_folderList.length; i++){
+              if(_folderList[i].indexOf(".")===-1){
+                var _f={name:"", files:[]};
+                _f.name = _folderList[i];
+                _f.files = [];
+
+                var _jList = this.getAllFiles(this._path.join(_dir,_folderList[i]));
+
+                for(var j=0; j<_jList.length; j++){
+                  if(_jList[j].substring(0, 6)!="coord_" && (_jList[j].indexOf('.json')>=0 || _jList[j].indexOf('.JSON')>=0)){
+                      _f.files.push(_jList[j]);
+                  }
                 }
-              }
 
-              _fList.push(_f);
+                _fList.push(_f);
+              }
             }
           }
 
@@ -222,6 +240,7 @@ $(function () {
             this.piePattern = false;
             this.grayNode = false;
             this.fileName = "";
+            this.autoLoadData = [];
 
             d3.select("#svg-container").style("background-color", this.svgBGColor);
             d3.select("#viewer").style("background-color", this.svgBGColor);
@@ -979,11 +998,26 @@ $(function () {
         },
 
         getNodeCoordinate: function () {
-          var _path = this._dataDir + "/json/" + gInstance.fl[gInstance.fileIndex].split(".")[0] + "/coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].split("__")[0] + ".json";
-          //alert(_path);
-          this._fs.readFile(_path, (err, data) => {
-            if (err){
-              alert("Error to load coord data: \n" + err.name + ': ' + err.message);
+          var _path = this._path.join(this.workspace, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].split("__")[0] + ".json"));
+
+          if(this._fs.existsSync(_path)){
+            var data = this._fs.readFileSync(_path, 'utf-8');
+            //alert(data);
+            gInstance.coordData = JSON.parse(data);
+
+            gInstance.node.each(function (d) {
+                var __coord = gInstance.coordData["nid_" + d.Id];
+                if (__coord) {
+                    d.fx = __coord[0];
+                    d.fy = __coord[1];
+                }
+            });
+          }else{
+            console.log(_path + " not found.");
+          }
+            //(err, data) => {
+            /*if (err){
+              //alert("Error to load coord data: \n" + err.name + ': ' + err.message);
             }else{
               gInstance.coordData = JSON.parse(data);
 
@@ -996,7 +1030,7 @@ $(function () {
               });
             }
             //console.log(data);
-          });
+          });*/
         },
 
         getCoordinates: function () {
@@ -1030,23 +1064,14 @@ $(function () {
             });
             nPos += "}";
 
-            d3.select("#type").attr("value", "set-coordinate");
-            d3.select("#data").attr("value", nPos);
-            d3.select("#folderName").attr("value", gInstance.fl[gInstance.fileIndex].split(".")[0]);
-            d3.select("#fileName").attr("value", gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex]);
-            var form = $("#frm");
+            var _path = gInstance._path.join(gInstance.workspace, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].split("__")[0] + ".json"));
 
-            $.ajax({
-                type: "POST",
-                url: "./datahandler/setcoord?t=" + new Date().getTime(),
-                data: form.serialize(),
-                success: function (json) {
-                    var a = 10;
-                },
-                error: function (request, err, ex) {
-                    var a = 10;
-                }
-            });
+            try{
+              gInstance._fs.writeFileSync(_path, nPos);
+            }catch(err){
+              alert("Error in setCoordinates: " + err.message);
+            }
+
         },
 
         saveColors: function () {
@@ -1054,23 +1079,13 @@ $(function () {
 
             var s = JSON.stringify(gInstance._graph);
 
-            d3.select("#type").attr("value", "set-color");
-            d3.select("#data").attr("value", s);
-            d3.select("#folderName").attr("value", gInstance.fl[gInstance.fileIndex].split(".")[0]);
-            d3.select("#fileName").attr("value", gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex]);
-            var form = $("#frm");
+            var _path = gInstance._path.join(gInstance.workspace, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex]);
 
-            $.ajax({
-                type: "POST",
-                url: "./datahandler/setcolor?t=" + new Date().getTime(),
-                data: form.serialize(),
-                success: function (json) {
-                    var a = 10;
-                },
-                error: function (request, err, ex) {
-                    var a = 10;
-                }
-            });
+            try{
+              gInstance._fs.writeFileSync(_path, s);
+            }catch(err){
+              alert("Error to saveColors: " + err.message);
+            }
         },
 
         createColorBar: function () {
@@ -1891,7 +1906,7 @@ $(function () {
             $("#attr-ctrl").css("display", "flex");
             $("#attr-details").html("");
             $("#attr-details").html("<fieldset><legend>View attributes&nbsp;</legend><ul class='view_attr_legend'></ul></fieldset>" +
-                    "<fieldset><legend>Tooltip&nbsp;</legend><ul class='node_attr_legend'></ul></fieldset>" +
+                    "<fieldset style='display:none;'><legend>Tooltip&nbsp;</legend><ul class='node_attr_legend'></ul></fieldset>" +
                     "<fieldset><legend>Edge attributes&nbsp;</legend><ul class='attr_legend'></ul></fieldset>" +
                     "<fieldset><legend>Features&nbsp;</legend><ul class='feature_legend'></ul></fieldset>");
 
@@ -2041,6 +2056,8 @@ $(function () {
 
         nodeRightClick: function (d) {
             d3.event.preventDefault();
+
+            return false;
 
             d3.select("#top-nav").style("display", "none");
 
@@ -2311,9 +2328,9 @@ $(function () {
                             ;
                         }
 
-                        d3.select("#tooltip").style("display", "block");
-                        gInstance.tooltipDiv.html("<strong>Node id:</strong>&nbsp;" + gInstance.selectedNodeId + "<br /><strong>Total points:</strong>&nbsp;" + tIDs.length +
-                                "<br />" + s);
+                        //d3.select("#tooltip").style("display", "block");
+                        //gInstance.tooltipDiv.html("<strong>Node id:</strong>&nbsp;" + gInstance.selectedNodeId + "<br /><strong>Total points:</strong>&nbsp;" + tIDs.length +
+                      //        "<br />" + s);
                     }
                 },
                 error: function (request, err, ex) {
@@ -2789,16 +2806,10 @@ $(function () {
             //d3.select("#fileName").attr("value", gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex]);
             //var form = $("#frm");
 
-            var _path = this._dataDir + "/json/" + gInstance.fl[gInstance.fileIndex].split(".")[0] + "/" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex];
+            var _path = this._path.join(this.workspace, "Data", "json", this.fl[this.fileIndex].split(".")[0], this.jfl[this.fileRIndex].files[this.fileCIndex])
             //alert(_path);
-            this._fs.readFile(_path, (err, data) => {
-              if (err){
-                alert("Error to load data: \n" + err.name + ': ' + err.message);
-              }else{
-                gInstance.initPage(JSON.parse(data));
-              }
-              //console.log(data);
-            });
+            var data = this._fs.readFileSync(_path, 'utf-8');
+            this.initPage(JSON.parse(data));
         },
 
         loadDD: function (filename) {
@@ -2809,71 +2820,235 @@ $(function () {
                 if (this.jfl[i].name === filename) {
                     s = "";
                     for (var j = 0; j < this.jfl[i].files.length; j++) {
-                        //s += "<a href='javascript:void(0)' class='file-json-select' row='" + i + "' seq='" + j + "' title='" + this.jfl[i].files[j] + "'>" + this.jfl[i].files[j] + "</a>";
-                        s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.jfl[i].files[j] + "</option>";
+                        if(this.autoLoadData.length>0){
+                          if(this.autoLoadData[0].json===this.jfl[i].files[j]){
+                            this.fileCIndex = j;//$opt.attr('seq');
+                            this.fileRIndex = i;//$opt.attr('row');
+                            s += "<option selected value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.jfl[i].files[j] + "</option>";
+                          }else{
+                            s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.jfl[i].files[j] + "</option>";
+                          }
+                        }else{
+                          s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.jfl[i].files[j] + "</option>";
+                        }
                     }
 
                     break;
                 }
             }
+
             if (s.length > 0) {
                 s = "<option class='file-select' value=''>&#xf039; &nbsp; Select a graph file</option>" + s;
             }
             $("#myJsonDropdown").html(s);
+
+            if(this.autoLoadData.length>0){
+              var jfn = this.autoLoadData[0].json;
+              $("#jsonheader .jsonDetails").html(this.getJSONFileDetails(jfn));
+              $("#jsonheader .jsonDetails table").css({"display":"block","width":"100%", "color":"white", "margin":"1%"});
+              $("#jsonheader .jsonDetails table tr").css({"width":"100%"});
+              $("#jsonheader .jsonDetails table td").css({"width":"33%", "border":"1px solid black"});
+
+              this.loadData();
+            }
+
             $("#myJsonDropdown").on("change", function () {
                 //$("#myJsonDropdown a").removeClass("seldw");
                 var $opt = $(this).find('option:selected');
                 var atr = eval($opt.attr('value'));
                 gInstance.fileCIndex = atr[1];//$opt.attr('seq');
                 gInstance.fileRIndex = atr[0];//$opt.attr('row');
-                //$(this).addClass("seldw");
-                //var _file = gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex];
-                //$("#file_json_select").html(_file);
-                //$("#myJsonDropdown").hide();
+
+                var jfn = $opt.html().replace("&nbsp; ", "");
+                $("#jsonheader .jsonDetails").html(gInstance.getJSONFileDetails(jfn));
+                $("#jsonheader .jsonDetails table").css({"display":"block","width":"100%", "color":"white", "margin":"1%"});
+                $("#jsonheader .jsonDetails table tr").css({"width":"100%"});
+                $("#jsonheader .jsonDetails table td").css({"width":"33%", "border":"1px solid black"});
+
                 gInstance.loadData();
             });
         },
 
-        loadFiles: function () {
-          /*this._electron = require('electron');
-          this._fs = require('fs');
-          this._path = require("path");
-          this._dataDir = this._path.resolve("./Data/");
-          this._browserWindow = electron.remote.BrowserWindow;
-*/
-            $("#mapperModalBtn").on("click", ()=>{
-              const modalPath = this._path.join('file://', __dirname, 'mapper.html');
-              const {width, height, x, y} = this._electron.remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
-              //alert("w="+width + ", h=" + height);
-              let cWin = new this._browserWindow({
-                width: width-50,
-                height: height-50,
-                parent: this._electron.remote.getCurrentWindow(),
-                webPreferences: {
-                  nodeIntegration: true
-                }
-              });
-              // Open the DevTools.
-              cWin.webContents.openDevTools();
+        getJSONFileDetails: function(fn){
+          var fn = fn.replace(".json", "");
+          var fl = fn.split("__")[0];
+          var pl = fl.split("_");
+          var obj = {
+            FN:[],
+            WX:[],
+            GX:[],
+            CLP:[],
+            FG:[]
+          };
 
-              cWin.on('close', function () { cWin = null });
-              cWin.loadURL(modalPath);
-              cWin.show();
+          //Filternames_windows_overlap_clusterParams_Genfilter__Signature_Performance_Membership_PieChart
+          for(var i=0; i<pl.length; i++){
+            if(i==0){
+              if(pl[i].indexOf("|")>=0){
+                obj.FN = pl[i].split("|");
+              }else{
+                obj.FN.push(pl[i]);
+              }
+            }else if(i==1){
+              if(pl[i].indexOf("|")>=0){
+                obj.WX = pl[i].split("|");
+              }else{
+                obj.WX.push(pl[i]);
+              }
+            }else if(i==2){
+              if(pl[i].indexOf("|")>=0){
+                obj.GX = pl[i].split("|");
+              }else{
+                obj.GX.push(pl[i]);
+              }
+            }else if(i==3){
+              if(pl[i].indexOf("|")>=0){
+                obj.CLP = pl[i].split("|");
+              }else{
+                obj.CLP.push(pl[i]);
+              }
+            }else if(i==4){
+              if(pl[i].indexOf("|")>=0){
+                obj.FG = pl[i].split("|");
+              }else{
+                obj.FG.push(pl[i]);
+              }
+            }
+          }
+
+          var s = "<table><tr><td>Filter</td><td>Windows</td><td>% Overlap</td></tr>";
+          if(obj.FN.length >0){
+            s += "<tr>"
+            for(var i=0; i<obj.FN.length; i++){
+              s += "<td>" + obj.FN[i] + "</td>";
+              s += "<td>" + obj.WX[i] + "</td>";
+              s += "<td>" + obj.GX[i] + "</td>";
+            }
+            s += "</tr>";
+          }
+          s += "</table><table><tr><td>Cluster</td><td>Density</td><td>Radius</td></tr>" +
+                "<tr><td>" + obj.CLP[0] + "</td><td>" + obj.CLP[1] + "</td><td>" + obj.CLP[2] +
+                "</td></tr></table>";
+
+          return s;
+        },
+
+        loadMapperWindow: function(){
+          const modalPath = this._path.join('file://', __dirname, 'mapper.html');
+          const mBound = this._electron.remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
+
+          console.log("wp: " + this.workspace);
+          if(this.workspace.length===0){
+
+            const { BrowserWindow } = require('electron').remote;
+            cWin = new BrowserWindow({
+              width: mBound.width-80,
+              height: mBound.height-80,
+              parent: this._electron.remote.getCurrentWindow(),
+              title: "Create a mapper object",
+              modal: true,
+              webPreferences: {
+                nodeIntegration: true
+              }
+            });
+            // Open the DevTools.
+            cWin.webContents.openDevTools();
+
+            cWin.on('closed', function () {
+              cWin = null;
+              console.log("exit the modal");
+
+              gInstance.fl = gInstance.getAllCsvFiles();
+              gInstance.jfl = gInstance.getAllJsonFiles();
+              gInstance.loadFiles(false);
+
             });
 
+            cWin.loadURL(modalPath);
+            cWin.show();
+          }
 
+          $("#mapperModalBtn").on("click", ()=>{
+            if(cWin) cWin=null;
+
+            const { BrowserWindow } = require('electron').remote;
+            cWin = new BrowserWindow({
+              width: mBound.width-80,
+              height: mBound.height-80,
+              parent: this._electron.remote.getCurrentWindow(),
+              title: "Create a mapper object",
+              webPreferences: {
+                nodeIntegration: true
+              }
+            });
+            // Open the DevTools.
+            cWin.webContents.openDevTools();
+
+            cWin.on('close', function () {
+              cWin = null;
+
+              gInstance.fl = gInstance.getAllCsvFiles();
+              gInstance.jfl = gInstance.getAllJsonFiles();
+              gInstance.loadFiles(false);
+            });
+
+            cWin.loadURL(modalPath);
+            cWin.show();
+          });
+
+        },
+
+        getStoredData: function(ofn){
+          try{
+            var data = this._fs.readFileSync(this._path.resolve(__dirname + "/tmp.sp"), 'utf-8');
+            if(data.length>0) this.autoLoadData = JSON.parse(data);
+
+            this._fs.writeFileSync(this._path.resolve(__dirname + "/tmp.sp"), '');
+          }catch(err){
+            console.log("Error to read data at getStoredData: " + err.message);
+          }
+        },
+
+        loadFiles: function (e) {
+          this.autoLoadData = [];
+          if(e) this.loadMapperWindow();
+          else{
+            this.getStoredData();
+            if(this.workspace.length===0) this.getWorkSpace();
+            this.fl = this.getAllCsvFiles();
+            this.jfl = this.getAllJsonFiles();
+          }
 
             $("#top-nav").css("display", "none");
             var s = "";
             for (var i = 0; i < this.fl.length; i++) {
-                //s += "<a href='javascript:void(0)' class='file-select' seq='" + i + "'>" + this.fl[i] + "</a>";
+              if(this.autoLoadData.length>0){
+                if(this.autoLoadData[0].csv === this.fl[i]){
+                  gInstance.fileIndex = i;
+                  s += "<option value='" + i + "' class='file-select' selected seq='" + i + "'>&nbsp; " + this.fl[i] + "</option>";
+                }else{
+                  s += "<option value='" + i + "' class='file-select' seq='" + i + "'>&nbsp; " + this.fl[i] + "</option>";
+                }
+              }else{
                 s += "<option value='" + i + "' class='file-select' seq='" + i + "'>&nbsp; " + this.fl[i] + "</option>";
+              }
             }
+
             if (s.length > 0) {
                 s = "<option class='file-select' value=''>&#xf039; &nbsp; Select a data file</option>" + s;
             }
             $("#myDropdown").html(s);
+
+            if(this.autoLoadData.length>0 && gInstance.fileIndex > -1){
+              var _file = this.fl[this.fileIndex];
+              //$("#file_select").html(_file);
+              var _fileName = _file.split(".")[0];
+              //$("#myDropdown").hide();
+              this.loadDD(_fileName);
+            }
+
             $("#myDropdown").on("change", function () {
+                $("#jsonheader .jsonDetails table").css({"display":"none"});
                 //$("#myDropdown a").removeClass("seldw");
                 var $opt = $(this).find('option:selected');
                 gInstance.fileIndex = $opt.attr('value');
@@ -2884,6 +3059,8 @@ $(function () {
                 //$("#myDropdown").hide();
                 gInstance.loadDD(_fileName);
             });
+
+
         }
 
     };
@@ -2906,6 +3083,8 @@ $(function () {
     $("#colDropdown span.anchor").on("click", function () {
         $("#colDropdown ul.items").toggle();
     });
+
+
 
     /*$(".dropbtn").on("click", function () {
      $("#myJsonDropdown").hide();
@@ -2979,7 +3158,9 @@ $(function () {
     });
 
     var gInstance = new Graph();//(fl, jfl);
-    gInstance.loadFiles();
+    var cWin = null;
+
+    gInstance.loadFiles(true);
 
 });
 

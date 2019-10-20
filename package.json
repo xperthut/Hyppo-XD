@@ -1,11 +1,16 @@
 {
   "name": "interface",
+  "productName": "Hyppo-X",
   "version": "1.0.1",
   "description": "Hypotheses extraction tool using visualization",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "rebuild": "electron-rebuild -f -w interface"
+    "rebuild": "electron-rebuild -f -w interface",
+    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=logo/icon.icns --prune=true --out=release-builds",
+    "package-win": "electron-packager . electron-tutorial-app --overwrite --asar=true --platform=win32 --arch=ia32 --icon=logo/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Hyppo-X\"",
+    "package-linux": "electron-packager . electron-tutorial-app --overwrite --asar=true --platform=linux --arch=x64 --icon=logo/1024x1024.png --prune=true --out=release-builds",
+    "installer-mac": "electron-installer-dmg --icon=./logo/icon.icns --overwrite ./release-builds/Hyppo-X-darwin-x64/Hyppo-X.app Hyppo-X"
   },
   "repository": {
     "type": "git",
@@ -19,10 +24,13 @@
   "homepage": "https://github.com/xperthut/Hyppo-X-desktop#readme",
   "dependencies": {
     "bindings": "^1.5.0",
-    "nan": "^2.14.0"
+    "nan": "^2.14.0",
+    "jquery": "^3.4.1"
   },
   "devDependencies": {
     "electron": "^6.0.10",
+    "electron-installer-dmg": "^3.0.0",
+    "electron-packager": "^14.0.6",
     "electron-rebuild": "^1.8.6",
     "jquery": "^3.4.1",
     "rebuild": "^0.1.2"

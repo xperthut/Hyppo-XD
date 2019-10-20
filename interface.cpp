@@ -64,7 +64,42 @@ void GetMessage(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   }else if(str.compare("CCSVADD")==0){
 
   }else if(str.compare("CRTMAPR")==0){
+    // Validate the type of the second argument.
+    /*if (!info[1]->IsNumber()) {
+      Nan::ThrowTypeError("Argument must be a number");
+      return;
+    }*/
 
+    if (!info[1]->IsArray()) {
+      Nan::ThrowTypeError("Argument must be a number");
+      return;
+    }
+
+    v8::Local<v8::Array> jsArr = v8::Local<v8::Array>::Cast(info[1]);
+
+    std::vector<std::string> param;
+    for (uint32_t i = 0; i < jsArr->Length(); i++) {
+      v8::Local<v8::Value> jsElement = jsArr->Get(i);
+
+      v8::String::Utf8Value tps(isolate, jsElement); // take the string arg and convert it to v8::string
+      std::string ps(*tps);
+
+      std::cout<<ps<<std::endl;
+
+      param.push_back(ps);
+    }
+
+    /*int32_t argC = info[1]->Int32Value(Nan::GetCurrentContext()).FromJust();
+    std::vector<std::string> param;
+
+    for(int32_t i=0; i<argC; i++){
+      v8::String::Utf8Value tps(isolate, info[2+i]); // take the string arg and convert it to v8::string
+      std::string ps(*tps);
+
+      param.push_back(ps);
+    }*/
+
+    s = hi.callHyppoX(param);
   }
 
   v8::MaybeLocal<v8::String> retval = v8::String::NewFromUtf8(isolate, s.c_str());
