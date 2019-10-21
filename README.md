@@ -218,3 +218,136 @@ rm -f /usr/local/bin/npm /usr/local/lib/dtrace/node.d
 
 rm -rf ~/.npm
 ```
+
+
+# Data Science Take-Home Exercise
+
+## Overview
+
+Core within the Outreach application is the concept of a _sequence_. A sequence
+is a series of automatic or manual touchpoints that are spread out over a period
+of time. A _prospect_ can be placed within a sequence. A primary use case for
+sequences is to elicit an email response from cold prospects who have not been
+contacted before. For the purposes of this exercise, a sequence might be
+considered to have a successful outcome if the prospect ultimately winds up
+responding to an email. In reality, sequences can consist of non-email touch
+points, but for the purposes of this exercise we will just be dealing with
+email.
+
+## Data
+
+`sequence-mailings.csv` contains partial data corresponding to approximately 1M
+emails sent via the Outreach platform by our internal sales team using
+sequences. For privacy reasons, a limited amount of data has been included and
+email content has been removed. Most of the fields in the csv file should be
+somewhat self-explanatory, but some descriptions are below:
+
+* `id` - The internal identifier of this mailing
+
+* `message_id` - The GUID of the email message (an email standard)
+
+* `parent_message_id` - If part of an email thread, the GUID of the parent message
+
+* `to_domain` - The domain of the to address of the email.
+
+* `from` - The from address of the email
+
+* `is_thread_reply` - Was this message a reply to an existing thread
+
+* `subject_customized` - Was the subject manually customized.
+
+* `body_customized` - Was the body manually customized
+
+* `subject_length` - The number of characters in the subject.
+
+* `body_length` - The number of characters in the body (including HTML characters)
+
+* `delivered_at` - The timestamp at which this particular email was delivered
+
+* `thread_replied_at` - The timestamp at which any email in this particular sequence of emails was responded to. E.g. all emails in a thread of email messages will have this value set when a prospect replies.
+
+* `track_clicks` - Whether link tracking is enabled.
+
+* `track_opens` - Whether open tracking is enabled.
+
+* `includes_link` - Whether the email body includes a link. If this is false, `clicked_at` will not be relevant.
+
+* `replied_at` - The timestamp at which this particular email was directly replied to
+
+* `opened_at` - The timestamp at which the email was opened by the prospect.
+
+* `clicked_at` - The timestamp at which a tracked link in the email was opened by the prospect.
+
+* `mailbox_id` - The internal id of the object representing the mailbox of the sender
+
+* `template_id` - The internal id of the template used to construct the email
+
+* `sequence_id` - The internal id of the sequence used
+* `sequence_step_id` - The internal id of the sequence step used to construct the email
+* `sequence_template_id` - The internal id of the a/b tested template that this particular mailing was placed into (each step in a sequence can have multiple templates).
+* `sequence_state_id` - The internal id of object tracking the state of a sequence in relation to a particular prospect. All emails related to a prospect within a particular sequence will share the same sequence_state_id.
+
+* `prospect_id` - The internal ID of the prospect
+* `prospect_first_name` - The first name of the prospect
+* `prospect_time_zone` - The time zone of the prospect
+* `prospect_gender` - The gender of the prospect
+* `prospect_dob` - The DOB of the prospect
+* `prospect_occupation` - The occupation of the prospect
+* `prospect_city` - The city the prospect resides
+* `prospect_zip` - The prospect zip code
+* `prospect_country` - The prospect country
+* `prospect_website` - A website related to the prospect
+* `prospect_opted_out` - The timestamp the prospect was opted out
+* `persona` - The persona of the prospect
+* `company_name` - The company name of the prospect
+* `company_size` - The number of employees in the company
+* `industry` - The industry of the company
+* `website` - The website of the company
+* `company_locality` - Where the company is located
+* `company_tier` - An indicator of which customer tier the company belongs to
+* `sequence_order` - The step in the sequence which generated this email (can be used to approximate how many emails came before this one).
+* `tags` - Comma-separated list of tags on the prospect
+
+## Problem
+
+The purpose of this project is to determine which features–if any–are strong
+indicators of whether or not a prospect will engage with an email. Specifically,
+successful emails will have `replied_at` set to a non-null value. Things such as
+`opened_at` and `clicked_at` are also indicators of an email's effectiveness.
+
+For example, it could turn out that the time at which the email is delivered (as
+indicated by `delivered_at`) is a significant predictor of whether the prospect
+will open/reply to an email. If this is true, a feature could be built into the
+product to automatically schedule the delivery of emails at optimal times.
+
+## Goals
+
+Successful completion of the project will include the following:
+
+1. Come up with a hypothesis and statistical explanation regarding the data and
+   which features are relevant to an email's effectiveness.
+1. Build a statistical model based on this data set to predict whether or not a
+   test email will be engaged with. Bonus points–depending on what features are
+   most important–would be to come up with a model to either prioritize
+   prospects or suggest changes to the email in order to maximize the
+   effectiveness of an email. For example, if `delivered_at` is an important
+   feature, this model would suggest at what time an email should be sent.
+
+## Things We Look For
+
+1. Basic competency in machine learning and statistics
+1. Ability to roll with an ambiguous problem statement and to think creatively.
+1. Scientific Depth
+   * Understanding of common pitfalls of predictive modeling, over-fitting, data
+     leakage, etc.
+   * Ability to establish deep understanding of data schema in relation to the
+     problem domain. For instance, message-threading, etc.
+   * Exploratory analysis with strong business instincts.
+1. Proclivity towards incorporation into actual product. Thinking with
+   real-world applications in mind. How could the model be adapted into a
+   product feature?
+1. Strong iterative model building methodology. Intentional thinking around
+   model comparison and evaluation– clear demonstration of the iterative path
+   from a baseline model to further improved models and explanation of the
+   source of improvement.
+
