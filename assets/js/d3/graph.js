@@ -2847,7 +2847,7 @@ $(function () {
               $("#jsonheader .jsonDetails").html(this.getJSONFileDetails(jfn));
               $("#jsonheader .jsonDetails table").css({"display":"block","width":"100%", "color":"white", "margin":"1%"});
               $("#jsonheader .jsonDetails table tr").css({"width":"100%"});
-              $("#jsonheader .jsonDetails table td").css({"width":"33%", "border":"1px solid black"});
+              $("#jsonheader .jsonDetails table td").css({"width":"33%", "border":"1px solid black", "text-align":"center", "padding":"2%"});
 
               this.loadData();
             }
@@ -2863,7 +2863,7 @@ $(function () {
                 $("#jsonheader .jsonDetails").html(gInstance.getJSONFileDetails(jfn));
                 $("#jsonheader .jsonDetails table").css({"display":"block","width":"100%", "color":"white", "margin":"1%"});
                 $("#jsonheader .jsonDetails table tr").css({"width":"100%"});
-                $("#jsonheader .jsonDetails table td").css({"width":"33%", "border":"1px solid black"});
+                $("#jsonheader .jsonDetails table td").css({"width":"33%", "border":"1px solid black", "text-align":"center", "padding":"2%"});
 
                 gInstance.loadData();
             });
@@ -2921,13 +2921,14 @@ $(function () {
             s += "<tr>"
             for(var i=0; i<obj.FN.length; i++){
               s += "<td>" + obj.FN[i] + "</td>";
-              s += "<td>" + obj.WX[i] + "</td>";
-              s += "<td>" + obj.GX[i] + "</td>";
+              s += "<td style='text-align:right;'>" + obj.WX[i] + "</td>";
+              s += "<td style='text-align:right;'>" + obj.GX[i] + "</td>";
             }
             s += "</tr>";
           }
           s += "</table><table><tr><td>Cluster</td><td>Density</td><td>Radius</td></tr>" +
-                "<tr><td>" + obj.CLP[0] + "</td><td>" + obj.CLP[1] + "</td><td>" + obj.CLP[2] +
+                "<tr><td>" + obj.CLP[0] + "</td><td style='text-align:right;'>" + obj.CLP[1] +
+                "</td><td  style='text-align:right;'>" + obj.CLP[2] +
                 "</td></tr></table>";
 
           return s;
@@ -2952,7 +2953,7 @@ $(function () {
               }
             });
             // Open the DevTools.
-            cWin.webContents.openDevTools();
+            //cWin.webContents.openDevTools();
 
             cWin.on('closed', function () {
               cWin = null;
@@ -2982,7 +2983,7 @@ $(function () {
               }
             });
             // Open the DevTools.
-            cWin.webContents.openDevTools();
+            //cWin.webContents.openDevTools();
 
             cWin.on('close', function () {
               cWin = null;

@@ -1161,7 +1161,7 @@ fieldset{
   background-color: #3A3C47;
 }
 
-#mapperBody{overflow: scroll;}
+#scrollDiv{overflow: scroll; background-color: #3A3C47;}
 
 #mapperBody fieldset{
   width: 98%;
@@ -1185,7 +1185,9 @@ fieldset{
 #file-input,
 #btnWrkSpace,
 #wpLabel,
-#fsLabel{
+#fsLabel,
+#fcLabel,
+#ccLabel{
   color: wheat;
   margin-left: 1em;
   margin-bottom: 1em;
@@ -1304,6 +1306,18 @@ fieldset{
   font-weight: bolder;
   font-family: sans-serif;
   margin-left: 40%;
+}
+
+#mapperBody #advance{border: none;border-top: 1px solid darkgray; display: none;}
+#mapperBody #advance legend{cursor: pointer; text-align: left; color: wheat;}
+
+#shCF{cursor: pointer;}
+
+.showhide {color: wheat;margin: 1%;}
+.ddiv{
+  display: flex;
+  flex-direction: column;
+  width: 50%;
 }
 
 /*Chrome*/

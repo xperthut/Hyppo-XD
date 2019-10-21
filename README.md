@@ -191,6 +191,11 @@ npm install electron-installer-dmg -g
 
 ```
 
+
+# Compile and run in together
+```R
+  node-gyp rebuild && npm run rebuild && npm start
+```
 # Remove npm modules
 ```R
 1. rm -rf node_modules

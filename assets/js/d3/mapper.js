@@ -1,4 +1,4 @@
-function Mapper(){
+function Mapper(maxFilter){
   this._electron = require('electron');
   this._fs = require('fs');
   this._path = require("path");
@@ -10,10 +10,14 @@ function Mapper(){
   this.numericColNames = [];
   this.numericColIndex = [];
   this.selectedFilter = [];
-  this.filterCount = 0;
+  this.filterCount = [];
   this.clusterCount = 0;
   this.hasIndexColumn = false;
   this.workspace = "";
+  this.maxFilter = maxFilter;
+  this.addIndex = 0;
+
+  for(var i=1; i<=maxFilter; i++) this.filterCount.push(i);
 
   this.getWorkSpace();
 }
@@ -33,7 +37,11 @@ Mapper.prototype = {
       $("#btnWrkSpace").html("Change workspace");
       $("#lblWrkSpace").html("Selected workspace directory: <strong>" + this.workspace + "</strong>");
       $("#fsFileSelect").css("display", "block");
-      $("#fsLabel").html("Selected a csv file from: <strong>" + this._path.join(this.workspace,"Data","csv") + "</strong>. If there has no csv file then place your csv file in this location first then click on the button <strong>Choose a csv file</strong>. Make the csv file correct formated.");
+      $("#fsLabel").html("Selected a csv file from: <strong>" +
+        this._path.join(this.workspace,"Data","csv") +
+        "</strong>. If there has no csv file then place your csv file in this location first then click on the button <strong>Choose a csv file</strong>. " +
+        "Make the csv file <strong>correct formated</strong> to get proper mapper object. " +
+        "Correct formats are as follows: <strong id='shCF'>show</strong>");
     }
   },
 
@@ -45,9 +53,12 @@ Mapper.prototype = {
     this.numericColNames = [];
     this.numericColIndex = [];
     this.selectedFilter = [];
-    this.filterCount = 0;
     this.clusterCount = 0;
     this.hasIndexColumn = false;
+    this.filterCount = [];
+    this.addIndex = 0;
+
+    for(var i=1; i<=this.maxFilter; i++) this.filterCount.push(i);
   },
 
   createDir: function(loc){
@@ -99,6 +110,8 @@ Mapper.prototype = {
     //if(this.hasIndexColumn) i = 2; // Discard the first column to appear in the drop down list
 
     for(; i<srt.header.length; i++){
+      if(i==0 && this.hasIndexColumn) continue;
+
       var index = srt.header[i].index;
       var name = srt.header[i].name;
       var type = srt.header[i].numeric;
@@ -208,6 +221,28 @@ Mapper.prototype = {
     s += "]";
     param.push(s);
 
+    if(nesVal.pie_attr.length > 0){
+      param.push("-PIEC");
+      s = "[";
+      for(var i=0; i<nesVal.pie_attr.length; i++){
+        if(s.length>1) s += ",";
+        s += nesVal.pie_attr[i];
+      }
+      s += "]";
+      param.push(s);
+    }
+
+    if(nesVal.mem_attr.length > 0){
+      param.push("-MEMC");
+      s = "[";
+      for(var i=0; i<nesVal.mem_attr.length; i++){
+        if(s.length>1) s += ",";
+        s += nesVal.mem_attr[i];
+      }
+      s += "]";
+      param.push(s);
+    }
+
     var addon = require('bindings')('interface');
     //var srt = addon.invoke("CRTMAPR", param.length, param[0],param[1],param[2],param[3],param[4],param[5],param[6],param[7],param[8],param[9],param[10],param[11],param[12],param[13],param[14],param[15]);
     var srt = addon.invoke("CRTMAPR", param);
@@ -217,16 +252,18 @@ Mapper.prototype = {
     return true;
   },
 
-  addFilter: function(max){
-    this.filterCount++;
-    if(this.filterCount === max){
+  addFilter: function(){
+    if(this.filterCount.length === 0) return "";
+
+    this.addIndex = this.filterCount.pop();
+    if(this.filterCount.length === 0){
       $("#addFilter").css("display", "none");
     }
 
-    var s = "<div id='filter_" + this.filterCount + "' class='rowDiv'>" +
+    var s = "<div id='filter_" + this.addIndex + "' class='rowDiv'>" +
               "<div class='selCol'>" +
                   "<label>Select a filter</label>" +
-                  "<select id='selFilter_" + this.filterCount + "' class='filterSel'>" +
+                  "<select id='selFilter_" + this.addIndex + "' class='filterSel'>" +
                     "<option value='-1'>Select a dimension</option>";
 
                     for(var i=0; i<this.numericColNames.length; i++){
@@ -242,27 +279,27 @@ Mapper.prototype = {
               "<div class='winCol'>" +
                 "<div>" +
                   "<label>Select windows</label>" +
-                  "<input type='range' min='1' max='100' value='50' step='1' class='slider' id='myRangeWin_" + this.filterCount + "' index='" + this.filterCount + "'/>&nbsp;" +
-                  "<label id='winLabel_" + this.filterCount + "'>50</label>" +
+                  "<input type='range' min='1' max='100' value='50' step='1' class='slider' id='myRangeWin_" + this.addIndex + "' index='" + this.addIndex + "'/>&nbsp;" +
+                  "<label id='winLabel_" + this.addIndex + "'>50</label>" +
                 "</div>" +
-                "<div id='ceWin_" + this.filterCount + "'>" +
+                "<div id='ceWin_" + this.addIndex + "'>" +
                   "<label>Custom entry</label>" +
-                  "<input type='text' id='txtWin_" + this.filterCount + "' placeholder='0' value='0' type='number' onkeypress='return isNumberKey(event)' />" +
+                  "<input type='text' id='txtWin_" + this.addIndex + "' placeholder='0' value='0' type='number' onkeypress='return isNumberKey(event)' />" +
                 "</div>" +
               "</div>" +
               "<div class='ovCol'>" +
                 "<div>" +
                   "<label>Select overlaps</label>" +
-                  "<input type='range' min='1' max='50' value='25' step='1' class='slider' id='myRangeOv_" + this.filterCount + "' index='" + this.filterCount + "'/>&nbsp;" +
-                  "<label id='ovLabel_" + this.filterCount + "'>25%</label>" +
+                  "<input type='range' min='1' max='50' value='25' step='1' class='slider' id='myRangeOv_" + this.addIndex + "' index='" + this.addIndex + "'/>&nbsp;" +
+                  "<label id='ovLabel_" + this.addIndex + "'>25%</label>" +
                 "</div>" +
-                "<div id='ceOv_" + this.filterCount + "'>" +
+                "<div id='ceOv_" + this.addIndex + "'>" +
                   "<label>Custom entry</label>" +
-                  "<input type='text' id='txtOv_" + this.filterCount + "' placeholder='0' value='0' onkeypress='return isFloatingNumberKey(event, this)' />" +
+                  "<input type='text' id='txtOv_" + this.addIndex + "' placeholder='0' value='0' onkeypress='return isFloatingNumberKey(event, this)' />" +
                 "</div>" +
               "</div>" +
               "<div class='delCol'>" +
-                "<span id='delFilter_" + this.filterCount + "' index='" + this.filterCount + "'><i class='fas fa-minus-square' aria-hidden='true'></i>&nbsp;Delete</span>" +
+                "<span id='delFilter_" + this.addIndex + "' index='" + this.addIndex + "'><i class='fas fa-minus-square' aria-hidden='true'></i>&nbsp;Delete</span>" +
               "</div>" +
             "</div>";
 
@@ -272,39 +309,73 @@ Mapper.prototype = {
   getClusteringAttributes: function(){
     var s = "<select id='select-state' multiple name='state[]' class='demo-default' style='width:50%'>";
 
-                for(var i=0; i<this.numericColNames.length; i++){
-                  s += "<option value='" + this.numericColIndex[i] + "'>" + this.numericColNames[i] + "</option>";
+    for(var i=0; i<this.numericColNames.length; i++){
+      s += "<option value='" + this.numericColIndex[i] + "'>" + this.numericColNames[i] + "</option>";
+    }
+
+    s += "</select>" +
+          "<script>" +
+    				"var $select = $('#select-state').selectize({" +
+    					"plugins: ['remove_button']," +
+    					"create          : true," +
+              "placeholder     : 'Select a clustering attributes'," +
+    				"});" +
+    				"</script>";
+
+    return s;
+  },
+
+  getPieAttributes: function(){
+    var s = "<div class='ddiv' id='pieDiv'><label>Select attributes for pie chart</label>" +
+            "<select id='pie-select-state' multiple name='state[]' class='demo-default' style='width:50%'>";
+            console.log("total cols: " + this.colNames.length);
+    for(var i=0; i<this.colNames.length; i++){
+      s += "<option value='" + this.colIndex[i] + "'>" + this.colNames[i] + "</option>";
+    }
+
+    s += "</select>" +
+          "<script>" +
+    				"var $select = $('#pie-select-state').selectize({" +
+    					"plugins: ['remove_button']," +
+    					"create          : true," +
+              "placeholder     : 'Select pie chart attributes'," +
+    				"});" +
+    				"</script></div>";
+
+    return s;
+  },
+
+  getMembershipAttributes: function(){
+    var s = "<div class='ddiv' id='memDiv'><label>Select attributes for flare membership</label>" +
+            "<select id='mem-select-state' multiple name='state[]' class='demo-default' style='width:50%'>";
+
+                for(var i=0; i<this.colNames.length; i++){
+                  s += "<option value='" + this.colIndex[i] + "'>" + this.colNames[i] + "</option>";
                 }
 
               s += "</select>" +
                     "<script>" +
-              				"var eventHandler = function(name) {" +
-              					"return \"\";" +
-              				"};" +
-              				"var $select = $('#select-state').selectize({" +
+              				"var $select = $('#mem-select-state').selectize({" +
               					"plugins: ['remove_button']," +
               					"create          : true," +
-                        "placeholder     : 'Select a clustering attribute'," +
-              					"onChange        : eventHandler('onChange')," +
-              					"onItemAdd       : eventHandler('onItemAdd')," +
-              					"onItemRemove    : eventHandler('onItemRemove')," +
-              					"onOptionAdd     : eventHandler('onOptionAdd')," +
-              					"onOptionRemove  : eventHandler('onOptionRemove')," +
-              					"onDropdownOpen  : eventHandler('onDropdownOpen')," +
-              					"onDropdownClose : eventHandler('onDropdownClose')," +
-              					"onFocus         : eventHandler('onFocus')," +
-              					"onBlur          : eventHandler('onBlur')," +
-              					"onInitialize    : eventHandler('onInitialize')," +
+                        "placeholder     : 'Select membership attributes for flare'," +
               				"});" +
-              				"</script>";
+              				"</script></div>";
 
+    return s;
+  },
+
+  getAdvanceAttributes: function(){
+    var s = this.getPieAttributes() + this.getMembershipAttributes();
     return s;
   }
 
 };
 
-var _mapper = new Mapper();
+var _mapper = new Mapper(2);
 _mapper.reload();
+$(".showhide").hide();
+$("#advContainer").hide();
 
 function showBusyIndicator(){
   $("#busyDiv").css("display", "block");
@@ -341,6 +412,33 @@ function deleteKeyPress(evt, e){
   }
 }
 
+$("#shCF").click(function(){
+  if($(this).html()==="show"){
+    $(this).html("hide");
+    //$(".showhide").css({"display":"block"});
+    $(".showhide").show(1000);
+  }
+  else{
+    $(this).html("show");
+    //$(".showhide").css({"display":"none"});
+    $(".showhide").hide(1000);
+  }
+
+
+});
+
+$("#advance legend").click(function(){
+  if($("#advance legend i").hasClass("fa-plus-circle")){
+    $("#advance legend i").removeClass("fa-plus-circle");
+    $("#advance legend i").addClass("fa-minus-circle");
+    $("#advContainer").show(1000);
+  }else {
+    $("#advance legend i").removeClass("fa-minus-circle");
+    $("#advance legend i").addClass("fa-plus-circle");
+    $("#advContainer").hide(1000);
+  }
+});
+
 $("#btnWrkSpace").click(function(){
   const {dialog} = require('electron').remote;
   dialog.showOpenDialog({
@@ -367,6 +465,7 @@ $("#file-input").on("click", (e)=>{
   const {width, height, x, y} = require('electron').remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
   $("#busyDiv").css("height", height+"px");
   $("#busyDiv").css("width", width+"px");
+  $("#scrollDiv").css("height", (height-30)+"px");
 
   const {dialog} = require('electron').remote;
   dialog.showOpenDialog({
@@ -387,9 +486,11 @@ $("#file-input").on("click", (e)=>{
         $("#lblFileName").html(_mapper.fileName);
         $("#fsFilterParams").css("display", "block");
         $("#fsClusterParams").css("display", "block");
+        $("#advance").css("display", "block");
         $("#btnCrMpr").css("display", "block");
         $("#filterContainer").html("");
         $("#clusterContainer").html(_mapper.getClusteringAttributes());
+        $("#advContainer").html(_mapper.getAdvanceAttributes());
 
         hideBusyIndicator();
     });
@@ -397,32 +498,36 @@ $("#file-input").on("click", (e)=>{
 
 $("#addFilter").on("click", (e)=>{
   $("#filterContainer").css("display", "block");
-  var s = _mapper.addFilter(2);
+  var s = _mapper.addFilter();
   if(s.length>0) $("#filterContainer").append(s);
 
   // Custom css
-  $("#myRangeWin_" + _mapper.filterCount + "").css({"width": "80%", "background-color": "burlywood"});
-  $("#myRangeOv_" + _mapper.filterCount + "").css({"width": "80%", "background-color": "burlywood"});
-  $("#winLabel_" + _mapper.filterCount + "").css({"width": "18%", "display": "contents"});
-  $("#ovLabel_" + _mapper.filterCount + "").css({"width": "18%", "display": "contents"});
-  $("#ceWin_" + _mapper.filterCount + " label").css({"width": "30%", "float": "left", "padding-top": "8pt"});
-  $("#ceOv_" + _mapper.filterCount + " label").css({"width": "30%", "float": "left", "padding-top": "8pt"});
-  $("#txtWin_" + _mapper.filterCount + "").css({"width": "50%", "float": "left"});
-  $("#txtOv_" + _mapper.filterCount + "").css({"width": "50%", "float": "left"});
-  $("#delFilter_" + _mapper.filterCount + "").css({"margin-left": "1em", "cursor": "pointer", "font-size": "18px", "color": "sandybrown"});
-  $("#delFilter_" + _mapper.filterCount + " i").css({"font-size": "18px", "color": "sandybrown"});
+  $("#myRangeWin_" + _mapper.addIndex + "").css({"width": "80%", "background-color": "burlywood"});
+  $("#myRangeOv_" + _mapper.addIndex + "").css({"width": "80%", "background-color": "burlywood"});
+  $("#winLabel_" + _mapper.addIndex + "").css({"width": "18%", "display": "contents"});
+  $("#ovLabel_" + _mapper.addIndex + "").css({"width": "18%", "display": "contents"});
+  $("#ceWin_" + _mapper.addIndex + " label").css({"width": "30%", "float": "left", "padding-top": "8pt"});
+  $("#ceOv_" + _mapper.addIndex + " label").css({"width": "30%", "float": "left", "padding-top": "8pt"});
+  $("#txtWin_" + _mapper.addIndex + "").css({"width": "50%", "float": "left"});
+  $("#txtOv_" + _mapper.addIndex + "").css({"width": "50%", "float": "left"});
+  $("#delFilter_" + _mapper.addIndex + "").css({"margin-left": "1em", "cursor": "pointer", "font-size": "18px", "color": "sandybrown"});
+  $("#delFilter_" + _mapper.addIndex + " i").css({"font-size": "18px", "color": "sandybrown"});
 
   // Custom events
-  $("#myRangeWin_" + _mapper.filterCount + "").change(function(){
+  $("#myRangeWin_" + _mapper.addIndex + "").change(function(){
     $("#winLabel_" + $(this).attr("index") + "").html($(this).val());
   });
 
-  $("#myRangeOv_" + _mapper.filterCount + "").change(function(){
+  $("#myRangeOv_" + _mapper.addIndex + "").change(function(){
     $("#ovLabel_" + $(this).attr("index") + "").html($(this).val() + "%");
   });
 
-  $("#delFilter_" + _mapper.filterCount + "").on("click", function(){
+  $("#delFilter_" + _mapper.addIndex + "").on("click", function(){
     alert("x=" + $(this).attr("index"));
+    $("#filter_"+$(this).attr("index")).remove();
+
+    _mapper.filterCount.push(parseInt($(this).attr("index")));
+    $("#addFilter").css("display", "block");
   });
 });
 
@@ -433,11 +538,13 @@ $("#btnCrMpr").click(function(){
     "overlap" : [],
     "cluster_algo": "DBSCAN",
     "cluster_attr": [],
-    "cluster_param": []
+    "cluster_param": [],
+    "pie_attr": [],
+    "mem_attr":[]
   };
 
-  for(var i=1; i<=_mapper.filterCount; i++){
-    nesVal.filter.push($("#selFilter_"+i + " option:selected").val());
+  for(var i=1; i<=(_mapper.maxFilter-_mapper.filterCount.length); i++){
+    nesVal.filter.push($("#selFilter_" + i + " option:selected").val());
 
     var rv = 0;
     if($("#txtWin_"+i).val().length===0){
@@ -464,11 +571,15 @@ $("#btnCrMpr").click(function(){
     nesVal.overlap.push(rvv);
   }
 
-  nesVal.cluster_attr = $('div.item').map((i, el) => el.getAttribute('data-value')).get();
+  nesVal.cluster_attr = $('#clusterContainer div.item').map((i, el) => el.getAttribute('data-value')).get();
   nesVal.cluster_algo = $("#selCluster option:selected").val();
   // radius then density
   nesVal.cluster_param.push($("#txtRadius").val());
   nesVal.cluster_param.push($("#txtDensity").val());
+
+  // From advance options
+  nesVal.pie_attr = $('#pieDiv div.item').map((i, el) => el.getAttribute('data-value')).get();
+  nesVal.mem_attr = $('#memDiv div.item').map((i, el) => el.getAttribute('data-value')).get();
 
   if(_mapper.createMapper(nesVal)){
     var mWin = require('electron').remote.getCurrentWindow();
