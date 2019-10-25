@@ -13,7 +13,7 @@ function Mapper(maxFilter){
   this.filterCount = [];
   this.clusterCount = 0;
   this.hasIndexColumn = false;
-  this.workspace = "";
+  this.workspace = {wd:"", files:[]};
   this.maxFilter = maxFilter;
   this.addIndex = 0;
 
@@ -28,20 +28,22 @@ Mapper.prototype = {
   // Load the getWorkSpace
   getWorkSpace: function(){
     try {
-      this.workspace = this._fs.readFileSync(this._path.resolve(__dirname + "/wp.sp"), 'utf-8');
-    }catch(err) {this.workspace = "";}
+      this.workspace = JSON.parse(this._fs.readFileSync(this._path.resolve(__dirname + "/wp.sp"), 'utf-8'));
+    }catch(err) {this.workspace = {wd:"", files:[]};}
   },
 
   reload: function(){
-    if(this.workspace.length>0){
-      $("#btnWrkSpace").html("Change workspace");
-      $("#lblWrkSpace").html("Selected workspace directory: <strong>" + this.workspace + "</strong>");
+    if(this.workspace.wd.length>0){
+      $("#btnWrkSpace").html("Change working directory");
+      $("#lblWrkSpace").html("Selected working directory: <strong>" + this.workspace.wd + "</strong>");
       $("#fsFileSelect").css("display", "block");
-      $("#fsLabel").html("Selected a csv file from: <strong>" +
-        this._path.join(this.workspace,"Data","csv") +
+      $("#fsLabel").html("Selected an input csv file from: <strong>" +
+        this._path.join(this.workspace.wd,"Data","csv") +
         "</strong>. If there has no csv file then place your csv file in this location first then click on the button <strong>Choose a csv file</strong>. " +
         "Make the csv file <strong>correct formated</strong> to get proper mapper object. " +
-        "Correct formats are as follows: <strong id='shCF'>show</strong>");
+        "Correct formats are as follows: <strong id='shCF'>show</strong><script>" +
+          "$(\"#shCF\").click(function(){if($(this).html()===\"show\"){$(this).html(\"hide\");$(\".showhide\").show(1000);}else{$(this).html(\"show\");$(\".showhide\").hide(1000);}});" +
+        "</script>");
     }
   },
 
@@ -78,12 +80,12 @@ Mapper.prototype = {
   },
 
   createWorkingDir: function(){
-    if(this.createDir(this._path.join(this.workspace, "Data"))){
-      this.createDir(this._path.join(this.workspace, "Data", "csv"));
-      this.createDir(this._path.join(this.workspace, "Data", "json"));
-      this.createDir(this._path.join(this.workspace, "Data", "tmp"));
+    if(this.createDir(this._path.join(this.workspace.wd, "Data"))){
+      this.createDir(this._path.join(this.workspace.wd, "Data", "csv"));
+      this.createDir(this._path.join(this.workspace.wd, "Data", "json"));
+      this.createDir(this._path.join(this.workspace.wd, "Data", "tmp"));
 
-      this._fs.writeFileSync(__dirname + '/wp.sp', this.workspace, 'utf8');
+      this._fs.writeFileSync(__dirname + '/wp.sp', this.workspace.wd, 'utf8');
 
       return true;
     }
@@ -96,32 +98,45 @@ Mapper.prototype = {
     // /Users/methun/Sites/hyppox/Data/csv/PlantHeight_18.csv
     this.fileName = this._path.basename(this.fileNameWithPath);
     var fName = this.fileName.substr(0, this.fileName.length-4);
-    this.createDir(this._path.join(this.workspace, "Data", "json",fName));
+    this.createDir(this._path.join(this.workspace.wd, "Data", "json",fName));
 
     this.getColumnNameList();
   },
 
   getColumnNameList: function(){
-    var addon = require('bindings')('interface');
-    var srt = JSON.parse(addon.invoke("RCSVH", this.fileNameWithPath));
+    var dt = new Date();
+    var ldt = new Date();
 
-    this.hasIndexColumn = srt.index;
-    var i=0;
-    //if(this.hasIndexColumn) i = 2; // Discard the first column to appear in the drop down list
+    for(var i=0; i<this.workspace.files.length; i++){
+      if(this.fileName === this.workspace.files[i].csv){
+        ldt = new Date(this.workspace.files[i].col.dt);
+        break;
+      }
+    }
 
-    for(; i<srt.header.length; i++){
-      if(i==0 && this.hasIndexColumn) continue;
+    // Reload if the data loads before 5 mins
+    if(Math.round((((dt-ldt) % 86400000) % 3600000) / 60000) > 5){
+      var addon = require('bindings')('interface');
+      var srt = JSON.parse(addon.invoke("RCSVH", this.fileNameWithPath));
 
-      var index = srt.header[i].index;
-      var name = srt.header[i].name;
-      var type = srt.header[i].numeric;
+      this.hasIndexColumn = srt.index;
+      var i=0;
+      //if(this.hasIndexColumn) i = 2; // Discard the first column to appear in the drop down list
 
-      this.colIndex.push((this.hasIndexColumn)?parseInt(index):1+parseInt(index));
-      this.colNames.push(name);
+      for(; i<srt.header.length; i++){
+        if(i==0 && this.hasIndexColumn) continue;
 
-      if(type){
-        this.numericColIndex.push((this.hasIndexColumn)?parseInt(index):1+parseInt(index));
-        this.numericColNames.push(name);
+        var index = srt.header[i].index;
+        var name = srt.header[i].name;
+        var type = srt.header[i].numeric;
+
+        this.colIndex.push((this.hasIndexColumn)?parseInt(index):1+parseInt(index));
+        this.colNames.push(name);
+
+        if(type){
+          this.numericColIndex.push((this.hasIndexColumn)?parseInt(index):1+parseInt(index));
+          this.numericColNames.push(name);
+        }
       }
     }
   },
@@ -129,21 +144,13 @@ Mapper.prototype = {
   storeData: function(ofn){
     try{
       this._fs.writeFileSync(this._path.resolve(__dirname + "/tmp.sp"), JSON.stringify([{'csv':this._path.basename(this.fileNameWithPath), 'json':this._path.basename(ofn)}]));
+      this._fs.writeFileSync(this._path.resolve(__dirname + "/wp.sp"), JSON.stringify(this.workspace)));
     }catch(err){
       console.log("Error to write data at storeData: " + err.message);
     }
   },
 
   createMapper: function(nesVal){
-    /*var nesVal = {
-      "filter" : [],
-      "window" : [],
-      "overlap" : [],
-      "cluster_algo": "DBSCAN",
-      "cluster_attr": [],
-      "cluster_param": []
-    };*/
-
     var param = [];
 
     param.push("-RD");
@@ -365,8 +372,34 @@ Mapper.prototype = {
     return s;
   },
 
+  getClusteringParams: function(){
+    var s = "<label id=\"ccLabel\">Select a clustering algorithm and its associated parameters</label>" +
+          "<div id=\"clusterParam\">" +
+            "<div class=\"selCol\">" +
+              "<select id=\"selCluster\" class=\"clusterSel\">" +
+                "<option value=\"-1\">Select a clustering method</option>" +
+                "<option value=\"DBSCAN\" selected>DBScan</option>" +
+              "</select>" +
+            "</div>" +
+            "<div class=\"winCol\">" +
+              "<div class=\"dens\">" +
+                "<label>Density</label>" +
+                "<input type=\"text\" id=\"txtDensity\" placeholder=\"4\" value=\"4\" onkeypress='return isFloatingNumberKey(event, this)' />" +
+              "</div>" +
+            "</div>" +
+            "<div class=\"ovCol\">" +
+              "<div class=\"rads\">" +
+                "<label>Radius</label>" +
+                "<input type=\"text\" id=\"txtRadius\" placeholder=\"1\" value=\"1\" onkeypress='return isFloatingNumberKey(event, this)' />" +
+              "</div>" +
+            "</div>" +
+          "</div>";
+
+    return s;
+  },
+
   getAdvanceAttributes: function(){
-    var s = this.getPieAttributes() + this.getMembershipAttributes();
+    var s = this.getClusteringParams() + this.getPieAttributes() + this.getMembershipAttributes();
     return s;
   }
 
@@ -412,21 +445,6 @@ function deleteKeyPress(evt, e){
   }
 }
 
-$("#shCF").click(function(){
-  if($(this).html()==="show"){
-    $(this).html("hide");
-    //$(".showhide").css({"display":"block"});
-    $(".showhide").show(1000);
-  }
-  else{
-    $(this).html("show");
-    //$(".showhide").css({"display":"none"});
-    $(".showhide").hide(1000);
-  }
-
-
-});
-
 $("#advance legend").click(function(){
   if($("#advance legend i").hasClass("fa-plus-circle")){
     $("#advance legend i").removeClass("fa-plus-circle");
@@ -453,9 +471,9 @@ $("#btnWrkSpace").click(function(){
         if(_mapper.createWorkingDir()){
           _mapper.reload();
 
-          alert("Please store all csv files at: \"" + _mapper._path.join(_mapper.workspace, "Data", "csv") + "\"");
+          alert("Please store all input csv files at: \"" + _mapper._path.join(_mapper.workspace, "Data", "csv") + "\"");
         }else{
-          alert("Can not create working directory in this location. Please select different location.");
+          alert("Can not create working directory in this location. Please select a different location.");
         }
     });
 });
@@ -543,32 +561,34 @@ $("#btnCrMpr").click(function(){
     "mem_attr":[]
   };
 
-  for(var i=1; i<=(_mapper.maxFilter-_mapper.filterCount.length); i++){
-    nesVal.filter.push($("#selFilter_" + i + " option:selected").val());
+  for(var i=1; i<=_mapper.maxFilter; i++){
+    if(_mapper.filterCount.indexOf(i)===-1){
+      nesVal.filter.push($("#selFilter_" + i + " option:selected").val());
 
-    var rv = 0;
-    if($("#txtWin_"+i).val().length===0){
-      rv = parseInt($("#myRangeWin_"+i).val());
-    }else{
-      rv = parseInt($("#txtWin_"+i).val());
-
-      if(rv===0){
+      var rv = 0;
+      if($("#txtWin_"+i).val().length===0){
         rv = parseInt($("#myRangeWin_"+i).val());
+      }else{
+        rv = parseInt($("#txtWin_"+i).val());
+
+        if(rv===0){
+          rv = parseInt($("#myRangeWin_"+i).val());
+        }
       }
-    }
-    nesVal.window.push(rv);
+      nesVal.window.push(rv);
 
-    var rvv=0.0;
-    if($("#txtOv_"+i).val().length===0){
-      rvv = parseFloat($("#myRangeOv_"+i).val());
-    }else{
-      rvv = parseFloat($("#txtOv_"+i).val());
-
-      if(rvv===0){
+      var rvv=0.0;
+      if($("#txtOv_"+i).val().length===0){
         rvv = parseFloat($("#myRangeOv_"+i).val());
+      }else{
+        rvv = parseFloat($("#txtOv_"+i).val());
+
+        if(rvv===0){
+          rvv = parseFloat($("#myRangeOv_"+i).val());
+        }
       }
+      nesVal.overlap.push(rvv);
     }
-    nesVal.overlap.push(rvv);
   }
 
   nesVal.cluster_attr = $('#clusterContainer div.item').map((i, el) => el.getAttribute('data-value')).get();

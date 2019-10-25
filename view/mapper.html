@@ -14,8 +14,8 @@
     <div id="scrollDiv">
       <div id="busyDiv"><img src="./../assets/busy.gif" /><label>Loading...</label></div>
       <fieldset id='fsWorkSpace'>
-        <label id="wpLabel">Work space directory</label>
-        <button id="btnWrkSpace">select workspace directory</button>&nbsp</label>&nbsp<label id="lblWrkSpace"></label>
+        <label id="wpLabel">Working directory</label>
+        <button id="btnWrkSpace">select a working directory</button>&nbsp</label>&nbsp<label id="lblWrkSpace"></label>
       </fieldset>
       <fieldset id='fsFileSelect'>
         <label id="fsLabel">Select a csv file from: </label>
@@ -39,27 +39,7 @@
       </fieldset>
       <!-- cluster selection -->
       <fieldset id='fsClusterParams'>
-        <label id="ccLabel">Select a clustering algorithm and its associated parameters</label>
-        <div id="clusterParam">
-          <div class="selCol">
-            <select id="selCluster" class="clusterSel">
-              <option value="-1">Select a clustering method</option>
-              <option value="DBSCAN" selected>DBScan</option>
-            </select>
-          </div>
-          <div class="winCol">
-            <div class="dens">
-              <label>Density</label>
-              <input type="text" id="txtDensity" placeholder="4" value="4" onkeypress='return isFloatingNumberKey(event, this)' />
-            </div>
-          </div>
-          <div class="ovCol">
-            <div class="rads">
-              <label>Radius</label>
-              <input type="text" id="txtRadius" placeholder="1" value="1" onkeypress='return isFloatingNumberKey(event, this)' />
-            </div>
-          </div>
-        </div>
+        <label style="margin:0em 0em 0em 1em;">Select real valued dimension for distance based clustering. (One dimension is highly recommended)</label>
         <div id="clusterContainer"></div>
       </fieldset>
       <fieldset id="advance">

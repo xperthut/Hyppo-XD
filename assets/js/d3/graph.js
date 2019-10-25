@@ -52,7 +52,7 @@ $(function () {
         this._path = require("path");
         //this._browserWindow = this._electron.remote.BrowserWindow;
 
-        this.workspace = "";
+        this.workspace = {wd:"", files:[]};
         this.getWorkSpace();
 
         this.fl = this.getAllCsvFiles();
@@ -126,8 +126,11 @@ $(function () {
         // Load the getWorkSpace
         getWorkSpace: function(){
           try {
-            this.workspace = this._fs.readFileSync(this._path.resolve(__dirname + "/wp.sp"), 'utf-8');
-          }catch(err) {this.workspace = "";}
+            this.workspace = JSON.parse(this._fs.readFileSync(this._path.resolve(__dirname + "/wp.sp"), 'utf-8'));
+          }catch(err) {
+            this.workspace = {wd:"", files:[]};
+            this._fs.writeFileSync(this._path.resolve(__dirname + "/wp.sp"), JSON.stringify(this.workspace));
+          }
         },
 
         // Get all JSON files
@@ -143,12 +146,24 @@ $(function () {
         getAllCsvFiles: function(){
           var flist = [];
 
-          if(this.workspace.length>0 && this._fs.existsSync(this.workspace)){
-            var _dir = this._path.join(this.workspace, "Data", "csv");
+          if(this.workspace && this._fs.existsSync(this.workspace.wd)){
+            var _dir = this._path.join(this.workspace.wd, "Data", "csv");
             var files = this.getAllFiles(_dir);
             for(var i=0; i<files.length; i++){
               if(files[i].indexOf('.csv')>=0 || files[i].indexOf('.CSV')>=0){
                   flist.push(files[i]);
+
+                  var ff = false;
+                  for(var j=0; j<this.workspace.files.length; j++){
+                    if(this.workspace.files[j].csv === files[i]){
+                      ff = true;
+                      break;
+                    }
+                  }
+
+                  if(!ff){
+                    this.workspace.files.push({csv:files[i], col:{index:true, header:[], dt:new Date().toString()}, json:[]});
+                  }
               }
             }
           }
@@ -160,8 +175,8 @@ $(function () {
         getAllJsonFiles: function(){
           var _fList = [];
 
-          if(this.workspace.length>0 && this._fs.existsSync(this.workspace)){
-            var _dir = this._path.join(this.workspace, "Data", "json");
+          if(this.workspace && this._fs.existsSync(this.workspace.wd)){
+            var _dir = this._path.join(this.workspace.wd, "Data", "json");
             var _folderList = this.getAllFiles(_dir);
 
             for(var i=0; i<_folderList.length; i++){
@@ -172,16 +187,31 @@ $(function () {
 
                 var _jList = this.getAllFiles(this._path.join(_dir,_folderList[i]));
 
+                var csvIndex = -1;
+                for(var j=0; j<this.workspace.files.length; j++){
+                  if(this.workspace.files[j].csv === (_f.name + ".csv") || this.workspace.files[j].csv === (_f.name + ".CSV")){
+                    csvIndex = j;
+                    this.workspace.files[j].json = [];
+                    break;
+                  }
+                }
+
                 for(var j=0; j<_jList.length; j++){
                   if(_jList[j].substring(0, 6)!="coord_" && (_jList[j].indexOf('.json')>=0 || _jList[j].indexOf('.JSON')>=0)){
-                      _f.files.push(_jList[j]);
+                      this.workspace.files[csvIndex].json.push(_jList[j]);
+
+                      var fjson = _jList[j].split("__")[0];
+                      if(_f.files.indexOf(fjson) === -1) _f.files.push({sj:fjson, lj:_jList[j]});
                   }
                 }
 
                 _fList.push(_f);
+
               }
             }
           }
+
+          this._fs.writeFileSync(this._path.resolve(__dirname + "/wp.sp"), JSON.stringify(this.workspace));
 
           return _fList;
         },
@@ -504,12 +534,21 @@ $(function () {
                     }
                 }
 
-                for (var i = 0; i < gInstance._linkData.length; i++) {
+                /*for (var i = 0; i < gInstance._linkData.length; i++) {
                     if (_nid.indexOf((gInstance._graph.links[i].source.Id) ? gInstance._graph.links[i].source.Id : gInstance._graph.links[i].source) === -1) {
                         _nid.push((gInstance._graph.links[i].source.Id) ? gInstance._graph.links[i].source.Id : gInstance._graph.links[i].source);
                     }
                     if (_nid.indexOf((gInstance._graph.links[i].target.Id) ? gInstance._graph.links[i].target.Id : gInstance._graph.links[i].target) === -1) {
                         _nid.push((gInstance._graph.links[i].target.Id) ? gInstance._graph.links[i].target.Id : gInstance._graph.links[i].target);
+                    }
+                }*/
+
+                for (var i = 0; i < gInstance._linkData.length; i++) {
+                    if (_nid.indexOf((gInstance._linkData[i].source.Id) ? gInstance._linkData[i].source.Id : gInstance._linkData[i].source) === -1) {
+                        _nid.push((gInstance._linkData[i].source.Id) ? gInstance._linkData[i].source.Id : gInstance._linkData[i].source);
+                    }
+                    if (_nid.indexOf((gInstance._linkData[i].target.Id) ? gInstance._linkData[i].target.Id : gInstance._linkData[i].target) === -1) {
+                        _nid.push((gInstance._linkData[i].target.Id) ? gInstance._linkData[i].target.Id : gInstance._linkData[i].target);
                     }
                 }
 
@@ -998,7 +1037,7 @@ $(function () {
         },
 
         getNodeCoordinate: function () {
-          var _path = this._path.join(this.workspace, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].split("__")[0] + ".json"));
+          var _path = this._path.join(this.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].sj + ".json"));
 
           if(this._fs.existsSync(_path)){
             var data = this._fs.readFileSync(_path, 'utf-8');
@@ -1064,7 +1103,7 @@ $(function () {
             });
             nPos += "}";
 
-            var _path = gInstance._path.join(gInstance.workspace, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].split("__")[0] + ".json"));
+            var _path = gInstance._path.join(gInstance.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].sj + ".json"));
 
             try{
               gInstance._fs.writeFileSync(_path, nPos);
@@ -1079,7 +1118,7 @@ $(function () {
 
             var s = JSON.stringify(gInstance._graph);
 
-            var _path = gInstance._path.join(gInstance.workspace, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex]);
+            var _path = gInstance._path.join(gInstance.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].lj);
 
             try{
               gInstance._fs.writeFileSync(_path, s);
@@ -1356,18 +1395,20 @@ $(function () {
         changePathcolor: function (e, col) {
             var c = parseInt($(e).attr("r"));
 
-            this.IPColors[c - 1] = col;
+            if(col.length>3){
+              this.IPColors[c - 1] = col;
 
-            for (var i = 0; i < this._linkData.length; i++) {
-                if (this._linkData[i].R[0] === c) {
-                    this._linkData[i].C = this.IPColors[c - 1];
-                }
-            }
+              for (var i = 0; i < this._linkData.length; i++) {
+                  if (this._linkData[i].R[0] === c) {
+                      this._linkData[i].C = this.IPColors[c - 1];
+                  }
+              }
 
-            for (var i = 0; i < this._graph.links.length; i++) {
-                if (this._graph.links[i].R[0] === c) {
-                    this._graph.links[i].C = this.IPColors[c - 1];
-                }
+              for (var i = 0; i < this._graph.links.length; i++) {
+                  if (this._graph.links[i].R[0] === c) {
+                      this._graph.links[i].C = this.IPColors[c - 1];
+                  }
+              }
             }
 
             if (this.dpie) {
@@ -1773,7 +1814,7 @@ $(function () {
 
             $("#path-details").html("");
             $("#path-details").html("<ul class='path_options'></ul><fieldset><legend>Path color&nbsp;</legend><ul class='path_legend'></ul></fieldset>" +
-                    "<fieldset><legend>Path analysis&nbsp;</legend><input type='text' id='txtPA' value='' style='color:wheat' />" +
+                    "<fieldset style='display:none;'><legend>Path analysis&nbsp;</legend><input type='text' id='txtPA' value='' style='color:wheat' />" +
                     "<input type='button' id='na-btn' value='Nodes' style='color:wheat' />" +
                     "<input type='button' id='pa-btn' value='Analysis' style='color:wheat' /><label id='pa-result'></label></fieldset>");
 
@@ -2806,7 +2847,7 @@ $(function () {
             //d3.select("#fileName").attr("value", gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex]);
             //var form = $("#frm");
 
-            var _path = this._path.join(this.workspace, "Data", "json", this.fl[this.fileIndex].split(".")[0], this.jfl[this.fileRIndex].files[this.fileCIndex])
+            var _path = this._path.join(this.workspace.wd, "Data", "json", this.fl[this.fileIndex].split(".")[0], this.jfl[this.fileRIndex].files[this.fileCIndex].lj)
             //alert(_path);
             var data = this._fs.readFileSync(_path, 'utf-8');
             this.initPage(JSON.parse(data));
@@ -2819,17 +2860,21 @@ $(function () {
             for (var i = 0; i < this.jfl.length; i++) {
                 if (this.jfl[i].name === filename) {
                     s = "";
+                    var sj = this.autoLoadData.length>0?this.autoLoadData[0].json.split("__")[0]:"", lj="";
+                    if(sj.length>0) lj = this.autoLoadData[0].json;
+
                     for (var j = 0; j < this.jfl[i].files.length; j++) {
-                        if(this.autoLoadData.length>0){
-                          if(this.autoLoadData[0].json===this.jfl[i].files[j]){
+                        if(sj>0){
+                          if(sj===this.jfl[i].files[j].sj){
+                            this.jfl[i].files[j].lj = lj;
                             this.fileCIndex = j;//$opt.attr('seq');
                             this.fileRIndex = i;//$opt.attr('row');
-                            s += "<option selected value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.jfl[i].files[j] + "</option>";
+                            s += "<option selected value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j].lj + "'>&nbsp; " + this.jfl[i].files[j].sj + "</option>";
                           }else{
-                            s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.jfl[i].files[j] + "</option>";
+                            s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j].lj + "'>&nbsp; " + this.jfl[i].files[j].sj + "</option>";
                           }
                         }else{
-                          s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.jfl[i].files[j] + "</option>";
+                          s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j].lj + "'>&nbsp; " + this.jfl[i].files[j].sj + "</option>";
                         }
                     }
 
@@ -2938,8 +2983,8 @@ $(function () {
           const modalPath = this._path.join('file://', __dirname, 'mapper.html');
           const mBound = this._electron.remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
 
-          console.log("wp: " + this.workspace);
-          if(this.workspace.length===0){
+          console.log("wp: " + this.workspace.wd);
+          if(this.workspace.wd===0){
 
             const { BrowserWindow } = require('electron').remote;
             cWin = new BrowserWindow({
@@ -2953,7 +2998,7 @@ $(function () {
               }
             });
             // Open the DevTools.
-            //cWin.webContents.openDevTools();
+            cWin.webContents.openDevTools();
 
             cWin.on('closed', function () {
               cWin = null;
@@ -2983,7 +3028,7 @@ $(function () {
               }
             });
             // Open the DevTools.
-            //cWin.webContents.openDevTools();
+            cWin.webContents.openDevTools();
 
             cWin.on('close', function () {
               cWin = null;
@@ -3015,7 +3060,7 @@ $(function () {
           if(e) this.loadMapperWindow();
           else{
             this.getStoredData();
-            if(this.workspace.length===0) this.getWorkSpace();
+            this.getWorkSpace();
             this.fl = this.getAllCsvFiles();
             this.jfl = this.getAllJsonFiles();
           }
