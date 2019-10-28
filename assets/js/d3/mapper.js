@@ -519,7 +519,7 @@ Mapper.prototype = {
   },
 
   getAdvanceAttributes: function(){
-    var s = this.getClusteringParams() + this.getPieAttributes() + this.getMembershipAttributes();
+    var s = this.getClusteringParams();// + this.getPieAttributes() + this.getMembershipAttributes();
     return s;
   }
 

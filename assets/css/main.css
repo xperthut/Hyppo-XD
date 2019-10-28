@@ -1315,10 +1315,18 @@ fieldset{
 
 .showhide {color: wheat;margin: 1%;}
 .ddiv{
-  display: flex;
-  flex-direction: column;
-  width: 50%;
+  width: 180%;
   margin-left: 1em;
+  text-align: left;
+}
+#pieDiv label{
+  text-align: left;
+  color: wheat;
+}
+#make_pie_chart{
+  display: block;
+  float: left;
+  margin: 1em 0em 0em 1em;
 }
 
 /*Chrome*/

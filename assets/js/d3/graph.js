@@ -1238,6 +1238,46 @@ $(function () {
                     .style("font-size", "20px");
         },
 
+        getColumnNames: function(){
+          var selectedCSVFile = this.fl[this.fileIndex];
+          for(var i=0; i<this.workspace.files.length; i++){
+            if(this.workspace.files[i].csv === selectedCSVFile){
+              return  this.workspace.files[i].col.header;
+            }
+          }
+
+          return [];
+        },
+
+        getPieAttributes: function(){
+          var header = this.getColumnNames();
+          var colNames = [], colIndex=[];
+
+          // Discard first column which is a index column
+          for(var i=1; i<header.length; i++){
+            colNames.push(header[i].name);
+            colIndex.push(header[i].index);
+          }
+
+          var s = "<div class='ddiv' id='pieDiv'><label>Select attributes for pie chart</label>" +
+                  "<select id='pie-select-state' multiple name='state[]' class='demo-default' style='width:50%'>";
+                  console.log("total cols: " + colNames.length);
+          for(var i=0; i<colNames.length; i++){
+            s += "<option value='" + colIndex[i] + "'>" + colNames[i] + "</option>";
+          }
+
+          s += "</select>" +
+                "<script>" +
+          				"var $select = $('#pie-select-state').selectize({" +
+          					"plugins: ['remove_button']," +
+          					"create          : true," +
+                    "placeholder     : 'Select pie chart attributes'," +
+          				"});" +
+          				"</script></div>";
+
+          return s;
+        },
+
         createButtons: function () {
 
             $("#thumbnails").css("display", "flex");
@@ -1293,10 +1333,14 @@ $(function () {
                     "<button id='color_bar' title='Color bar'>Color bar</button>&nbsp;" +
                     "<button id='node_analysis' title='Explore nodes' style='display:none;'>Analysis</button>&nbsp;";
 
-            $("#other-btn").html(s + "</fieldset>");
+            s += "</fieldset><fieldset>" +
+            $("#other-btn").html(s + "</fieldset><fieldset>" + this.getPieAttributes() +
+              "<button id='make_pie_chart' title='Create pie chart' style='display:none;'>Create pie chart</button>&nbsp;" +
+              "</fieldset>");
 
             d3.select("#save_image").style("color", "wheat").on("click", gInstance.saveImage);
             d3.select("#btn_Pie").style("color", "wheat").on("click", gInstance.createPieColorLegend);
+            d3.select("#make_pie_chart").style("display", "block").style("color", "wheat").on("click", gInstance.createPieChart);
 
             for (var l in label) {
                 if (parseInt(l) === 0) {
@@ -1335,6 +1379,162 @@ $(function () {
 
                 gInstance.adjustSelectedAttr();
             });
+        },
+
+        createMapper: function(nesVal){
+          var param = [];
+
+          param.push("-RD");
+          param.push(this._path.join(this.workspace.wd, "Data" , "csv"));
+          param.push("-WD");
+          param.push(this._path.join(this.workspace.wd, "Data" , "json"));
+          param.push("-FN");
+          param.push(this.fl[this.fileIndex]);
+          param.push("-FC");
+
+          /*if(nesVal.filter.length===0){
+              alert("Please select a filter attibute");
+              return false;
+          }*/
+
+          var s = "[";
+          for(var i=0; i<nesVal.filter.length; i++){
+            if(s.length>1) s += ",";
+            s += nesVal.filter[i];
+          }
+          s += "]";
+          param.push(s);
+
+          param.push("-WX");
+          s = "[";
+          for(var i=0; i<nesVal.window.length; i++){
+            if(s.length>1) s += ",";
+            s += nesVal.window[i];
+          }
+          s += "]";
+          param.push(s);
+
+          param.push("-GX");
+          s = "[";
+          for(var i=0; i<nesVal.overlap.length; i++){
+            if(s.length>1) s += ",";
+            s += nesVal.overlap[i];
+          }
+          s += "]";
+          param.push(s);
+
+          param.push("-CC");
+
+          /*if(nesVal.cluster_attr.length===0){
+            alert("Please select a cluster attribute");
+            return false;
+          }*/
+
+          s = "[";
+          for(var i=0; i<nesVal.cluster_attr.length; i++){
+            if(s.length>1) s += ",";
+            s += nesVal.cluster_attr[i];
+          }
+          s += "]";
+          param.push(s);
+
+          param.push("-CP");
+          s = "[";
+          for(var i=0; i<nesVal.cluster_param.length; i++){
+            /*if(nesVal.cluster_param[i].length===0 || parseFloat(nesVal.cluster_param[i])===0){
+              if(nesVal.cluster_algo==="DBSCAN"){
+                if(i==0){
+                  alert("Radius should be non-zero.");
+                  return false;
+                }else if(i==0){
+                  alert("Density should be non-zero.");
+                  return false;
+                }
+              }
+            }*/
+
+            if(s.length>1) s += ",";
+            s += nesVal.cluster_param[i];
+          }
+          s += "]";
+          param.push(s);
+
+          if(nesVal.pie_attr.length > 0){
+            param.push("-PIEC");
+            s = "[";
+            for(var i=0; i<nesVal.pie_attr.length; i++){
+              if(s.length>1) s += ",";
+              s += nesVal.pie_attr[i];
+            }
+            s += "]";
+            param.push(s);
+          }
+
+          if(nesVal.mem_attr.length > 0){
+            param.push("-MEMC");
+            s = "[";
+            for(var i=0; i<nesVal.mem_attr.length; i++){
+              if(s.length>1) s += ",";
+              s += nesVal.mem_attr[i];
+            }
+            s += "]";
+            param.push(s);
+          }
+
+          var addon = require('bindings')('interface');
+          var srt = addon.invoke("CRTMAPR", param);
+
+          this.storeData(srt);
+
+          return true;
+        },
+
+        storeData: function(ofn){
+          try{
+            this._fs.writeFileSync(this._path.resolve(__dirname + "/tmp.sp"), JSON.stringify([{'csv':this.fl[this.fileIndex], 'json':this._path.basename(ofn)}]));
+/*
+            for(var i=0; i<this.workspace.files.length; i++){
+              if(this.fl[this.fileIndex] === this.workspace.files[i].csv){
+                if(this.workspace.files[i].json.indexOf(this._path.basename(ofn))===-1){
+                  this.workspace.files[i].json.push(this._path.basename(ofn));
+                }
+
+                break;
+              }
+            }
+
+            this._fs.writeFileSync(this._path.resolve(__dirname + "/wp.sp"), JSON.stringify(this.workspace));*/
+          }catch(err){
+            console.log("Error to write data at storeData: " + err.message);
+          }
+        },
+
+        createPieChart: function(){
+          var param = (gInstance._graph.param)?gInstance._graph.param:null;
+
+          if(param){
+            var nesVal = {
+              "filter" : param.fc,
+              "window" : param.wx,
+              "overlap" : param.gx,
+              "cluster_algo": param.cls.name,
+              "cluster_attr": param.cla,
+              "cluster_param": param.cls.param,
+              "pie_attr": $('#pieDiv div.item').map((i, el) => el.getAttribute('data-value')).get(),
+              "mem_attr":[]
+            };
+
+            gInstance.createMapper(nesVal);
+            gInstance.reload();
+
+          }
+        },
+
+        reload: function(){
+          this.getWorkSpace();
+          this.fl = this.getAllCsvFiles();
+          this.jfl = this.getAllJsonFiles();
+          this.loadFiles(false);
         },
 
         changeEdgeColor: function (col) {
@@ -3016,10 +3216,7 @@ $(function () {
               cWin = null;
               console.log("exit the modal");
 
-              gInstance.getWorkSpace();
-              gInstance.fl = gInstance.getAllCsvFiles();
-              gInstance.jfl = gInstance.getAllJsonFiles();
-              gInstance.loadFiles(false);
+              gInstance.reload();
 
             });
 
@@ -3046,10 +3243,7 @@ $(function () {
             cWin.on('close', function () {
               cWin = null;
 
-              gInstance.getWorkSpace();
-              gInstance.fl = gInstance.getAllCsvFiles();
-              gInstance.jfl = gInstance.getAllJsonFiles();
-              gInstance.loadFiles(false);
+              gInstance.reload();
             });
 
             cWin.loadURL(modalPath);
