@@ -70,7 +70,7 @@ namespace file_handler{
     std::string fileNameWithPath;
     bool hasIndexColumn;
 
-    void getData(std::string lineData, std::vector<std::string>& line){
+    void getData(std::string lineData, std::vector<std::string>& line, bool header = false){
       bool start = false;
       std::string s="";
       line.clear();
@@ -84,13 +84,20 @@ namespace file_handler{
         }else if(ch==','){
             if(start) s+= ch;
             else{
-              line.push_back((this->isValidNumber(s))?s:"\"" + s + "\"");
+                if(header) line.push_back("\"" + s + "\"");
+                else line.push_back((this->isValidNumber(s))?s:"\"" + s + "\"");
+
               s="";
             }
         }else{
             s += ch;
         }
       }
+
+        if(s.length()>0){
+            if(header) line.push_back("\"" + s + "\"");
+            else line.push_back((this->isValidNumber(s))?s:"\"" + s + "\"");
+        }
     }
 
     void getRowData(std::string lineData, std::vector<bool>& line){
@@ -115,6 +122,8 @@ namespace file_handler{
             s += ch;
         }
       }
+        col++;
+        if(s.length()>0 && line[col]) line[col]= (this->isValidNumber(s))?true:false;
     }
 
     bool isValidNumber(std::string s){
@@ -191,7 +200,7 @@ namespace file_handler{
       //std::cout<<header<<std::endl;
       //std::cout<<firstRow<<std::endl;
 
-      this->getData(header, vHeader);
+      this->getData(header, vHeader, true);
       std::vector<bool> numericHeader(vHeader.size(), true);
 
       for(size_t i=0; i<firstRow.size(); i++){

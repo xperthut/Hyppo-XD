@@ -44,6 +44,9 @@ Mapper.prototype = {
         "Correct formats are as follows: <strong id='shCF'>show</strong><script>" +
           "$(\"#shCF\").click(function(){if($(this).html()===\"show\"){$(this).html(\"hide\");$(\".showhide\").show(1000);}else{$(this).html(\"show\");$(\".showhide\").hide(1000);}});" +
         "</script>");
+
+        this.loadAllCsvFiles();
+        this.loadAllJsonFiles();
     }
   },
 
@@ -79,18 +82,93 @@ Mapper.prototype = {
     return true;
   },
 
+  getAllFiles: function(_folder){
+    try {
+      var files = this._fs.readdirSync(_folder);
+      return files;
+    }
+    catch(err) {alert(err); return [];}
+  },
+
+  loadAllCsvFiles: function(){
+    if(this.workspace && this._fs.existsSync(this.workspace.wd)){
+      var _dir = this._path.join(this.workspace.wd, "Data", "csv");
+      var files = this.getAllFiles(_dir);
+      for(var i=0; i<files.length; i++){
+        if(files[i].indexOf('.csv')>=0 || files[i].indexOf('.CSV')>=0){
+            var ff = false;
+            for(var j=0; j<this.workspace.files.length; j++){
+              if(this.workspace.files[j].csv === files[i]){
+                ff = true;
+                break;
+              }
+            }
+
+            if(!ff){
+              this.workspace.files.push({csv:files[i], col:{index:true, header:[], dt:new Date().toString()}, json:[]});
+            }
+        }
+      }
+    }
+  },
+
+  // Get all JSON files
+  loadAllJsonFiles: function(){
+    if(this.workspace && this._fs.existsSync(this.workspace.wd)){
+      var _dir = this._path.join(this.workspace.wd, "Data", "json");
+      var _folderList = this.getAllFiles(_dir);
+
+      for(var i=0; i<_folderList.length; i++){
+        if(_folderList[i].indexOf(".")===-1){
+          var _jList = this.getAllFiles(this._path.join(_dir,_folderList[i]));
+
+          var csvIndex = -1;
+          for(var j=0; j<this.workspace.files.length; j++){
+            if(this.workspace.files[j].csv === (_folderList[i] + ".csv") || this.workspace.files[j].csv === (_folderList[i] + ".CSV")){
+              csvIndex = j;
+              //this.workspace.files[j].json = [];
+              break;
+            }
+          }
+
+          for(var j=0; j<_jList.length; j++){
+            if(_jList[j].substring(0, 6)!="coord_" && (_jList[j].indexOf('.json')>=0 || _jList[j].indexOf('.JSON')>=0)){
+                if(csvIndex>-1 && this.workspace.files[csvIndex].json.indexOf(_jList[j])===-1){
+                  this.workspace.files[csvIndex].json.push(_jList[j]);
+                }
+            }
+          }
+        }
+      }
+      this._fs.writeFileSync(this._path.resolve(__dirname + "/wp.sp"), JSON.stringify(this.workspace));
+    }
+  },
+
   createWorkingDir: function(){
-    if(this.createDir(this._path.join(this.workspace.wd, "Data"))){
-      this.createDir(this._path.join(this.workspace.wd, "Data", "csv"));
-      this.createDir(this._path.join(this.workspace.wd, "Data", "json"));
-      this.createDir(this._path.join(this.workspace.wd, "Data", "tmp"));
+    var f = this.createDir(this._path.join(this.workspace.wd, "Data")) |
+            this.createDir(this._path.join(this.workspace.wd, "Data", "csv")) |
+            this.createDir(this._path.join(this.workspace.wd, "Data", "json")) |
+            this.createDir(this._path.join(this.workspace.wd, "Data", "tmp"));
 
-      this._fs.writeFileSync(__dirname + '/wp.sp', this.workspace.wd, 'utf8');
-
-      return true;
+    if(!this._fs.existsSync(this._path.join(this.workspace.wd, "Data", "csv","PlantHeight.csv"))){
+      this._fs.copyFileSync(this._path.join(__dirname, "dummy","PlantHeight.csv"), this._path.join(this.workspace.wd, "Data", "csv","PlantHeight.csv") );
     }
 
-    return false;
+    var ff = false;
+    for(var i=0; i<this.workspace.files.length; i++){
+      if(this.workspace.files[i].csv==="PlantHeight.csv"){
+        ff = true;
+        break;
+      }
+    }
+
+    if(!ff){
+      console.log(this._path.join(__dirname, "dummy","PlantHeight.csv"));
+      this.workspace.files.push({csv:"PlantHeight.csv", col:{index:true, header:[], dt:new Date().toString()}, json:[]});
+      this._fs.writeFileSync(__dirname + '/wp.sp', JSON.stringify(this.workspace), 'utf8');
+    }
+
+    return f;
   },
 
   extractFileName: function(){
@@ -106,23 +184,54 @@ Mapper.prototype = {
   getColumnNameList: function(){
     var dt = new Date();
     var ldt = new Date();
+    var csvIndex = -1;
 
     for(var i=0; i<this.workspace.files.length; i++){
       if(this.fileName === this.workspace.files[i].csv){
         ldt = new Date(this.workspace.files[i].col.dt);
+        csvIndex = i;
         break;
       }
     }
 
+    if(csvIndex<0){
+      csvIndex = 0;
+      this.workspace.files.push({csv:this.fileName, col:{index:true, header:[], dt:new Date().toString()}, json:[]});// = this.fileName;
+    }
     // Reload if the data loads before 5 mins
-    if(Math.round((((dt-ldt) % 86400000) % 3600000) / 60000) > 5){
+    if(this.workspace.files[csvIndex].col.header.length ===0 || Math.round((((dt-ldt) % 86400000) % 3600000) / 60000) > 5){
       var addon = require('bindings')('interface');
       var srt = JSON.parse(addon.invoke("RCSVH", this.fileNameWithPath));
 
       this.hasIndexColumn = srt.index;
       var i=0;
       //if(this.hasIndexColumn) i = 2; // Discard the first column to appear in the drop down list
+      this.workspace.files[csvIndex].col.header = [];
+      this.workspace.files[csvIndex].col.index = srt.index;
+      this.workspace.files[csvIndex].col.dt = new Date().toString();
 
+      for(; i<srt.header.length; i++){
+        this.workspace.files[csvIndex].col.header.push(srt.header[i]);
+
+        if(i==0 && this.hasIndexColumn) continue;
+
+        var index = srt.header[i].index;
+        var name = srt.header[i].name;
+        var type = srt.header[i].numeric;
+
+        this.colIndex.push((this.hasIndexColumn)?parseInt(index):1+parseInt(index));
+        this.colNames.push(name);
+
+        if(type){
+          this.numericColIndex.push((this.hasIndexColumn)?parseInt(index):1+parseInt(index));
+          this.numericColNames.push(name);
+        }
+      }
+    }else{
+      var srt = this.workspace.files[i].col;
+      this.hasIndexColumn = srt.index;
+      var i=0;
+      //if(this.hasIndexColumn) i = 2; // Discard the first column to appear in the drop down list
       for(; i<srt.header.length; i++){
         if(i==0 && this.hasIndexColumn) continue;
 
@@ -144,7 +253,18 @@ Mapper.prototype = {
   storeData: function(ofn){
     try{
       this._fs.writeFileSync(this._path.resolve(__dirname + "/tmp.sp"), JSON.stringify([{'csv':this._path.basename(this.fileNameWithPath), 'json':this._path.basename(ofn)}]));
-      this._fs.writeFileSync(this._path.resolve(__dirname + "/wp.sp"), JSON.stringify(this.workspace)));
+
+      for(var i=0; i<this.workspace.files.length; i++){
+        if(this.fileName === this.workspace.files[i].csv){
+          if(this.workspace.files[i].json.indexOf(this._path.basename(ofn))===-1){
+            this.workspace.files[i].json.push(this._path.basename(ofn));
+          }
+
+          break;
+        }
+      }
+
+      this._fs.writeFileSync(this._path.resolve(__dirname + "/wp.sp"), JSON.stringify(this.workspace));
     }catch(err){
       console.log("Error to write data at storeData: " + err.message);
     }
@@ -154,9 +274,9 @@ Mapper.prototype = {
     var param = [];
 
     param.push("-RD");
-    param.push(this._path.join(this.workspace, "Data" , "csv"));
+    param.push(this._path.join(this.workspace.wd, "Data" , "csv"));
     param.push("-WD");
-    param.push(this._path.join(this.workspace, "Data" , "json"));
+    param.push(this._path.join(this.workspace.wd, "Data" , "json"));
     param.push("-FN");
     param.push(this.fileName);
     param.push("-FC");
@@ -466,12 +586,12 @@ $("#btnWrkSpace").click(function(){
         if (files === undefined) return;
         if(files.length===0) return;
 
-        _mapper.workspace = files[0];
+        _mapper.workspace.wd = files[0];
 
         if(_mapper.createWorkingDir()){
           _mapper.reload();
 
-          alert("Please store all input csv files at: \"" + _mapper._path.join(_mapper.workspace, "Data", "csv") + "\"");
+          alert("Please store all input csv files at: \"" + _mapper._path.join(_mapper.workspace.wd, "Data", "csv") + "\"");
         }else{
           alert("Can not create working directory in this location. Please select a different location.");
         }
@@ -489,7 +609,7 @@ $("#file-input").on("click", (e)=>{
   dialog.showOpenDialog({
         properties: ['openFile'],
         filters: [{ name: 'CSV', extensions: ['csv'] }],
-        defaultPath: _mapper._path.join(_mapper.workspace, "Data", "csv")
+        defaultPath: _mapper._path.join(_mapper.workspace.wd, "Data", "csv")
     }, function (files) {
         showBusyIndicator();
 
@@ -532,11 +652,11 @@ $("#addFilter").on("click", (e)=>{
   $("#delFilter_" + _mapper.addIndex + " i").css({"font-size": "18px", "color": "sandybrown"});
 
   // Custom events
-  $("#myRangeWin_" + _mapper.addIndex + "").change(function(){
+  $("#myRangeWin_" + _mapper.addIndex + "").on('input',function(){
     $("#winLabel_" + $(this).attr("index") + "").html($(this).val());
   });
 
-  $("#myRangeOv_" + _mapper.addIndex + "").change(function(){
+  $("#myRangeOv_" + _mapper.addIndex + "").on("input",function(){
     $("#ovLabel_" + $(this).attr("index") + "").html($(this).val() + "%");
   });
 

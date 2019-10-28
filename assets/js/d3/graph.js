@@ -57,6 +57,7 @@ $(function () {
 
         this.fl = this.getAllCsvFiles();
         this.jfl = this.getAllJsonFiles();
+        this.saveWorkSpace();
 
         this.svg = d3.select("svg").on("click", function () {
             $("#top-nav").css("display", "none");
@@ -127,9 +128,14 @@ $(function () {
         getWorkSpace: function(){
           try {
             this.workspace = JSON.parse(this._fs.readFileSync(this._path.resolve(__dirname + "/wp.sp"), 'utf-8'));
-          }catch(err) {
-            this.workspace = {wd:"", files:[]};
+          }catch(err) {this.workspace = {wd:"", files:[]};}
+        },
+
+        saveWorkSpace: function(){
+          try {
             this._fs.writeFileSync(this._path.resolve(__dirname + "/wp.sp"), JSON.stringify(this.workspace));
+          }catch(err) {
+            console.log("Can not write working directory JSON: " + err.message);
           }
         },
 
@@ -191,14 +197,14 @@ $(function () {
                 for(var j=0; j<this.workspace.files.length; j++){
                   if(this.workspace.files[j].csv === (_f.name + ".csv") || this.workspace.files[j].csv === (_f.name + ".CSV")){
                     csvIndex = j;
-                    this.workspace.files[j].json = [];
+                    //this.workspace.files[j].json = [];
                     break;
                   }
                 }
 
                 for(var j=0; j<_jList.length; j++){
                   if(_jList[j].substring(0, 6)!="coord_" && (_jList[j].indexOf('.json')>=0 || _jList[j].indexOf('.JSON')>=0)){
-                      this.workspace.files[csvIndex].json.push(_jList[j]);
+                      if(csvIndex>-1 && this.workspace.files[csvIndex].json.indexOf(_jList[j])===-1) this.workspace.files[csvIndex].json.push(_jList[j]);
 
                       var fjson = _jList[j].split("__")[0];
                       if(_f.files.indexOf(fjson) === -1) _f.files.push({sj:fjson, lj:_jList[j]});
@@ -2864,7 +2870,7 @@ $(function () {
                     if(sj.length>0) lj = this.autoLoadData[0].json;
 
                     for (var j = 0; j < this.jfl[i].files.length; j++) {
-                        if(sj>0){
+                        if(sj.length>0){
                           if(sj===this.jfl[i].files[j].sj){
                             this.jfl[i].files[j].lj = lj;
                             this.fileCIndex = j;//$opt.attr('seq');
@@ -2883,7 +2889,7 @@ $(function () {
             }
 
             if (s.length > 0) {
-                s = "<option class='file-select' value=''>&#xf039; &nbsp; Select a graph file</option>" + s;
+                s = "<option class='file-select' value=''>&nbsp; Select a graph file</option>" + s;
             }
             $("#myJsonDropdown").html(s);
 
@@ -2984,7 +2990,7 @@ $(function () {
           const mBound = this._electron.remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
 
           console.log("wp: " + this.workspace.wd);
-          if(this.workspace.wd===0){
+          if(this.workspace.wd.length===0){
 
             const { BrowserWindow } = require('electron').remote;
             cWin = new BrowserWindow({
@@ -3004,6 +3010,7 @@ $(function () {
               cWin = null;
               console.log("exit the modal");
 
+              gInstance.getWorkSpace();
               gInstance.fl = gInstance.getAllCsvFiles();
               gInstance.jfl = gInstance.getAllJsonFiles();
               gInstance.loadFiles(false);
@@ -3033,6 +3040,7 @@ $(function () {
             cWin.on('close', function () {
               cWin = null;
 
+              gInstance.getWorkSpace();
               gInstance.fl = gInstance.getAllCsvFiles();
               gInstance.jfl = gInstance.getAllJsonFiles();
               gInstance.loadFiles(false);
@@ -3081,7 +3089,7 @@ $(function () {
             }
 
             if (s.length > 0) {
-                s = "<option class='file-select' value=''>&#xf039; &nbsp; Select a data file</option>" + s;
+                s = "<option class='file-select' value=''>&nbsp; Select a data file</option>" + s;
             }
             $("#myDropdown").html(s);
 
