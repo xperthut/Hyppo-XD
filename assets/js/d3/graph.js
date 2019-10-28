@@ -193,6 +193,12 @@ $(function () {
 
                 var _jList = this.getAllFiles(this._path.join(_dir,_folderList[i]));
 
+                if(_jList.length>0) _jList.sort(function(a,b){
+                  var x = a.toLowerCase();
+                  var y = b.toLowerCase();
+                  return x < y ? -1 : x > y ? 1 : 0;
+                });
+
                 var csvIndex = -1;
                 for(var j=0; j<this.workspace.files.length; j++){
                   if(this.workspace.files[j].csv === (_f.name + ".csv") || this.workspace.files[j].csv === (_f.name + ".CSV")){
@@ -1281,8 +1287,8 @@ $(function () {
             s = "<fieldset><legend>Actions&nbsp;</legend><button id='save_image'>Save image</button>&nbsp;";
 
             // dev version
-            s += "<button id='get_coord' title='Assign saved node position to the graph'>Restore nodes</button>&nbsp;" +
-                    "<button id='set_coord' title='Save node positions'>Save nodes</button>&nbsp;" +
+            s += "<button id='get_coord' title='Assign saved node position to the graph'>Restore nodes positions</button>&nbsp;" +
+                    "<button id='set_coord' title='Save node positions'>Save nodes positions</button>&nbsp;" +
                     "<button id='set_color' title='Save colors whatever you changed'>Save colors</button>&nbsp;" +
                     "<button id='color_bar' title='Color bar'>Color bar</button>&nbsp;" +
                     "<button id='node_analysis' title='Explore nodes' style='display:none;'>Analysis</button>&nbsp;";
@@ -2875,12 +2881,12 @@ $(function () {
                             this.jfl[i].files[j].lj = lj;
                             this.fileCIndex = j;//$opt.attr('seq');
                             this.fileRIndex = i;//$opt.attr('row');
-                            s += "<option selected value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j].lj + "'>&nbsp; " + this.jfl[i].files[j].sj + "</option>";
+                            s += "<option selected value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j].lj + "'>&nbsp; " + this.jfl[i].files[j].lj + "</option>";
                           }else{
-                            s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j].lj + "'>&nbsp; " + this.jfl[i].files[j].sj + "</option>";
+                            s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j].lj + "'>&nbsp; " + this.jfl[i].files[j].lj + "</option>";
                           }
                         }else{
-                          s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j].lj + "'>&nbsp; " + this.jfl[i].files[j].sj + "</option>";
+                          s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j].lj + "'>&nbsp; " + this.jfl[i].files[j].lj + "</option>";
                         }
                     }
 
