@@ -270,6 +270,39 @@ Mapper.prototype = {
     }
   },
 
+  checkMapperParams: function(nesVal){
+    var errStatus = {status:true, msg:[]};
+
+    if(nesVal.filter.length===0){
+        errStatus.status = false;
+        errStatus.msg.push("Please select a filter attibute");
+    }else if(nesVal.filter.length===1 && parseInt(nesVal.filter[0])===-1){
+        errStatus.status = false;
+        errStatus.msg.push("Please select a filter attibute");
+    }
+
+    if(nesVal.cluster_attr.length===0){
+      errStatus.status = false;
+      errStatus.msg.push("Please select a cluster attribute");
+    }
+
+    for(var i=0; i<nesVal.cluster_param.length; i++){
+      if(nesVal.cluster_param[i].length===0 || parseFloat(nesVal.cluster_param[i])===0){
+        if(nesVal.cluster_algo==="DBSCAN"){
+          if(i==0){
+            errStatus.status = false;
+            errStatus.msg.push("Radius should be non-zero.");
+          }else if(i==1){
+            errStatus.status = false;
+            errStatus.msg.push("Density should be non-zero.");
+          }
+        }
+      }
+    }
+
+    return errStatus;
+  },
+
   createMapper: function(nesVal){
     var param = [];
 
@@ -280,11 +313,6 @@ Mapper.prototype = {
     param.push("-FN");
     param.push(this.fileName);
     param.push("-FC");
-
-    if(nesVal.filter.length===0){
-        alert("Please select a filter attibute");
-        return false;
-    }
 
     var s = "[";
     for(var i=0; i<nesVal.filter.length; i++){
@@ -314,11 +342,6 @@ Mapper.prototype = {
 
     param.push("-CC");
 
-    if(nesVal.cluster_attr.length===0){
-      alert("Please select a cluster attribute");
-      return false;
-    }
-
     s = "[";
     for(var i=0; i<nesVal.cluster_attr.length; i++){
       if(s.length>1) s += ",";
@@ -330,18 +353,6 @@ Mapper.prototype = {
     param.push("-CP");
     s = "[";
     for(var i=0; i<nesVal.cluster_param.length; i++){
-      if(nesVal.cluster_param[i].length===0 || parseFloat(nesVal.cluster_param[i])===0){
-        if(nesVal.cluster_algo==="DBSCAN"){
-          if(i==0){
-            alert("Radius should be non-zero.");
-            return false;
-          }else if(i==0){
-            alert("Density should be non-zero.");
-            return false;
-          }
-        }
-      }
-
       if(s.length>1) s += ",";
       s += nesVal.cluster_param[i];
     }
@@ -371,12 +382,9 @@ Mapper.prototype = {
     }
 
     var addon = require('bindings')('interface');
-    //var srt = addon.invoke("CRTMAPR", param.length, param[0],param[1],param[2],param[3],param[4],param[5],param[6],param[7],param[8],param[9],param[10],param[11],param[12],param[13],param[14],param[15]);
     var srt = addon.invoke("CRTMAPR", param);
 
     this.storeData(srt);
-
-    return true;
   },
 
   addFilter: function(){
@@ -532,10 +540,12 @@ $("#advContainer").hide();
 
 function showBusyIndicator(){
   $("#busyDiv").css("display", "block");
+  console.log("Start busy indicator");
 }
 
 function hideBusyIndicator(){
   $("#busyDiv").css("display", "none");
+  console.log("Stop busy indicator");
 }
 
 function isNumberKey(evt){
@@ -599,10 +609,11 @@ $("#btnWrkSpace").click(function(){
 });
 
 $("#file-input").on("click", (e)=>{
+  showBusyIndicator();
 
   const {width, height, x, y} = require('electron').remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
-  $("#busyDiv").css("height", height+"px");
-  $("#busyDiv").css("width", width+"px");
+  //$("#busyDiv").css("height", height+"px");
+  //$("#busyDiv").css("width", width+"px");
   $("#scrollDiv").css("height", (height-30)+"px");
 
   const {dialog} = require('electron').remote;
@@ -611,10 +622,8 @@ $("#file-input").on("click", (e)=>{
         filters: [{ name: 'CSV', extensions: ['csv'] }],
         defaultPath: _mapper._path.join(_mapper.workspace.wd, "Data", "csv")
     }, function (files) {
-        showBusyIndicator();
 
         if (files === undefined ) {hideBusyIndicator(); return;}
-
         if(files.length === 0) {hideBusyIndicator(); return;}
 
         _mapper.reset();
@@ -670,6 +679,8 @@ $("#addFilter").on("click", (e)=>{
 });
 
 $("#btnCrMpr").click(function(){
+  showBusyIndicator();
+
   var nesVal = {
     "filter" : [],
     "window" : [],
@@ -721,9 +732,48 @@ $("#btnCrMpr").click(function(){
   nesVal.pie_attr = $('#pieDiv div.item').map((i, el) => el.getAttribute('data-value')).get();
   nesVal.mem_attr = $('#memDiv div.item').map((i, el) => el.getAttribute('data-value')).get();
 
-  if(_mapper.createMapper(nesVal)){
-    var mWin = require('electron').remote.getCurrentWindow();
-    mWin.close();
+  var errStatus = _mapper.checkMapperParams(nesVal);
+  const {dialog, nativeImage} = require('electron').remote;
+  const path = require('path');
+
+  console.log(path.join(__dirname, 'Icon.png'));
+  let nativeIcon = nativeImage.createFromPath(path.join(__dirname, 'Icon.png'));
+  nativeIcon = nativeIcon.resize({ width: 16, height: 16 });
+  //const tray = new Tray(trayIcon);
+
+  if(errStatus.status===true){
+    let options  = {
+       buttons: ["Yes", "No"],
+       message: "Do you want to create the mapper with this settings.",
+       icon: nativeIcon
+     };
+
+     dialog.showMessageBox(options,(response) => {
+            console.log(response);
+
+            if(response===0){
+              _mapper.createMapper(nesVal);
+              var mWin = require('electron').remote.getCurrentWindow();
+              mWin.close();
+            }
+        });
+  }else{
+    var s = "Please fix following issues:\n";
+    for(var i=0; i<errStatus.msg.length; i++){
+      if(i>0) s+= "\n";
+      s += "\t" + (i+1) + ". " + errStatus.msg[i] + ".";
+    }
+
+    let options  = {
+       buttons: ["Ok"],
+       message: s,
+       icon: nativeIcon
+     };
+
+     dialog.showMessageBox(options,(response) => {
+        console.log(response);
+    });
   }
 
+  hideBusyIndicator();
 });

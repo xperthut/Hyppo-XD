@@ -3,14 +3,14 @@
     {
       "target_name": "interface",
       "include_dirs": [
-        "<!(node -e \"require('nan')\")",
+        "node_modules/nan",#"<!(node -e \"require('nan')\")",
         "src"
       ],
       "sources": [
         "interface.cpp"
       ],
       "libraries": [
-            "-lboost_filesystem", "-lboost_system"
+        "-lboost_filesystem", "-lboost_system"
       ],
       "cflags_c": [
         "-std=c++14",

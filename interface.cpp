@@ -1,5 +1,5 @@
 #include <nan.h>
-#include "src/hyppox.h"
+#include <hyppox.h>
 
 template<typename C>
 inline v8::Local<C>
