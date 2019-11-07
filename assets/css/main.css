@@ -830,6 +830,7 @@ dl dd {
     visibility: visible;
     z-index: 10000;
     right: 0;
+    font-family: FontAwesome;
 }
 
 #main .toggle {
@@ -874,6 +875,7 @@ body.is-loading-1 #main {
 
     #main {
         background: #3A3C47;
+        font-family: FontAwesome;
     }
 
     #main .toggle {
@@ -892,6 +894,7 @@ body.is-loading-1 #main {
         width: 100%;
         background: #3A3C47;
         text-align: center;
+        font-family: FontAwesome;
     }
 
     body.is-loading-1 #main {
@@ -1155,6 +1158,18 @@ fieldset{
 #pw,#fw{display: inline; width: 7em; color: white; background-color: transparent;}
 #pwl,#fwl{display: inline; color: white; float: right; background-color: transparent;}
 
+#attr-btn fieldset button,
+#other-btn fieldset button{
+  margin: 2px 0em 2px 1em;
+  float: left;
+  line-height: unset;
+  font-size: 80%;
+  font-family: auto;
+}
+
+.jsonDetails table tr td{
+  font-family: FontAwesome;
+}
 
 /* Mapper css */
 #mapperBody,#mapperHTML{
