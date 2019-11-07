@@ -221,7 +221,7 @@ $(function () {
                     _show = $(this).prop("checked"),
                     c = parseInt($(this).attr("r"));
 
-            this._nodeData = [];
+            gInstance._nodeData = [];
 
             // Filter links and nodes
             if (_show === true) {
@@ -625,7 +625,7 @@ $(function () {
                      gInstance._linkData[i].FR.splice(gInstance._linkData[i].FR.indexOf(c) - 1);
                      }
                      }
-                     
+
                      for (var i = 0, j = 0; i < dc.length; i++, j++) {
                      gInstance._linkData.splice(dc[i] - j, 1);
                      }*/
@@ -647,7 +647,7 @@ $(function () {
                     }
                 }
 
-                // Remove links which has either rank=0 or rank={unselected rank set} 
+                // Remove links which has either rank=0 or rank={unselected rank set}
                 for (var i = 0; i < nfs.length; i++) {
                     gInstance._linkData.splice(nfs[i], 1);
                 }
@@ -1065,7 +1065,7 @@ $(function () {
                 }
             });
 
-            var w = $(window).width(), //pos[pos.length - 1][0] - pos[0][0], 
+            var w = $(window).width(), //pos[pos.length - 1][0] - pos[0][0],
                     h = 70;
 
             if (d3.selectAll("#legends")) {
@@ -1169,7 +1169,7 @@ $(function () {
              $("grayScaleNode").prop("checked", false);
              else
              $("grayScaleNode").prop("checked", true);
-             
+
              gInstance.grayScaleNode();
              });*/
             d3.select("#grayScaleNode").on("change", gInstance.grayScaleNode);
@@ -1206,7 +1206,7 @@ $(function () {
             d3.select("#wdtf-btn").style("color", "wheat").on("click", gInstance.writeDataToFile);
             d3.select("#clearNIDs").style("color", "wheat").on("click", gInstance.removeSelection);
 
-            // 
+            //
             s = "";
             for (var i = 0; i < this._graph.HN.length; i++) {
                 //s += "<a href='javascript:void(0)' class='file-select' seq='" + i + "'>" + this.fl[i] + "</a>";
@@ -1625,7 +1625,7 @@ $(function () {
 
             return _data;
         },
-        
+
         nodeAnalysis:function(){
             var _l = $("#txtPA").val();
             if (_l.toUpperCase() === 'ALL') {
@@ -1639,7 +1639,7 @@ $(function () {
             var IP_ids = eval("[" + _l + "]");
             if (IP_ids.length === 0)
                 return false;
-            
+
             var nIDs = [];
             for(var i=0; i<gInstance._linkData.length; i++){
                 var ipr = gInstance._linkData[i].R[0];
@@ -1652,23 +1652,23 @@ $(function () {
                     }
                 }
             }
-            
+
             var x = "", y="";
             var tmpIDs = [];
             for(var i=0; i<gInstance._nodeData.length; i++){
                 tmpIDs.push(gInstance._nodeData[i].Id);
             }
-            
+
             for(var i=0; i<nIDs.length; i++){
                 var ni = tmpIDs.indexOf(nIDs[i]);
-                
+
                 if(x.length>0) x += ",";
                 if(y.length>0) y += ",";
-                
+
                 x += gInstance._nodeData[ni].Label[1];
                 y += gInstance._nodeData[ni].Label[2];
             }
-            
+
             $("#pa-result").html("x=[" + x + "]\n\ny=[" + y + "]");
             $("#pa-result").css("color", "wheat");
         },
@@ -1715,7 +1715,7 @@ $(function () {
             $("#path-details").html("");
             $("#path-details").html("<ul class='path_options'></ul><fieldset><legend>Path color&nbsp;</legend><ul class='path_legend'></ul></fieldset>" +
                     "<fieldset><legend>Path analysis&nbsp;</legend><input type='text' id='txtPA' value='' style='color:wheat' />" +
-                    "<input type='button' id='na-btn' value='Nodes' style='color:wheat' />" + 
+                    "<input type='button' id='na-btn' value='Nodes' style='color:wheat' />" +
                     "<input type='button' id='pa-btn' value='Analysis' style='color:wheat' /><label id='pa-result'></label></fieldset>");
 
             var map = new HashMap(),
@@ -2553,7 +2553,7 @@ $(function () {
 
             /*gInstance.simulation.force("link")
              .links(gInstance._linkData);
-             
+
              gInstance.simulation.velocityDecay(0.07);*/
 
             if (this.__transform) {
@@ -2844,7 +2844,7 @@ $(function () {
      $("#myJsonDropdown").hide();
      $("#myDropdown").toggle();
      });
-     
+
      $(".dropjbtn").on("click", function () {
      $("#myDropdown").hide();
      $("#myJsonDropdown").toggle();
@@ -2917,7 +2917,7 @@ $(function () {
 });
 
 /*
- * The following code copied from: 
+ * The following code copied from:
  * http://rosettacode.org/wiki/LZW_compression#JavaScript
  */
 var LZW = {
@@ -2938,7 +2938,7 @@ var LZW = {
         for (i = 0; i < uncompressed.length; i += 1) {
             c = uncompressed.charAt(i);
             wc = w + c;
-            //Do not use dictionary[wc] because javascript arrays 
+            //Do not use dictionary[wc] because javascript arrays
             //will return values for array['pop'], array['push'] etc
             // if (dictionary[wc]) {
             if (dictionary.hasOwnProperty(wc)) {
@@ -2998,18 +2998,18 @@ var LZW = {
 };
 
 /*
- * 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+ *
+
+
+
+
+
+
+
+
+
+
+
  function displayAnalysis() {
  if (_analysis.length > 0) {
  d3.select("#node_analysis").style("display", "block");
@@ -3017,22 +3017,22 @@ var LZW = {
  d3.select("#node_analysis").style("display", "none");
  }
  }
- 
+
  function intersection(a1, a2) {
  var a = [];
- 
+
  if (a1.length === 0 || a2.length === 0)
  return a;
- 
+
  for (var i = 0; i < a1.length; i++) {
  if (a2.indexOf(a1[i]) >= 0 && a.indexOf(a1[i]) < 0) {
  a.push(a1[i]);
  }
  }
- 
+
  return a;
  }
- 
+
  function getPoints(_id) {
  var a = [];
  for (var i = 0; i < _graph.nodes.length; i++) {
@@ -3047,12 +3047,12 @@ var LZW = {
  }
  return a;
  }
- 
+
  function AnalyzeNodes() {
  if (_analysis.length > 0) {
  var _ptHash = new HashMap();
  var _json = {'nodes': [], 'links': []};
- 
+
  for (var i = 0; i < _analysis.length; i++) {
  var _lbl = null, _col = null;
  for (var g = 0; g < _graph.nodes.length; g++) {
@@ -3062,65 +3062,65 @@ var LZW = {
  break;
  }
  }
- 
+
  var ptVal = getPoints(_analysis[i]);
- 
+
  if (_ptHash.get(_analysis[i]) === null) {
  _ptHash.put(_analysis[i], ptVal);
  }
- 
+
  _json.nodes.push({'node': i, 'name': "node" + _analysis[i], 'NP': _ptHash.get(_analysis[i]).length, 'label': _lbl, 'Color': _col});
- 
+
  }
- 
+
  for (var i = 0; i < _analysis.length; i++) {
  for (var j = i + 1; j < _analysis.length; j++) {
  var a = intersection(_ptHash.get(_analysis[i]), _ptHash.get(_analysis[j]));
- 
+
  if (a.length > 0) {
  _json.links.push({'source': i, 'target': j, 'value': a.length});
  }
  }
  }
- 
+
  //alert(_json);
- 
+
  //return 0;
- 
+
  //d3.select("#data").attr("value", _json);
  //var form = $("#frm");
- 
+
  if (d3.select("#modal-init")) {
  d3.select("#modal-init").style("display", "none");
  }
- 
+
  vm.model.$modal();
  loadSankeyJS(_json);
  }
- 
+
  return false;
  }
- 
+
  function loadSankeyJS(graph) {
  if (graph === null)
  return;
- 
+
  $("#iframe-container").html("");
- 
+
  var units = "points";
- 
+
  // set the dimensions and margins of the graph
  var margin = {top: 10, right: 10, bottom: 10, left: 10},
  _width = (width * .8) - margin.left - margin.right,
  _height = (height * .7) - margin.top - margin.bottom;
- 
+
  // format variables
  var formatNumber = d3.format(",.0f"), // zero decimal places
  format = function (d) {
  return formatNumber(d) + " " + units;
  },
  color = d3.scaleOrdinal(d3.schemeCategory20);
- 
+
  // append the svg object to the body of the page
  var sSvg = d3.select("#iframe-container").append("svg")
  .attr("width", _width + margin.left + margin.right)
@@ -3129,23 +3129,23 @@ var LZW = {
  .append("g")
  .attr("transform",
  "translate(" + margin.left + "," + margin.top + ")");
- 
+
  // Set the sankey diagram properties
  sankey = d3.sankey()
  .nodeWidth(36)
  .nodePadding(40)
  .size([_width, _height]);
- 
+
  path = sankey.link();
- 
+
  // load the data
  //d3.json("sankey.json", function(error, graph) {
- 
+
  sankey
  .nodes(graph.nodes)
  .links(graph.links)
  .layout(32);
- 
+
  // add in the links
  slink = sSvg.append("g").selectAll(".link")
  .data(graph.links)
@@ -3161,14 +3161,14 @@ var LZW = {
  .sort(function (a, b) {
  return b.dy - a.dy;
  });
- 
+
  // add the link titles
  slink.append("title")
  .text(function (d) {
  return d.source.name + " → " +
  d.target.name + "\n" + format(d.value);
  });
- 
+
  // add in the nodes
  var node = sSvg.append("g").selectAll(".node")
  .data(graph.nodes)
@@ -3185,7 +3185,7 @@ var LZW = {
  this.parentNode.appendChild(this);
  })
  .on("drag", dragmoveSankey));
- 
+
  // add the rectangles for the nodes
  node.append("rect")
  .attr("height", function (d) {
@@ -3205,7 +3205,7 @@ var LZW = {
  .text(function (d) {
  return d.name + "\n" + format(d.NP);
  });
- 
+
  // add in the title for the nodes
  node.append("text")
  .attr("x", -6)
@@ -3225,14 +3225,14 @@ var LZW = {
  })
  .attr("x", 6 + sankey.nodeWidth())
  .attr("text-anchor", "start");
- 
- 
+
+
  $("#tsvg .link").hover(function () {
  $(this).css("stroke-opacity", "0.5");
  });
- 
+
  }
- 
+
  // the function for moving the nodes
  function dragmoveSankey(d) {
  d3.select(this)
@@ -3245,43 +3245,43 @@ var LZW = {
  sankey.relayout();
  slink.attr("d", path);
  }
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
  */

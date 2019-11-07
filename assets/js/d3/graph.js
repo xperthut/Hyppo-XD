@@ -119,6 +119,7 @@ $(function () {
         this.grayNode = false;
         this.fileName = "";
         this.autoLoadData = [];
+        this.devMode = false;
     }
 
     Graph.prototype = {
@@ -286,6 +287,8 @@ $(function () {
 
             d3.select("#svg-container").style("background-color", this.svgBGColor);
             d3.select("#viewer").style("background-color", this.svgBGColor);
+
+            this.devMode = false;
         },
 
         initPage: function (gData) {
@@ -337,7 +340,7 @@ $(function () {
                     _show = $(this).prop("checked"),
                     c = parseInt($(this).attr("r"));
 
-            this._nodeData = [];
+            gInstance._nodeData = [];
 
             // Filter links and nodes
             if (_show === true) {
@@ -386,8 +389,6 @@ $(function () {
         },
 
         createSubGraphLegends: function () {
-            $("#int-cc").css("display", "block");
-
             $("#cc-details").html("");
             $("#cc-details").html("<fieldset><legend>Connected subgraphs&nbsp;</legend><ul class='cc_legend'></ul></fieldset>");
 
@@ -858,9 +859,15 @@ $(function () {
                 sack = " checked";
             }
 
-            var s = "<li><label id='idl'>Flare width:</label>&nbsp<input type='range' min='1' max='100' value='50' id='fw' />&nbsp;<label id='fwl'>50%</label></li>" +
-                    "<li><input type='checkbox' id='ifs' /><label class='fa' for='ifs'>Show only interesting flares</label></li>" +
-                    "<li><input type='checkbox' id='saf'" + sack + " /><label class='fa' for='saf'>Select all</label></li>";
+            var s = "<li><label id='idl'>Flare width:</label>&nbsp<input type='range' min='1' max='100' value='50' id='fw' />&nbsp;<label id='fwl'>50%</label></li>";
+
+            if(this.devMode){
+              s += "<li><input type='checkbox' id='ifs' /><label class='fa' for='ifs'>Show only interesting flares</label></li>";
+            }
+            else {
+              s += "<li style='display:none'><input type='checkbox' id='ifs' /><label class='fa' for='ifs'>Show only interesting flares</label></li>";
+            }
+            s += "<li><input type='checkbox' id='saf'" + sack + " /><label class='fa' for='saf'>Select all</label></li>";
 
             $(".flare_options").html(s);
 
@@ -1063,6 +1070,7 @@ $(function () {
                     d.fy = __coord[1];
                 }
             });
+            $("#int-cc").css("display", "block");
           }else{
             console.log(_path + " not found.");
           }
@@ -1094,6 +1102,7 @@ $(function () {
                         d.fy = __coord[1];
                     }
                 });
+                $("#int-cc").css("display", "block");
             } else {
                 gInstance.getNodeCoordinate();
             }
@@ -2062,10 +2071,17 @@ $(function () {
                 sack = " checked";
             }
 
-            var s = "<li><label id='idl'>Path width:</label>&nbsp<input type='range' min='101' max='200' value='150' id='pw' />&nbsp;<label id='pwl'>50%</label></li>" +
-                    "<li><input type='radio' id='sa' name='esr' checked /><label class='fa' for='sa'>Show all edges</label></li>" +
-                    "<li><input type='radio' id='ips' name='esr' /><label class='fa' for='ips'>Show only interesting paths</label></li>" +
-                    "<li><input type='checkbox' id='sap'" + sack + " /><label class='fa' for='sap'>Show all paths</label></li>";
+            var s = "<li><label id='idl'>Path width:</label>&nbsp<input type='range' min='101' max='200' value='150' id='pw' />&nbsp;<label id='pwl'>50%</label></li>";
+
+            if(this.devMode){
+              s += "<li><input type='radio' id='sa' name='esr' checked /><label class='fa' for='sa'>Show all edges</label></li>" +
+                   "<li><input type='radio' id='ips' name='esr' /><label class='fa' for='ips'>Show only interesting paths</label></li>";
+            }else{
+               s += "<li style='display:none'><input type='radio' id='sa' name='esr' checked /><label class='fa' for='sa'>Show all edges</label></li>" +
+                    "<li style='display:none'><input type='radio' id='ips' name='esr' /><label class='fa' for='ips'>Show only interesting paths</label></li>";
+            }
+
+            s += "<li><input type='checkbox' id='sap'" + sack + " /><label class='fa' for='sap'>Show all paths</label></li>";
 
             $(".path_options").html(s);
 
@@ -2179,9 +2195,15 @@ $(function () {
             d3.select("#shTT").on("change", gInstance.showHideToolTip);
 
             var s = "<li><input type='text' class='color_pick' id='edgeDC' value='" + this.defaultEdgeColor + "'/>&nbsp;Edge color</li>" +
-                    "<li><input type='checkbox' name='eArrow' id='eArrow' checked /><label class='fa' for='eArrow'>Show edge direction</label></li>" +
-                    "<li><input type='checkbox' name='eRank' id='eRank' /><label class='fa' for='eRank'>Show edge rank</label></li>" +
+                    "<li><input type='checkbox' name='eArrow' id='eArrow' checked /><label class='fa' for='eArrow'>Show edge direction</label></li>";
+
+            if(this.devMode){
+              s += "<li><input type='checkbox' name='eRank' id='eRank' /><label class='fa' for='eRank'>Show edge rank</label></li>" +
                     "<li><input type='checkbox' name='eSig' id='eSig' /><label class='fa' for='eSig'>Show edge signature</label></li>";
+            }else{
+               s += "<li style='display:none'><input type='checkbox' name='eRank' id='eRank' /><label class='fa' for='eRank'>Show edge rank</label></li>" +
+                     "<li style='display:none'><input type='checkbox' name='eSig' id='eSig' /><label class='fa' for='eSig'>Show edge signature</label></li>";
+            }
 
             $(".attr_legend").html(s);
 
