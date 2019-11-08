@@ -1260,6 +1260,8 @@ $(function () {
 
         getPieAttributes: function(){
           var header = this.getColumnNames();
+          if(header.length===0) return "";
+
           var colNames = [], colIndex=[];
 
           // Discard first column which is a index column

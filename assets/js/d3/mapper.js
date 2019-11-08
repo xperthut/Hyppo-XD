@@ -303,6 +303,17 @@ Mapper.prototype = {
     return errStatus;
   },
 
+  getHeaderName: function(index, header){
+    index = parseInt(index);
+    for(var i=1; i<=header.length; i++){
+      if(parseInt(header[i-1].index) === i){
+        return header[i-1].name;
+      }
+    }
+
+    return "";
+  },
+
   createMapper: function(nesVal){
     var param = [];
 
@@ -314,30 +325,78 @@ Mapper.prototype = {
     param.push(this.fileName);
     param.push("-FC");
 
+    // Get the header list  and create file name using that List
+    // If file alread exists then pull it otherwise run mapper
+    _header_names = [];
+    for(var i=0; i<this.workspace.files.length; i++){
+      if(this.workspace.files[i].csv===this.fileName){
+        _header_names = this.workspace.files[i].col.header;
+        break;
+      }
+    }
+
+    /*
+    {
+      "filter" : [],
+      "filter_gen":[],
+      "window" : [],
+      "overlap" : [],
+      "cluster_algo": "DBSCAN",
+      "cluster_attr": [],
+      "cluster_param": [],
+      "pie_attr": [],
+      "mem_attr":[],
+      "ref_perf_index":0
+    }
+    */
+
+    var fName = "";
     var s = "[";
     for(var i=0; i<nesVal.filter.length; i++){
       if(s.length>1) s += ",";
+      if(i>0) fName += "|";
       s += nesVal.filter[i];
+      fName += this.getHeaderName(nesVal.filter[i], _header_names);
     }
     s += "]";
+    fName += "_";
     param.push(s);
 
     param.push("-WX");
     s = "[";
     for(var i=0; i<nesVal.window.length; i++){
       if(s.length>1) s += ",";
+      if(i>0) fName += "|";
       s += nesVal.window[i];
+      fName += nesVal.window[i];
     }
     s += "]";
+    fName += "_";
     param.push(s);
 
     param.push("-GX");
     s = "[";
     for(var i=0; i<nesVal.overlap.length; i++){
       if(s.length>1) s += ",";
+      if(i>0) fName += "|";
       s += nesVal.overlap[i];
+      fName += nesVal.overlap[i];
     }
     s += "]";
+    fName += "_";
+    param.push(s);
+
+    param.push("-CP");
+    s = "[";
+    fName += nesVal.cluster_algo + "|";
+    for(var i=0; i<nesVal.cluster_param.length; i++){
+      if(s.length>1) s += ",";
+      if(i>0) fName += "|";
+      s += nesVal.cluster_param[i];
+      fName += nesVal.cluster_param[i];
+    }
+    s += "]";
+    fName += "_";
     param.push(s);
 
     param.push("-CC");
@@ -345,19 +404,27 @@ Mapper.prototype = {
     s = "[";
     for(var i=0; i<nesVal.cluster_attr.length; i++){
       if(s.length>1) s += ",";
+      if(i>0) fName += "|";
       s += nesVal.cluster_attr[i];
+      fName += nesVal.cluster_attr[i];
     }
     s += "]";
     param.push(s);
 
-    param.push("-CP");
-    s = "[";
-    for(var i=0; i<nesVal.cluster_param.length; i++){
-      if(s.length>1) s += ",";
-      s += nesVal.cluster_param[i];
+    if(nesVal.filter_gen.length>0){
+      param.push("-FC");
+      fName += "_";
+
+      s = "[";
+      for(var i=0; i<nesVal.filter_gen.length; i++){
+        if(s.length>1) s += ",";
+        if(i>0) fName += "|";
+        s += nesVal.filter_gen[i];
+        fName += nesVal.filter_gen[i];
+      }
+      s += "]";
+      param.push(s);
     }
-    s += "]";
-    param.push(s);
 
     if(nesVal.pie_attr.length > 0){
       param.push("-PIEC");
@@ -683,13 +750,15 @@ $("#btnCrMpr").click(function(){
 
   var nesVal = {
     "filter" : [],
+    "filter_gen":[],
     "window" : [],
     "overlap" : [],
     "cluster_algo": "DBSCAN",
     "cluster_attr": [],
     "cluster_param": [],
     "pie_attr": [],
-    "mem_attr":[]
+    "mem_attr":[],
+    "ref_perf_index":0
   };
 
   for(var i=1; i<=_mapper.maxFilter; i++){
