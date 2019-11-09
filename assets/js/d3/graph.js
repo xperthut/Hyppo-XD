@@ -52,12 +52,11 @@ $(function () {
         this._path = require("path");
         //this._browserWindow = this._electron.remote.BrowserWindow;
 
-        this.workspace = {wd:"", files:[]};
-        this.getWorkSpace();
+        this.workspace = _common.getWorkSpace();
 
         this.fl = this.getAllCsvFiles();
         this.jfl = this.getAllJsonFiles();
-        this.saveWorkSpace();
+        _common.saveWorkSpace(this.workspace);
 
         this.svg = d3.select("svg").on("click", function () {
             $("#top-nav").css("display", "none");
@@ -125,20 +124,7 @@ $(function () {
     Graph.prototype = {
         constructor: Graph,
 
-        // Load the getWorkSpace
-        getWorkSpace: function(){
-          try {
-            this.workspace = JSON.parse(this._fs.readFileSync(this._path.resolve(__dirname + "/wp.sp"), 'utf-8'));
-          }catch(err) {this.workspace = {wd:"", files:[]};}
-        },
 
-        saveWorkSpace: function(){
-          try {
-            this._fs.writeFileSync(this._path.resolve(__dirname + "/wp.sp"), JSON.stringify(this.workspace));
-          }catch(err) {
-            console.log("Can not write working directory JSON: " + err.message);
-          }
-        },
 
         // Get all JSON files
         getAllFiles: function(_folder){
@@ -1542,7 +1528,7 @@ $(function () {
         },
 
         reload: function(){
-          this.getWorkSpace();
+          this.workspace = _common.getWorkSpace();
           this.fl = this.getAllCsvFiles();
           this.jfl = this.getAllJsonFiles();
           this.loadFiles(false);
@@ -3077,12 +3063,6 @@ $(function () {
 
         loadData: function () {
 
-            //d3.select("#type").attr("value", "loaddata");
-            //d3.select("#data").attr("value", "");
-            //d3.select("#folderName").attr("value", gInstance.fl[gInstance.fileIndex].split(".")[0]);
-            //d3.select("#fileName").attr("value", gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex]);
-            //var form = $("#frm");
-
             var _path = this._path.join(this.workspace.wd, "Data", "json", this.fl[this.fileIndex].split(".")[0], this.jfl[this.fileRIndex].files[this.fileCIndex].lj)
             //alert(_path);
             var data = this._fs.readFileSync(_path, 'utf-8');
@@ -3292,7 +3272,7 @@ $(function () {
           if(e) this.loadMapperWindow();
           else{
             this.getStoredData();
-            this.getWorkSpace();
+            this.workspace = _common.getWorkSpace();
             this.fl = this.getAllCsvFiles();
             this.jfl = this.getAllJsonFiles();
           }
@@ -3435,6 +3415,7 @@ $(function () {
         });
     });
 
+    var _common = new CommonOps();
     var gInstance = new Graph();//(fl, jfl);
     var cWin = null;
 
