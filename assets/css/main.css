@@ -118,7 +118,7 @@ html {
     font-size: 16pt;
 }
 
-.cc-show,.path-show,.flare-show,.node-show{
+.cc-show,.path-show,.flare-show,.node-show, .map-details-show{
     cursor: pointer;
 }
 
@@ -980,31 +980,10 @@ body.is-loading-1 #main {
     width: 100%;
 }
 
-#int-path{
-    padding: 0.1em 1em 1.75em 1em ;
-
-    /* border: 1px solid red; */
-    background-color: #3A3C47;
-    color: white;
-    display: none;
-    text-align: left;
-    float: left;
-    width: 100%;
-}
-
-#int-flare{
-    padding: 0.1em 1em 1.75em 1em ;
-
-    /* border: 1px solid red; */
-    background-color: #3A3C47;
-    color: white;
-    display: none;
-    text-align: left;
-    float: left;
-    width: 100%;
-}
-
-#int-nodes{
+#int-path,
+#int-flare,
+#int-nodes,
+#map-details{
     padding: 0.1em 1em 1.75em 1em ;
 
     /* border: 1px solid red; */
@@ -1027,7 +1006,8 @@ fieldset{
 #node-details,
 #flare-details,
 #path-details,
-#attr-details{
+#attr-details,
+#map-details-details{
     margin: 0 auto;
     text-align: center;
 }
@@ -1334,7 +1314,8 @@ fieldset{
   margin-left: 1em;
   text-align: left;
 }
-#pieDiv label{
+#ftrDiv label,
+#ctrDiv label{
   text-align: left;
   color: wheat;
 }

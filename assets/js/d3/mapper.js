@@ -427,7 +427,7 @@ $(function () {
 
       fName += "_";
 
-      fName += this.getHeaderName(nesVal.cluster_attr[nesVal.ref_perf_index], _header_names);;
+      fName += this.getHeaderName(nesVal.cluster_attr[nesVal.ref_perf_index], _header_names);
 
       if(nesVal.mem_attr.length > 0){
         param.push("-MEMC");
@@ -461,6 +461,7 @@ $(function () {
 
       var chkFN = this._path.join(this.workspace.wd,"Data", "json", this.fileName.split(".")[0], fName);
       console.log(chkFN);
+
       if(this._fs.existsSync(chkFN)){
         this.storeData(chkFN);
       }else{
@@ -585,27 +586,28 @@ $(function () {
     },
 
     getClusteringParams: function(){
-      var s = "<label id=\"ccLabel\">Select a clustering algorithm and its associated parameters</label>" +
-            "<div id=\"clusterParam\">" +
-              "<div class=\"selCol\">" +
-                "<select id=\"selCluster\" class=\"clusterSel\">" +
-                  "<option value=\"-1\">Select a clustering method</option>" +
-                  "<option value=\"DBSCAN\" selected>DBScan</option>" +
+      var s = "<label id='ccLabel'>Select a clustering algorithm and its associated parameters</label>" +
+            "<div id='clusterParam'>" +
+              "<div class='selCol'>" +
+                "<select id='selCluster' class='clusterSel'>" +
+                  "<option value='-1'>Select a clustering method</option>" +
+                  "<option value='DBSCAN' selected>DBScan</option>" +
                 "</select>" +
               "</div>" +
-              "<div class=\"winCol\">" +
-                "<div class=\"dens\">" +
+              "<div class='winCol'>" +
+                "<div class='dens'>" +
                   "<label>Density</label>" +
-                  "<input type=\"text\" id=\"txtDensity\" placeholder=\"4\" value=\"4\" onkeypress='return isFloatingNumberKey(event, this)' />" +
+                  "<input type='text' id='txtDensity' placeholder='4' value='4' onkeypress='return isFloatingNumberKey(event, this)' />" +
                 "</div>" +
               "</div>" +
-              "<div class=\"ovCol\">" +
-                "<div class=\"rads\">" +
+              "<div class='ovCol'>" +
+                "<div class='rads'>" +
                   "<label>Radius</label>" +
-                  "<input type=\"text\" id=\"txtRadius\" placeholder=\"1\" value=\"1\" onkeypress='return isFloatingNumberKey(event, this)' />" +
+                  "<input type='text' id='txtRadius' placeholder='1.00' value='1.00' onkeypress='return isFloatingNumberKey(event, this)' />" +
                 "</div>" +
               "</div>" +
             "</div>";
+
 
       return s;
     },
@@ -831,40 +833,3 @@ $(function () {
   $("#advContainer").hide();
 
 });
-
-function showBusyIndicator(){
-  $("#busyDiv").css("display", "block");
-  console.log("Start busy indicator");
-}
-
-function hideBusyIndicator(){
-  $("#busyDiv").css("display", "none");
-  console.log("Stop busy indicator");
-}
-
-function isNumberKey(evt){
-    var charCode = (evt.which) ? evt.which : evt.keyCode;
-    if (charCode > 31 && (charCode < 48 || charCode > 57))
-        return false;
-    return true;
-}
-
-function isFloatingNumberKey(evt, e){
-    var charCode = (evt.which) ? evt.which : evt.keyCode;
-    if (charCode > 31 && (charCode < 48 || charCode > 57)){
-      if(charCode===46){
-        if(e.value.indexOf(".")>=0) return false;
-        else return true;
-      }
-      return false;
-    }
-    return true;
-}
-
-//onkeyup='return deleteKeyPress(event, this)'
-function deleteKeyPress(evt, e){
-  var charCode = (evt.which) ? evt.which : evt.keyCode;
-  if(charCode === 46 || charCode === 8){
-    if(e.value.length<2) e.value='0';
-  }
-}

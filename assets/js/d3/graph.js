@@ -118,6 +118,7 @@ $(function () {
         this.grayNode = false;
         this.fileName = "";
         this.autoLoadData = [];
+        this.fnParam = null;
         this.devMode = false;
     }
 
@@ -270,6 +271,7 @@ $(function () {
             this.grayNode = false;
             this.fileName = "";
             this.autoLoadData = [];
+            this.fnParam = null;
 
             d3.select("#svg-container").style("background-color", this.svgBGColor);
             d3.select("#viewer").style("background-color", this.svgBGColor);
@@ -299,6 +301,7 @@ $(function () {
             this.headerNames = this.graph.HN;
             this.IPColors = this.graph.IPC;
             this.IFColors = this.graph.IFC;
+            this.fnParam = this.graph.param;
 
             this._nodeData = $.extend(true, [], this.graph.nodes);
             this._linkData = $.extend(true, [], this.graph.links);
@@ -1237,15 +1240,25 @@ $(function () {
           var selectedCSVFile = this.fl[this.fileIndex];
           for(var i=0; i<this.workspace.files.length; i++){
             if(this.workspace.files[i].csv === selectedCSVFile){
-              return  this.workspace.files[i].col.header;
+              if(this.workspace.files[i].col.header.length===0){
+                var addon = require('bindings')('interface');
+                var srt = JSON.parse(addon.invoke("RCSVH", this._path.join(this.workspace.wd, "Data","csv",selectedCSVFile)));
+
+                for(var h=0; h<srt.header.length; h++){
+                  this.workspace.files[i].col.header.push(srt.header[h]);
+                }
+
+                _common.saveWorkSpace(this.workspace);
+              }
+              return this.workspace.files[i].col.header;
             }
           }
 
           return [];
         },
 
-        getPieAttributes: function(){
-          var header = this.getColumnNames();
+        getPieAttributes: function(header){
+          //var header = this.getColumnNames();
           if(header.length===0) return "";
 
           var colNames = [], colIndex=[];
@@ -1256,11 +1269,14 @@ $(function () {
             colIndex.push(header[i].index);
           }
 
-          var s = "<div class='ddiv' id='pieDiv'><label>Select attributes for pie chart</label>" +
-                  "<select id='pie-select-state' multiple name='state[]' class='demo-default' style='width:50%'>";
+          var s = "<select id='pie-select-state' multiple name='state[]' class='demo-default' style='width:100%'>";
                   console.log("total cols: " + colNames.length);
           for(var i=0; i<colNames.length; i++){
-            s += "<option value='" + colIndex[i] + "'>" + colNames[i] + "</option>";
+            if(this.fnParam.pie.length>0 && this.fnParam.pie.indexOf(parseInt(colIndex[i]))>-1){
+              s += "<option value='" + colIndex[i] + "' selected>" + colNames[i] + "</option>";
+            }else{
+              s += "<option value='" + colIndex[i] + "'>" + colNames[i] + "</option>";
+            }
           }
 
           s += "</select>" +
@@ -1268,7 +1284,41 @@ $(function () {
           				"var $select = $('#pie-select-state').selectize({" +
           					"plugins: ['remove_button']," +
           					"create          : true," +
-                    "placeholder     : 'Select pie chart attributes'," +
+                    "placeholder     : 'Select pie chart features'," +
+          				"});" +
+          				"</script></div>";
+
+          return s;
+        },
+
+        getFlareMemAttributes:function(header){
+
+          if(header.length===0) return "";
+
+          var colNames = [], colIndex=[];
+
+          // Discard first column which is a index column
+          for(var i=1; i<header.length; i++){
+            colNames.push(header[i].name);
+            colIndex.push(header[i].index);
+          }
+
+          var s = "<select id='mem-select-state' multiple name='state[]' class='demo-default' style='width:100%'>";
+                  console.log("total cols: " + colNames.length);
+          for(var i=0; i<colNames.length; i++){
+            if(this.fnParam.mem.length>0 && this.fnParam.mem.indexOf(parseInt(colIndex[i]))>-1){
+              s += "<option value='" + colIndex[i] + "' selected>" + colNames[i] + "</option>";
+            }else{
+              s += "<option value='" + colIndex[i] + "'>" + colNames[i] + "</option>";
+            }
+          }
+
+          s += "</select>" +
+                "<script>" +
+          				"var $select = $('#mem-select-state').selectize({" +
+          					"plugins: ['remove_button']," +
+          					"create          : true," +
+                    "placeholder     : 'Select flare membership features'," +
           				"});" +
           				"</script></div>";
 
@@ -1277,7 +1327,7 @@ $(function () {
 
         createButtons: function () {
 
-            $("#thumbnails").css("display", "flex");
+            $("#thumbnails").css("display", "block");
 
             var label = [];
 
@@ -1330,14 +1380,12 @@ $(function () {
                     "<button id='color_bar' title='Color bar'>Color bar</button>&nbsp;" +
                     "<button id='node_analysis' title='Explore nodes' style='display:none;'>Analysis</button>&nbsp;";
 
-            s += "</fieldset><fieldset>" +
-            $("#other-btn").html(s + "</fieldset><fieldset>" + this.getPieAttributes() +
-              "<button id='make_pie_chart' title='Create pie chart' style='display:none;'>Create pie chart</button>&nbsp;" +
-              "</fieldset>");
+            s += "</fieldset>";
+
+            $("#other-btn").html(s);
 
             d3.select("#save_image").style("color", "wheat").on("click", gInstance.saveImage);
             d3.select("#btn_Pie").style("color", "wheat").on("click", gInstance.createPieColorLegend);
-            d3.select("#make_pie_chart").style("display", "block").style("color", "wheat").on("click", gInstance.createPieChart);
 
             for (var l in label) {
                 if (parseInt(l) === 0) {
@@ -1376,6 +1424,25 @@ $(function () {
 
                 gInstance.adjustSelectedAttr();
             });
+
+            $("#map-details-details .jsonDetails").html(this.getJSONFileDetails());
+            $("#map-details-details .jsonDetails table").css({"display":"block","width":"100%", "color":"white", "margin":"1%"});
+            $("#map-details-details .jsonDetails table tr").css({"width":"100%"});
+            $("#map-details-details .jsonDetails table td").css({"width":"33%", "border":"1px solid black", "text-align":"center", "padding":"2%"});
+
+            d3.select("#make_pie_chart").style("display", "block").style("color", "wheat").style("float", "right").on("click", gInstance.generateMapper);
+
+        },
+
+        getHeaderName: function(index, header){
+          index = parseInt(index);
+          for(var i=1; i<=header.length; i++){
+            if(parseInt(header[i-1].index) === index){
+              return header[i-1].name;
+            }
+          }
+
+          return "";
         },
 
         createMapper: function(nesVal){
@@ -1389,99 +1456,173 @@ $(function () {
           param.push(this.fl[this.fileIndex]);
           param.push("-FC");
 
-          /*if(nesVal.filter.length===0){
-              alert("Please select a filter attibute");
-              return false;
-          }*/
+          /*
+          {
+            "filter" : param.fc,
+            "filter_gen":[],
+            "window" : param.wx,
+            "overlap" : param.gx,
+            "cluster_algo": param.cls.name,
+            "cluster_attr": param.cla,
+            "cluster_param": param.cls.param,
+            "pie_attr": $('#pieDiv div.item').map((i, el) => el.getAttribute('data-value')).get(),
+            "mem_attr":[],
+            "edge_sig":param.sig,
+            "ref_perf":param.rp
+          }
+          */
 
+          // Get the header list  and create file name using that List
+          // If file alread exists then pull it otherwise run mapper
+          _header_names = [];
+          for(var i=0; i<this.workspace.files.length; i++){
+            if(this.workspace.files[i].csv===this.fl[this.fileIndex]){
+              _header_names = this.workspace.files[i].col.header;
+              break;
+            }
+          }
+
+          var fName = "";
           var s = "[";
           for(var i=0; i<nesVal.filter.length; i++){
-            if(s.length>1) s += ",";
+            if(i>0){
+              s += ",";
+              fName += "|";
+            }
             s += nesVal.filter[i];
+            fName += this.getHeaderName(nesVal.filter[i], _header_names);
           }
           s += "]";
+          fName += "_";
           param.push(s);
 
           param.push("-WX");
           s = "[";
           for(var i=0; i<nesVal.window.length; i++){
-            if(s.length>1) s += ",";
+            if(i>0){
+              s += ",";
+              fName += "|";
+            }
             s += nesVal.window[i];
+            fName += nesVal.window[i];
           }
           s += "]";
+          fName += "_";
           param.push(s);
 
           param.push("-GX");
           s = "[";
           for(var i=0; i<nesVal.overlap.length; i++){
-            if(s.length>1) s += ",";
+            if(i>0){
+              s += ",";
+              fName += "|";
+            }
             s += nesVal.overlap[i];
+            fName += parseFloat(nesVal.overlap[i]).toFixed(2);
           }
           s += "]";
-          param.push(s);
-
-          param.push("-CC");
-
-          /*if(nesVal.cluster_attr.length===0){
-            alert("Please select a cluster attribute");
-            return false;
-          }*/
-
-          s = "[";
-          for(var i=0; i<nesVal.cluster_attr.length; i++){
-            if(s.length>1) s += ",";
-            s += nesVal.cluster_attr[i];
-          }
-          s += "]";
+          fName += "_";
           param.push(s);
 
           param.push("-CP");
           s = "[";
+          fName += nesVal.cluster_algo + "|";
           for(var i=0; i<nesVal.cluster_param.length; i++){
-            /*if(nesVal.cluster_param[i].length===0 || parseFloat(nesVal.cluster_param[i])===0){
-              if(nesVal.cluster_algo==="DBSCAN"){
-                if(i==0){
-                  alert("Radius should be non-zero.");
-                  return false;
-                }else if(i==0){
-                  alert("Density should be non-zero.");
-                  return false;
-                }
-              }
-            }*/
-
-            if(s.length>1) s += ",";
+            if(i>0){
+              s += ",";
+              fName += "|";
+            }
             s += nesVal.cluster_param[i];
+
+            if(i==0 && nesVal.cluster_algo==="DBSCAN"){
+              fName += parseFloat(nesVal.cluster_param[i]).toFixed(2);
+            }else{
+              fName += nesVal.cluster_param[i];
+            }
           }
           s += "]";
+          fName += "_";
           param.push(s);
 
-          if(nesVal.pie_attr.length > 0){
-            param.push("-PIEC");
+          param.push("-CC");
+          s = "[";
+          for(var i=0; i<nesVal.cluster_attr.length; i++){
+            if(i>0){
+              s += ",";
+              fName += "|";
+            }
+            s += nesVal.cluster_attr[i];
+            fName += this.getHeaderName(nesVal.cluster_attr[i], _header_names);
+          }
+          s += "]";
+          fName += "_";
+          param.push(s);
+
+          if(nesVal.filter_gen.length>0){
+            param.push("-FG");
+
             s = "[";
-            for(var i=0; i<nesVal.pie_attr.length; i++){
-              if(s.length>1) s += ",";
-              s += nesVal.pie_attr[i];
+            for(var i=0; i<nesVal.filter_gen.length; i++){
+              if(i>0){
+                s += ",";
+                fName += "|";
+              }
+              s += nesVal.filter_gen[i];
+              fName += nesVal.filter_gen[i];
             }
             s += "]";
+            fName += "_";
             param.push(s);
           }
+
+          fName += "_";
+          fName += nesVal.ref_perf;
 
           if(nesVal.mem_attr.length > 0){
             param.push("-MEMC");
             s = "[";
+            fName += "_";
             for(var i=0; i<nesVal.mem_attr.length; i++){
-              if(s.length>1) s += ",";
+              if(i>0){
+                s += ",";
+                fName += "|";
+              }
               s += nesVal.mem_attr[i];
+              fName += nesVal.mem_attr[i];
             }
             s += "]";
             param.push(s);
           }
 
-          var addon = require('bindings')('interface');
-          var srt = addon.invoke("CRTMAPR", param);
+          if(nesVal.pie_attr.length > 0){
+            param.push("-PIEC");
+            s = "[";
+            fName += "_";
+            for(var i=0; i<nesVal.pie_attr.length; i++){
+              if(i>0){
+                s += ",";
+                fName += "|";
+              }
+              s += nesVal.pie_attr[i];
+              fName += nesVal.pie_attr[i];
+            }
+            s += "]";
+            param.push(s);
+          }
 
-          this.storeData(srt);
+          fName += ".json";
+
+          var chkFN = this._path.join(this.workspace.wd,"Data", "json", this.fileName.split(".")[0], fName);
+          console.log(chkFN);
+
+          if(this._fs.existsSync(chkFN)){
+            this.storeData(chkFN);
+          }else{
+            var addon = require('bindings')('interface');
+            var srt = addon.invoke("CRTMAPR", param);
+
+            this.storeData(srt);
+          }
 
           return true;
         },
@@ -1489,37 +1630,50 @@ $(function () {
         storeData: function(ofn){
           try{
             this._fs.writeFileSync(this._path.resolve(__dirname + "/tmp.sp"), JSON.stringify([{'csv':this.fl[this.fileIndex], 'json':this._path.basename(ofn)}]));
-/*
-            for(var i=0; i<this.workspace.files.length; i++){
-              if(this.fl[this.fileIndex] === this.workspace.files[i].csv){
-                if(this.workspace.files[i].json.indexOf(this._path.basename(ofn))===-1){
-                  this.workspace.files[i].json.push(this._path.basename(ofn));
-                }
-
-                break;
-              }
-            }
-
-            this._fs.writeFileSync(this._path.resolve(__dirname + "/wp.sp"), JSON.stringify(this.workspace));*/
           }catch(err){
             console.log("Error to write data at storeData: " + err.message);
           }
         },
 
-        createPieChart: function(){
+        generateMapper: function(){
           var param = (gInstance._graph.param)?gInstance._graph.param:null;
 
           if(param){
             var nesVal = {
               "filter" : param.fc,
+              "filter_gen":[],
               "window" : param.wx,
               "overlap" : param.gx,
               "cluster_algo": param.cls.name,
               "cluster_attr": param.cla,
               "cluster_param": param.cls.param,
               "pie_attr": $('#pieDiv div.item').map((i, el) => el.getAttribute('data-value')).get(),
-              "mem_attr":[]
+              "mem_attr":$('#memDiv div.item').map((i, el) => el.getAttribute('data-value')).get(),
+              "edge_sig":param.sig,
+              "ref_perf":param.rp
             };
+
+            for(var i=1; i<=param.fc.length; i++){
+              if(parseInt($("#txtWin_"+i).val())!==nesVal.window[i-1]){
+                nesVal.window[i-1] = parseInt($("#txtWin_"+i).val());
+              }
+
+              if(parseFloat($("#myRangeOv_"+i).val())!==nesVal.overlap[i-1]){
+                nesVal.overlap[i-1] = parseFloat($("#myRangeOv_"+i).val());
+              }
+            }
+
+            if($("#selCluster option:selected").val() !== nesVal.cluster_algo){
+              nesVal.cluster_algo = $("#selCluster option:selected").val();
+            }
+
+            if(nesVal.cluster_param[0]!==parseFloat($("#txtRadius").val())){
+              nesVal.cluster_param[0] = parseFloat($("#txtRadius").val());
+            }
+
+            if(nesVal.cluster_param[1] !== parseInt($("#txtDensity").val())){
+              nesVal.cluster_param[1] = parseInt($("#txtDensity").val());
+            }
 
             gInstance.createMapper(nesVal);
             gInstance.reload();
@@ -2160,7 +2314,9 @@ $(function () {
         },
 
         createAttributes: function () {
-            $("#attr-ctrl").css("display", "flex");
+            $("#map-details").css("display", "block");
+
+            $("#attr-ctrl").css("display", "block");
             $("#attr-details").html("");
             $("#attr-details").html("<fieldset><legend>View attributes&nbsp;</legend><ul class='view_attr_legend'></ul></fieldset>" +
                     "<fieldset style='display:none;'><legend>Tooltip&nbsp;</legend><ul class='node_attr_legend'></ul></fieldset>" +
@@ -3104,12 +3260,6 @@ $(function () {
             $("#myJsonDropdown").html(s);
 
             if(this.autoLoadData.length>0){
-              var jfn = this.autoLoadData[0].json;
-              $("#jsonheader .jsonDetails").html(this.getJSONFileDetails(jfn));
-              $("#jsonheader .jsonDetails table").css({"display":"block","width":"100%", "color":"white", "margin":"1%"});
-              $("#jsonheader .jsonDetails table tr").css({"width":"100%"});
-              $("#jsonheader .jsonDetails table td").css({"width":"33%", "border":"1px solid black", "text-align":"center", "padding":"2%"});
-
               this.loadData();
             }
 
@@ -3120,79 +3270,52 @@ $(function () {
                 gInstance.fileCIndex = atr[1];//$opt.attr('seq');
                 gInstance.fileRIndex = atr[0];//$opt.attr('row');
 
-                var jfn = $opt.html().replace("&nbsp; ", "");
-                $("#jsonheader .jsonDetails").html(gInstance.getJSONFileDetails(jfn));
-                $("#jsonheader .jsonDetails table").css({"display":"block","width":"100%", "color":"white", "margin":"1%"});
-                $("#jsonheader .jsonDetails table tr").css({"width":"100%"});
-                $("#jsonheader .jsonDetails table td").css({"width":"33%", "border":"1px solid black", "text-align":"center", "padding":"2%"});
-
                 gInstance.loadData();
             });
         },
 
-        getJSONFileDetails: function(fn){
-          var fn = fn.replace(".json", "");
-          var fl = fn.split("__")[0];
-          var pl = fl.split("_");
-          var obj = {
-            FN:[],
-            WX:[],
-            GX:[],
-            CLP:[],
-            FG:[]
-          };
+        getJSONFileDetails: function(){
+          //{"fc":[2],"wx":[30],"gx":[25.00],"cls":{"name":"DBSCAN", "param":[0.60,2]},"cla":[7],"sig":[],"rp":["GrowthRate"]}
+          if(this.fnParam){
 
-          //Filternames_windows_overlap_clusterParams_Genfilter__Signature_Performance_Membership_PieChart
-          for(var i=0; i<pl.length; i++){
-            if(i==0){
-              if(pl[i].indexOf("|")>=0){
-                obj.FN = pl[i].split("|");
-              }else{
-                obj.FN.push(pl[i]);
-              }
-            }else if(i==1){
-              if(pl[i].indexOf("|")>=0){
-                obj.WX = pl[i].split("|");
-              }else{
-                obj.WX.push(pl[i]);
-              }
-            }else if(i==2){
-              if(pl[i].indexOf("|")>=0){
-                obj.GX = pl[i].split("|");
-              }else{
-                obj.GX.push(pl[i]);
-              }
-            }else if(i==3){
-              if(pl[i].indexOf("|")>=0){
-                obj.CLP = pl[i].split("|");
-              }else{
-                obj.CLP.push(pl[i]);
-              }
-            }else if(i==4){
-              if(pl[i].indexOf("|")>=0){
-                obj.FG = pl[i].split("|");
-              }else{
-                obj.FG.push(pl[i]);
-              }
+            // Get the header list  and create file name using that List
+            // If file alread exists then pull it otherwise run mapper
+            var _header_names = this.getColumnNames();
+            var scrpt = "<script>";
+            var s = "<fieldset><legend>Filter settings</legend>";
+            s += "<table id='ftrDiv'>";//"<tr><td></td><td></td><td></td></tr>";
+            for(var i=0; i<this.fnParam.fc.length; i++){
+              s += "<tr><td colspan='3'><label>Filter name: " + this.getHeaderName(this.fnParam.fc[i], _header_names) + "</label></td></tr>";
+              s += "<tr><td><label>Number of windows: </label></td>";
+              s += "<td colspan='2'><input type='text' id='txtWin_" + (i+1) + "' placeholder='" + this.fnParam.wx[i] + "' value='" + this.fnParam.wx[i] + "' type='number' onkeypress='return isNumberKey(event)' /></td></tr>";
+              s += "<tr><td><label>Overlap: </label></td>";
+              s += "<td><input type='range' min='1' max='50' value='" + this.fnParam.gx[i] + "' step='1' class='slider' id='myRangeOv_" + (i+1) + "' index='" + (i+1) + "'/></td>";
+              s += "<td><label id='ovLabel_" + (i+1) + "'>" + this.fnParam.gx[i] + "%</label></td>";
+              s += "</tr>";
+
+              scrpt += "$('#myRangeOv_" + (i+1) + "').on('input',function(){$('#ovLabel_" + (i+1) + "').html($(this).val() + '%');});"
             }
+
+            scrpt += "</script>";
+            s += "</table>";
+            s += "</fieldset>";
+            s += "<fieldset><legend>Cluster settings</legend>";
+            s += "<table id='ctrDiv'>";
+            s += "<tr><td><label>Clustering algorithm: </label></td>";
+            s += "<td><select id='selCluster' class='clusterSel'><option value='-1'>Select a clustering method</option><option value='" + this.fnParam.cls.name + "' selected>" + this.fnParam.cls.name + "</option></select></td></tr>";
+            s += "<tr><td><label>Density: </label></td>";
+            s += "<td><input type='text' id='txtDensity' placeholder='" + this.fnParam.cls.param[1] + "' value='" + this.fnParam.cls.param[1] + "' onkeypress='return isFloatingNumberKey(event, this)' /></td></tr>";
+            s += "<tr><td><label>Radius: </label></td>";
+            s += "<td><input type='text' id='txtRadius' placeholder='" + parseFloat(this.fnParam.cls.param[0]).toFixed(2) + "' value='" + parseFloat(this.fnParam.cls.param[0]).toFixed(2) + "' onkeypress='return isFloatingNumberKey(event, this)' /></td></tr>";
+            s += "</table>";
+            s += "</fieldset>";
+            s += "<fieldset id='pieDiv'><legend>Pie chart features</legend>" + this.getPieAttributes(_header_names) + "</fieldset>";
+            s += "<fieldset id='memDiv'><legend>Flare membership features</legend>" + this.getFlareMemAttributes(_header_names) + "</fieldset>" +
+              "<button id='make_pie_chart' title='Generate mapper' style='display:none;'>Generate mapper</button>";
+            return s+scrpt;
           }
 
-          var s = "<table><tr><td>Filter</td><td>Windows</td><td>% Overlap</td></tr>";
-          if(obj.FN.length >0){
-            s += "<tr>"
-            for(var i=0; i<obj.FN.length; i++){
-              s += "<td>" + obj.FN[i] + "</td>";
-              s += "<td style='text-align:right;'>" + obj.WX[i] + "</td>";
-              s += "<td style='text-align:right;'>" + obj.GX[i] + "</td>";
-            }
-            s += "</tr>";
-          }
-          s += "</table><table><tr><td>Cluster</td><td>Density</td><td>Radius</td></tr>" +
-                "<tr><td>" + obj.CLP[0] + "</td><td style='text-align:right;'>" + obj.CLP[1] +
-                "</td><td  style='text-align:right;'>" + obj.CLP[2] +
-                "</td></tr></table>";
-
-          return s;
+          return "";
         },
 
         loadMapperWindow: function(){
@@ -3306,7 +3429,7 @@ $(function () {
             }
 
             $("#myDropdown").on("change", function () {
-                $("#jsonheader .jsonDetails table").css({"display":"none"});
+                $("#map-details-details .jsonDetails table").css({"display":"none"});
                 //$("#myDropdown a").removeClass("seldw");
                 var $opt = $(this).find('option:selected');
                 gInstance.fileIndex = $opt.attr('value');
@@ -3365,6 +3488,21 @@ $(function () {
             } else {
                 $("#fa-path-title").removeClass('fa-angle-double-up');
                 $("#fa-path-title").addClass('fa-angle-double-down');
+            }
+
+        });
+    });
+
+    $(".map-details-show").click(function (e) {
+        e.preventDefault();
+        $("#map-details .row").not("#map-details .row1").slideUp();
+        $("#map-details .row1").slideToggle("slow", function () {
+            if ($(this).css("display") === "none") {
+                $("#fa-map-details-title").removeClass('fa-angle-double-down');
+                $("#fa-map-details-title").addClass('fa-angle-double-up');
+            } else {
+                $("#fa-map-details-title").removeClass('fa-angle-double-up');
+                $("#fa-map-details-title").addClass('fa-angle-double-down');
             }
 
         });
