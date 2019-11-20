@@ -30,6 +30,12 @@ sudo npm install -g node-gyp
 # nan package for node
 npm install --save nan
 
+# bindings for external sources
+npm install --save bindings
+
+# rebuild package
+npm install --save-dev rebuild
+
 # electron package
 npm install --save-dev electron
 
@@ -47,15 +53,36 @@ npm install --save jquery
 npm install electron-installer-dmg --save-dev
 npm install electron-installer-dmg -g
 
-// For WINDOWS user
+# For WINDOWS user
 npm install --save-dev electron-winstaller
 
-// For LINUX user
+# For LINUX user
 npm install --save-dev  electron-installer-debian
 npm install -g electron-installer-debian
 
-// asar package
+# asar package
 npm install --save-dev  asar
+```
+
+After running all the commands, open the `package.json` file. At the end of this file there has two keys named `dependencies` and `devDependencies` as follows. Sometimes `jquery` moves to `devDependencies` during installation then please move it to `dependencies`. Otherwise, JQUERY will not work in the distribution.
+
+```JSON
+"dependencies": {
+    "bindings": "^1.5.0",
+    "electron-log": "^3.0.9",
+    "jquery": "^3.4.1",
+    "nan": "^2.14.0"
+  },
+ "devDependencies": {
+    "asar": "^2.0.1",
+    "electron": "^6.1.4",
+    "electron-installer-debian": "^2.0.1",
+    "electron-installer-dmg": "^3.0.0",
+    "electron-packager": "^14.1.0",
+    "electron-rebuild": "^1.8.8",
+    "electron-winstaller": "^4.0.0",
+    "rebuild": "^0.1.2"
+  },
 ```
 
 
