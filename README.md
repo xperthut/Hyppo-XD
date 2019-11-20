@@ -16,7 +16,8 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 3. Copy the [hyppox](https://github.com/xperthut/HYPPO-X/tree/master/Library) folder and paste it here.
 
 ## Create Node environment
-Download and install [nodeJS](https://nodejs.org/download/release/v12.13.1/) v12.13.1. Current `V8` interface is campatible with this version.
+1. Download and install [nodeJS](https://nodejs.org/download/release/v12.13.1/) v12.13.1. Current `V8` interface is campatible with this version.
+2. Need python >= 2.7
 
 ## Install required node packages
 Open terminal and redirect to the git folder prior running the following commands
@@ -31,7 +32,7 @@ sudo npm install -g node-gyp
 npm install --save nan
 
 # bindings for external sources
-npm install --save bindings
+npm install -g bindings
 
 # rebuild package
 npm install --save-dev rebuild
@@ -85,4 +86,12 @@ After running all the commands, open the `package.json` file. At the end of this
   },
 ```
 
+## Build the package
+Use following command to build the package
+```bash
+# Create build directory based on OS (a Makefile and associated property files will be created on Unix systems and a vcxproj file will be created on Windows)
+node-gyp  configure
 
+# Build the solution
+node-gyp rebuild
+```
