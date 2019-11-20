@@ -1,4 +1,4 @@
-<img src="https://github.com/xperthut/Hyppo-XD/blob/master/logo/icon.iconset/icon_256x256.png" width="20%" style="margin:0" />
+[<img src="https://github.com/xperthut/Hyppo-XD/blob/master/logo/icon.iconset/icon_256x256.png" width="10%" style="margin:0" />Mac version](https://github.com/xperthut/Hyppo-XD/releases)
 # Hyppo-XD 
 This is a desktop based software aimed to generate mapper object from dataset. We are continuously updating the software focusing on the user experience. If you have any suggestion, please email to [Methun](mailto:mhmethun@gmail.com).
 
