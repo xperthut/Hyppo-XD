@@ -2,29 +2,33 @@
   <a href="https://github.com/xperthut/Hyppo-XD/releases"><img src="https://github.com/xperthut/Hyppo-XD/blob/master/logo/logoM.png" width="20%" style="margin:0" /></a>&nbsp;<a href="https://github.com/xperthut/Hyppo-XD/releases"><img src="https://github.com/xperthut/Hyppo-XD/blob/master/logo/logoW.png" width="20%" style="margin:0" /></a>&nbsp;<a href="https://github.com/xperthut/Hyppo-XD/releases"><img src="https://github.com/xperthut/Hyppo-XD/blob/master/logo/logoL.png" width="20%" style="margin:0" /></a>
  </p>
 
-# Hyppo-XD 
+<h1> Hyppo-XD </h1>
 This is a desktop based software aimed to generate mapper object from dataset. We are continuously updating the software focusing on the user experience. If you have any suggestion, please [email](mailto:mhmethun@gmail.com) to the developer.
 
-# Pre-requisite for installation
+<h1> Pre-requisite for installation </h1>
 1. Must need GCC version at least 5.0
 2. Download and Install [boost](https://www.boost.org/) library
 
-# Instructions for a developer
+<h1> Instructions for a developer </h1>
 <ul>
   <li><a href="#add_library"> Add library</a></li>
   <li><a href="#create_node_environment"> Create Node environment</a></li>
   <li><a href="#install_required_node_packages"> Install required node packages</a></li>
+  <li><a href="#clean_and_build_the_package"> Clean and build the package</a></li>
+  <li><a href="#run_the_desktop_app"> Run the desktop app</a></li>
+  <li><a href="#licence_copyright"> Licence &amp; copyright</a></li>
 </ul>
-## <h2 id="add_library"></h2>Add library
+
+<h2 id="add_library">Add library</h2>
 1. Fork the git
 2. Open `src` directiry
 3. Copy the [hyppox](https://github.com/xperthut/HYPPO-X/tree/master/Library) folder and paste it here.
 
-## <h2 id="create_node_environment"></h2>Create Node environment
+<h2 id="create_node_environment">Create Node environment</h2>
 1. Download and install [nodeJS](https://nodejs.org/download/release/v12.13.1/) v12.13.1. Current `V8` interface is campatible with this version.
 2. Need python >= 2.7
 
-## <h2 id="install_required_node_packages"></h2>Install required node packages
+<h2 id="install_required_node_packages">Install required node packages</h2>
 Open terminal and redirect to the git folder prior running the following commands
 ```bash
 # Update npm
@@ -91,7 +95,7 @@ After running all the commands, open the `package.json` file. At the end of this
   },
 ```
 
-## Clean and build the package
+<h2 id="clean_and_build_the_package">Clean and build the package</h2>
 Use following command to build the package
 ```bash
 # Create build directory based on OS (a Makefile and associated property files will be created on Unix systems and a vcxproj file will be created on Windows)
@@ -109,7 +113,7 @@ node-gyp clean
 rm -rf build/
 ```
 
-## Run the desktop app
+<h2 id="run_the_desktop_app">Run the desktop app</h2>
 Run following commands to build the solution as a desktop application
 ```bash
 # Three consecutive commands are concatenated by logical && operator
@@ -117,8 +121,8 @@ Run following commands to build the solution as a desktop application
 node-gyp rebuild && npm run rebuild && npm start
 ```
 
-## Licence &amp; copyright
+<h2 id="licence_copyright">Licence &amp; copyright</h2>
 
-Copyright (c) 2019 Hyppo-XD Collaborators.
+Copyright (&copy;) 2019 Hyppo-XD Collaborators.
 
 Hyppo-XD is licensed under an MIT license. All rights not explicitly granted in the MIT license are reserved. See the included LICENSE file for more details.
