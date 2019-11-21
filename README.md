@@ -86,7 +86,7 @@ After running all the commands, open the `package.json` file. At the end of this
   },
 ```
 
-## Build the package
+## Clean and build the package
 Use following command to build the package
 ```bash
 # Create build directory based on OS (a Makefile and associated property files will be created on Unix systems and a vcxproj file will be created on Windows)
@@ -94,6 +94,22 @@ node-gyp  configure
 
 # Build the solution
 node-gyp rebuild
+```
+If you already have solution in build directory then do the following:
+```bash
+# Clean node-gyp
+node-gyp clean
+
+# Remove build folder if still exists
+rm -rf build/
+```
+
+## Run the desktop app
+Run following commands to build the solution as a desktop application
+```bash
+# Three consecutive commands are concatenated by logical && operator
+# If anyone failed then it will not execute the subsequent commands
+node-gyp rebuild && npm run rebuild && npm start
 ```
 
 ## Licence &amp; copyright
