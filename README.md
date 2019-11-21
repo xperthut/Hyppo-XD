@@ -31,7 +31,7 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 <h2 id="create_node_environment">Create Node environment</h2>
 <ol>
   <li>Download and install <a href="https://nodejs.org/download/release/v12.13.1/" target="_blank">nodeJS</a> <strong>v12.13.1</strong>. Current <strong>V8</strong> interface is campatible with this version.</li>
-  <li>Need python &ge 2.7</li>
+  <li>Need python &ge; 2.7</li>
 </ol> 
 
 <h2 id="install_required_node_packages">Install required node packages</h2>
