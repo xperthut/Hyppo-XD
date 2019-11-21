@@ -13,17 +13,18 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 <ul>
   <li><a href="#add_library"> Add library</a></li>
   <li><a href="#create_node_environment"> Create Node environment</a></li>
+  <li><a href="#install_required_node_packages"> Install required node packages</a></li>
 </ul>
-## <h2 id="add_library" />Add library
+## <h2 id="add_library"></h2>Add library
 1. Fork the git
 2. Open `src` directiry
 3. Copy the [hyppox](https://github.com/xperthut/HYPPO-X/tree/master/Library) folder and paste it here.
 
-## <h2 id="create_node_environment" />Create Node environment
+## <h2 id="create_node_environment"></h2>Create Node environment
 1. Download and install [nodeJS](https://nodejs.org/download/release/v12.13.1/) v12.13.1. Current `V8` interface is campatible with this version.
 2. Need python >= 2.7
 
-## Install required node packages
+## <h2 id="install_required_node_packages"></h2>Install required node packages
 Open terminal and redirect to the git folder prior running the following commands
 ```bash
 # Update npm
