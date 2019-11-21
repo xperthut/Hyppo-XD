@@ -6,8 +6,10 @@
 This is a desktop based software aimed to generate mapper object from dataset. We are continuously updating the software focusing on the user experience. If you have any suggestion, please [email](mailto:mhmethun@gmail.com) to the developer.
 
 <h1> Pre-requisite for installation </h1>
-1. Must need GCC version at least 5.0
-2. Download and Install [boost](https://www.boost.org/) library
+<ol>
+  <li>Must need GCC version at least 5.0</li>
+  <li>Download and Install <a href="https://www.boost.org/" target="_blank">boost</a> library</li>
+</ol>
 
 <h1> Instructions for a developer </h1>
 <ul>
@@ -20,12 +22,17 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 </ul>
 
 <h2 id="add_library">Add library</h2>
-1. Fork the git
-2. Open `src` directiry
-3. Copy the [hyppox](https://github.com/xperthut/HYPPO-X/tree/master/Library) folder and paste it here.
+<ol>
+  <li>Fork the git</li>
+  <li>Open <strong>src</strong> directiry</li>
+  <li>Copy the <a href="https://github.com/xperthut/HYPPO-X/tree/master/Library" target="_blank">hyppox</a> folder and paste it here.</li>
+</ol> 
 
 <h2 id="create_node_environment">Create Node environment</h2>
-1. Download and install [nodeJS](https://nodejs.org/download/release/v12.13.1/) v12.13.1. Current `V8` interface is campatible with this version.
+<ol>
+  <li>Download and install <a href="https://nodejs.org/download/release/v12.13.1/" target="_blank">nodeJS</a> <strong>v12.13.1</strong>. Current `V8` interface is campatible with this version.</li>
+</ol>
+1. 
 2. Need python >= 2.7
 
 <h2 id="install_required_node_packages">Install required node packages</h2>
