@@ -9,13 +9,17 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 1. Must need GCC version at least 5.0
 2. Download and Install [boost](https://www.boost.org/) library
 
-# Instruction for developers
-## Add library
+# Instructions for a developer
+<ul>
+  <li><a href="#add_library"> Add library</a></li>
+  <li><a href="#create_node_environment"> Create Node environment</a></li>
+</ul>
+## <h2 id="add_library" />Add library
 1. Fork the git
 2. Open `src` directiry
 3. Copy the [hyppox](https://github.com/xperthut/HYPPO-X/tree/master/Library) folder and paste it here.
 
-## Create Node environment
+## <h2 id="create_node_environment" />Create Node environment
 1. Download and install [nodeJS](https://nodejs.org/download/release/v12.13.1/) v12.13.1. Current `V8` interface is campatible with this version.
 2. Need python >= 2.7
 
