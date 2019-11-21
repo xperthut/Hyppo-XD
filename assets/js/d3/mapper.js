@@ -143,21 +143,21 @@ $(function () {
               this.createDir(this._path.join(this.workspace.wd, "Data", "json")) |
               this.createDir(this._path.join(this.workspace.wd, "Data", "tmp"));
 
-      if(!this._fs.existsSync(this._path.join(this.workspace.wd, "Data", "csv","PlantHeight.csv"))){
-        this._fs.copyFileSync(this._path.join(__dirname, "dummy","PlantHeight.csv"), this._path.join(this.workspace.wd, "Data", "csv","PlantHeight.csv") );
+      if(!this._fs.existsSync(this._path.join(this.workspace.wd, "Data", "csv","Sample.csv"))){
+        this._fs.copyFileSync(this._path.join(__dirname, "dummy","Sample.csv"), this._path.join(this.workspace.wd, "Data", "csv","Sample.csv") );
       }
 
       var ff = false;
       for(var i=0; i<this.workspace.files.length; i++){
-        if(this.workspace.files[i].csv==="PlantHeight.csv"){
+        if(this.workspace.files[i].csv==="Sample.csv"){
           ff = true;
           break;
         }
       }
 
       if(!ff){
-        console.log(this._path.join(__dirname, "dummy","PlantHeight.csv"));
-        this.workspace.files.push({csv:"PlantHeight.csv", col:{index:true, header:[], dt:new Date().toString()}, json:[]});
+        console.log(this._path.join(__dirname, "dummy","Sample.csv"));
+        this.workspace.files.push({csv:"Sample.csv", col:{index:true, header:[], dt:new Date().toString()}, json:[]});
         this._fs.writeFileSync(__dirname + '/wp.sp', JSON.stringify(this.workspace), 'utf8');
       }
 
@@ -166,7 +166,7 @@ $(function () {
 
     extractFileName: function(){
       //alert(this.fileNameWithPath);
-      // /Users/methun/Sites/hyppox/Data/csv/PlantHeight_18.csv
+      // /Users/methun/Sites/hyppox/Data/csv/Sample_18.csv
       this.fileName = this._path.basename(this.fileNameWithPath);
       var fName = this.fileName.substr(0, this.fileName.length-4);
       this.createDir(this._path.join(this.workspace.wd, "Data", "json",fName));
