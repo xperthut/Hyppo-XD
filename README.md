@@ -95,3 +95,9 @@ node-gyp  configure
 # Build the solution
 node-gyp rebuild
 ```
+
+## Licence &amp; copyright
+
+Copyright (c) 2019 Hyppo-XD Collaborators.
+
+Hyppo-XD is licensed under an MIT license. All rights not explicitly granted in the MIT license are reserved. See the included LICENSE file for more details.
