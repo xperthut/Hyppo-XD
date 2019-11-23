@@ -14,12 +14,12 @@ function getInstallerConfig () {
   const outPath = path.join(rootPath, 'release-builds');
 
   return Promise.resolve({
-    appDirectory: path.join(outPath, 'Hyppo-X-win32-ia32/'),
+    appDirectory: path.join(outPath, 'Hyppo-XD-win32-ia32/'),
     authors: 'Methun Kamruzzaman',
     noMsi: true,
     outputDirectory: path.join(rootPath, 'release'),
-    exe: 'Hyppo-X.exe',
-    setupExe: 'Hyppo-X.exe',
+    exe: 'Hyppo-XD-Windows.exe',
+    setupExe: 'Hyppo-XD-Windows.exe',
     setupIcon: path.join(rootPath, 'logo', 'icon.ico')
   });
 }
