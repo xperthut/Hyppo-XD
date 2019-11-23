@@ -17,6 +17,10 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 * [Install required node packages](#install-required-node-packages)
 * [Clean and build the package](#clean-and-build-the-package)
 * [Run the desktop app](#run-the-desktop-app)
+* [Distribute app](#distribute-app)
+    * [Machintos OSX](#machintos-osx)
+    * [Windows OS](#windows-os)
+    * [Linux OS](#linux-os)
 * [Licence &amp; copyright](#licence--copyright)
 
 
@@ -111,6 +115,9 @@ node-gyp  configure
 
 # Build the solution
 node-gyp rebuild
+
+# Build the app
+npm run rebuild
 ```
 If you already have solution in build directory then do the following:
 ```bash
@@ -136,6 +143,24 @@ Run following commands to build the solution as a desktop application
 # Three consecutive commands are concatenated by logical && operator
 # If anyone failed then it will not execute the subsequent commands
 node-gyp rebuild && npm run rebuild && npm start
+```
+
+## Distribute app ##
+Run following OS specific commands to generate distributed application.
+### Machintos OSX ###
+```bash
+npm run package-mac
+npm run installer-mac
+```
+### Windows OS ###
+```bash
+npm run package-win
+npm run installer-win
+```
+### Linux OS ###
+```bash
+npm run package-linux
+npm run installer-linux
 ```
 
 ## Licence &amp; copyright ##
