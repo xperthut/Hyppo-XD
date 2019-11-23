@@ -119,6 +119,15 @@ node-gyp clean
 
 # Remove build folder if still exists
 rm -rf build/
+
+# Remove bin folder
+rm -rf bin
+
+# Remove release-builds folder
+rm -rf release-builds/
+
+# Remove release folder
+rm -rf release/
 ```
 
 ## Run the desktop app ##
