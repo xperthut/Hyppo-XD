@@ -17,7 +17,7 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 * [Install required node packages](#install-required-node-packages)
 * [Clean and build the package](#clean-and-build-the-package)
 * [Run the desktop app](#run-the-desktop-app)
-* [Licence &amp; copyright](#licence-&amp;-copyright)
+* [Licence &amp; copyright](#licence--copyright)
 
 
 ## Add library ##
