@@ -36,72 +36,72 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 
 <h2 id="install_required_node_packages">Install required node packages</h2>
 Open terminal and redirect to the git folder prior running the following commands
-<div style="background-color:black; color:darkgreen;">
-  <span># Update npm</span>
+  <h4>Update npm</h4>
   <strong>sudo npm install -g npm</strong>
 
-  <span># Install node-gyp</span>
+  <h4>Install node-gyp</h4>
   <strong>sudo npm install -g node-gyp</strong>
 
-  <span># nan package for node</span>
+  <h4>Install nan package for node</h4>
   <strong>npm install --save nan</strong>
   
-  </div>
-<div>
-# bindings for external sources
-npm install -g bindings
+  <h4>Install bindings for external sources</h4>
+  <strong>npm install -g bindings</strong>
+  
+  <h4>Install rebuild package</h4>
+  <strong>npm install --save-dev rebuild</strong>
 
-# rebuild package
-npm install --save-dev rebuild
+  <h4>Install electron package</h4>
+  <strong>npm install --save-dev electron</strong>
 
-# electron package
-npm install --save-dev electron
+  <h4>Install electron-packager package</h4>
+  <strong>npm install --save-dev electron-packager</strong><br />
+  <strong>npm install electron-packager -g</strong>
+  
+  <h4>Install electron-rebuild package</h4>
+  <strong>npm install --save electron-rebuild</strong>
+  
+  <h4>Install jquery package</h4>
+  <strong>npm install --save jquery</strong>
 
-# electron-packager package
-npm install --save-dev electron-packager
-npm install electron-packager -g
+  <h4>Install jquery package</h4>
+  <strong>npm install --save jquery</strong>
+  
+  <h4>Install asar package</h4>
+  <strong>npm install --save-dev asar</strong>
+  
+  <h4>For MAC user</h4>
+  <strong>npm install electron-installer-dmg --save-dev</strong>
+  <strong>npm install electron-installer-dmg -g</strong>
 
-# electron-rebuild package
-npm install --save electron-rebuild
+  <h4>For WINDOWS user</h4>
+  <strong>npm install --save-dev electron-winstaller</strong>
 
-# jquery package
-npm install --save jquery
+  <h4>For LINUX user</h4>
+  <strong>npm install --save-dev  electron-installer-debian</strong>
+  <strong>npm install -g electron-installer-debian</strong>
 
-# For MAC user
-npm install electron-installer-dmg --save-dev
-npm install electron-installer-dmg -g
 
-# For WINDOWS user
-npm install --save-dev electron-winstaller
+<span>After running all the commands, open the <strong>package.json</strong> file. At the end of this file there has two keys named <strong>dependencies</strong> and <strong>devDependencies</strong> as follows. Sometimes <strong>jquery</strong> moves to <strong>devDependencies</strong> during installation then please move it to <strong>dependencies</strong>. Otherwise, JQUERY will not work in the distribution.</span><br />
 
-# For LINUX user
-npm install --save-dev  electron-installer-debian
-npm install -g electron-installer-debian
-
-# asar package
-npm install --save-dev  asar
-</div>
-
-After running all the commands, open the `package.json` file. At the end of this file there has two keys named `dependencies` and `devDependencies` as follows. Sometimes `jquery` moves to `devDependencies` during installation then please move it to `dependencies`. Otherwise, JQUERY will not work in the distribution.
-
-```JSON
-"dependencies": {
-    "bindings": "^1.5.0",
-    "electron-log": "^3.0.9",
-    "jquery": "^3.4.1",
-    "nan": "^2.14.0"
-  },
- "devDependencies": {
-    "asar": "^2.0.1",
-    "electron": "^6.1.4",
-    "electron-installer-debian": "^2.0.1",
-    "electron-installer-dmg": "^3.0.0",
-    "electron-packager": "^14.1.0",
-    "electron-rebuild": "^1.8.8",
-    "electron-winstaller": "^4.0.0",
-    "rebuild": "^0.1.2"
-  },
-```
+<span>
+"dependencies": {<br />
+    "bindings": "^1.5.0",<br />
+    "electron-log": "^3.0.9",<br />
+    "jquery": "^3.4.1",<br />
+    "nan": "^2.14.0"<br />
+  },<br />
+ "devDependencies": {<br />
+    "asar": "^2.0.1",<br />
+    "electron": "^6.1.4",<br />
+    "electron-installer-debian": "^2.0.1",<br />
+    "electron-installer-dmg": "^3.0.0",<br />
+    "electron-packager": "^14.1.0",<br />
+    "electron-rebuild": "^1.8.8",<br />
+    "electron-winstaller": "^4.0.0",<br />
+    "rebuild": "^0.1.2"<br />
+  },<br />
+</span>
 
 <h2 id="clean_and_build_the_package">Clean and build the package</h2>
 Use following command to build the package
