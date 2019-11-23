@@ -36,7 +36,7 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 
 <h2 id="install_required_node_packages">Install required node packages</h2>
 Open terminal and redirect to the git folder prior running the following commands
-```bash
+<div style="background-color:black; color:darkgreen;">
 # Update npm
 sudo npm install -g npm
 
@@ -78,7 +78,7 @@ npm install -g electron-installer-debian
 
 # asar package
 npm install --save-dev  asar
-```
+</div>
 
 After running all the commands, open the `package.json` file. At the end of this file there has two keys named `dependencies` and `devDependencies` as follows. Sometimes `jquery` moves to `devDependencies` during installation then please move it to `dependencies`. Otherwise, JQUERY will not work in the distribution.
 
