@@ -12,12 +12,12 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 
 
 # Instructions for a developer #
-* [Add library](##add_library "Goto add-library")
-* [Create Node environment](##create_node_environment "Goto create-node-environment")
-* [Install required node packages](##install_required_node_packages "Goto install-required-node-packages")
-* [Clean and build the package](##clean_and_build_the_package "Goto clean-and-build-the-package")
-* [Run the desktop app](##run_the_desktop_app "Goto run-the-desktop-app")
-* [Licence &amp; copyright](##licence_copyright "Goto licence-&-copyright")
+* [Add library](#add-library)
+* [Create Node environment](#create-node-environment)
+* [Install required node packages](#install-required-node-packages)
+* [Clean and build the package](#clean-and-build-the-package "Goto clean-and-build-the-package")
+* [Run the desktop app](#run-the-desktop-app "Goto run-the-desktop-app")
+* [Licence &amp; copyright](#licence-&-copyright "Goto licence-&-copyright")
 
 
 ## Add library ##
