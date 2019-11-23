@@ -1,4 +1,9 @@
-<p align="center">
+<!doctype html>
+<html>
+  <head></head>
+  <body>
+    
+    <p align="center">
   <a href="https://github.com/xperthut/Hyppo-XD/releases"><img src="https://github.com/xperthut/Hyppo-XD/blob/master/logo/logoM.png" width="20%" style="margin:0" /></a>&nbsp;<a href="https://github.com/xperthut/Hyppo-XD/releases"><img src="https://github.com/xperthut/Hyppo-XD/blob/master/logo/logoW.png" width="20%" style="margin:0" /></a>&nbsp;<a href="https://github.com/xperthut/Hyppo-XD/releases"><img src="https://github.com/xperthut/Hyppo-XD/blob/master/logo/logoL.png" width="20%" style="margin:0" /></a>
  </p>
 
@@ -138,3 +143,6 @@ node-gyp rebuild && npm run rebuild && npm start
 Copyright (&copy;) 2019 Hyppo-XD Collaborators.
 
 Hyppo-XD is licensed under an MIT license. All rights not explicitly granted in the MIT license are reserved. See the included LICENSE file for more details.
+
+</body>
+</html>
