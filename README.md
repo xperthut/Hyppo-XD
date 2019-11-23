@@ -12,26 +12,26 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 ```
 
 # Instructions for a developer #
-* [Add library](#add_library "Goto add-library")
-* [Create Node environment](#create_node_environment "Goto create-node-environment")
-* [Install required node packages](#install_required_node_packages "Goto install-required-node-packages")
-* [Clean and build the package](#clean_and_build_the_package "Goto clean-and-build-the-package")
-* [Run the desktop app](#run_the_desktop_app "Goto run-the-desktop-app")
-* [Licence &amp; copyright](#licence_copyright "Goto licence-&-copyright")
+* [Add library](##add_library "Goto add-library")
+* [Create Node environment](##create_node_environment "Goto create-node-environment")
+* [Install required node packages](##install_required_node_packages "Goto install-required-node-packages")
+* [Clean and build the package](##clean_and_build_the_package "Goto clean-and-build-the-package")
+* [Run the desktop app](##run_the_desktop_app "Goto run-the-desktop-app")
+* [Licence &amp; copyright](##licence_copyright "Goto licence-&-copyright")
 
 
 ## Add library ##
-```
+
   1. Fork the git
   2. Open __src__ directiry
   3. Copy the [hyppox](https://github.com/xperthut/HYPPO-X/tree/master/Library) folder and paste it here.
-```
+
 
 ## Create Node environment ##
-```
+
   1. Download and install [nodeJS __v12.13.1__](https://nodejs.org/download/release/v12.13.1/). Current __V8__ interface is campatible with this version.
   2. Need python >= 2.7
-```
+
 
 ## Install required node packages ##
 Open terminal and redirect to the git folder prior running the following commands
