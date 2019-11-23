@@ -35,9 +35,9 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 </ol> 
 
 <h2 id="install_required_node_packages">Install required node packages</h2>
-Open terminal and redirect to the git folder prior running the following commands
-  <h4>Update npm</h4>
-  <strong>sudo npm install -g npm</strong>
+Open terminal and redirect to the git folder prior running the following commands<br />
+  // Update npm<br />
+  sudo npm install -g npm<br />
 
   <h4>Install node-gyp</h4>
   <strong>sudo npm install -g node-gyp</strong>
