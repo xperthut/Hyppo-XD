@@ -2,8 +2,7 @@
   <a href="https://github.com/xperthut/Hyppo-XD/releases"><img src="https://github.com/xperthut/Hyppo-XD/blob/master/logo/logo.png" width="30%" style="margin:0" /></a>
  </p>
 
-# Hyppo-XD #
-This is a desktop based software aimed to generate mapper object from dataset. We are continuously updating the software focusing on the user experience. If you have any suggestion, please [email](mailto:mhmethun@gmail.com) to the developer.
+A desktop based cross platform application to generate mapper object from a dataset. We are continuously updating the software focusing on the user experience. If you have any suggestion, please [email](mailto:mhmethun@gmail.com) to the developer.
 
 # Pre-requisite for installation #
 
