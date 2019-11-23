@@ -37,15 +37,17 @@ This is a desktop based software aimed to generate mapper object from dataset. W
 <h2 id="install_required_node_packages">Install required node packages</h2>
 Open terminal and redirect to the git folder prior running the following commands
 <div style="background-color:black; color:darkgreen;">
-# Update npm
-sudo npm install -g npm
+  <span># Update npm</span>
+  <strong>sudo npm install -g npm</strong>
 
-# Install node-gyp
-sudo npm install -g node-gyp
+  <span># Install node-gyp</span>
+  <strong>sudo npm install -g node-gyp</strong>
 
-# nan package for node
-npm install --save nan
-
+  <span># nan package for node</span>
+  <strong>npm install --save nan</strong>
+  
+  </div>
+<div>
 # bindings for external sources
 npm install -g bindings
 
