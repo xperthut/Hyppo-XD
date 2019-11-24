@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href="asserts/css/git/css.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="asserts/css/git/style.css" media="screen" type="text/css">
-    <link rel="stylesheet" href="asserts/css/git/print.css" media="print" type="text/css">
-    <link rel="shortcut icon" href="logo/logo.png">
+    <link href="assets/css/git/css.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="assets/css/git/style.css" media="screen" type="text/css">
+    <link rel="stylesheet" href="assets/css/git/print.css" media="print" type="text/css">
+    <link rel="shortcut icon" href="logo/icon.ico">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -19,21 +19,50 @@
     <header>
       <div class="inner">
         <a href="https://github.com/xperthut/HYPPO-XD">
-          <h1>
-            <img src="logo/logo.png" width="40%" alt="Hyppo-XD">
-          </h1>
+          <img src="assets/css/images/git-header.png" width="80%" alt="Hyppo-XD">
         </a>
-        <h2>A desktop based application to visually discover the insights of high dimensional complex data set as a mapper complex.</h2>
-
-          <a href="https://github.com/xperthut/HYPPO-XD" class="button"><small>View project on</small> GitHub</a>
-
-
+        <a href="https://github.com/xperthut/HYPPO-XD" class="button"></a>
       </div>
     </header>
 
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
+          <h2>Headlines</h2>
+          <ul>
+            <li><a href="#data-pre-processing">Data pre&ndash;processing</a></li>
+            <li><a href="#setup-installation">Setup and installation</a></li>
+          </ul>
+          <h2 id="data-pre-processing">Data pre&ndash;processing</h2>
+          <p>Our solution only accept comma separated CSV file as input. The csv file should have following properties:</p>
+          <ol>
+            <li>
+              <p>
+                <strong>Column name</strong>: The first row should contain the column name. Do not place <i>space</i> with in a column name. Try to avoid long name and use meaningful name.
+              </p>
+            </li>
+            <li>
+              <p>
+                <strong>First column</strong>: The first column should be a row index column. If the data set does not contain any row index column then add this column. This column should be the very first column.
+                <img src="assets/css/images/img1.png" width="80%"/>
+              </p>
+            </li>
+            <li>
+              <p>
+                <strong>Cleanup</strong>: Follow standard data imputation techniques for missing data.
+              </p>
+            </li>
+          </ol>
+          <h2 id="setup-installation">Setup and installation</h2>
+          <p>
+            At first download the software from <a href="https://github.com/xperthut/Hyppo-XD/releases" target="_blank">here</a>. You also need to complete following steps before installing the software in your machine.<br />
+            <ol>
+              <li> Check your current GCC version, we need GCC at least 5.0</li>
+              <li> Download <a href="https://www.boost.org/" target="_blank">boost</a> library and install it. </li>
+              <!--<li> Install Python at least 3.0 </li>
+              <li> Install Java </li> -->
+            </ol>
+          </p>
           <h2>Framework overview</h2>
             <p>This software library is built to delve the insights of a complex high dimensional dataset. We instantiated the Mapper framework which is based on the algebraic topology in order to represent the structure of a dataset in a graph. The Mapper framework uses three steps named a) Filtering, b) Clustering, and c) Graph generation to convert a high dimensional dataset to a graph. The generated graph is used for visual analytics. Details of our framework is described in our <a href="https://arxiv.org/pdf/1707.04362.pdf" target="_blank">paper</a>. A schematic functional overview of the framework with a sample dataset is given below.<br />
                 <img src="images/tda-object.png" width="100%" alt="Dataset to graph using Hyppo-x"/>
