@@ -107,18 +107,7 @@ After running all the commands, open the __package.json__ file. At the end of th
 ```
 
 ## Clean and build the package ##
-Use following command to build the package
-```bash
-# Create build directory based on OS (a Makefile and associated property files will be created on Unix systems and a vcxproj file will be created on Windows)
-node-gyp  configure
-
-# Build the solution
-node-gyp rebuild
-
-# Build the app
-npm run rebuild
-```
-If you already have solution in build directory then do the following:
+Use following commands to clean the solutions that you built earlier:
 ```bash
 # Clean node-gyp
 node-gyp clean
@@ -134,6 +123,18 @@ rm -rf release-builds/
 
 # Remove release folder
 rm -rf release/
+```
+
+Use following command to build the package
+```bash
+# Create build directory based on OS (a Makefile and associated property files will be created on Unix systems and a vcxproj file will be created on Windows)
+node-gyp  configure
+
+# Build the solution
+node-gyp rebuild
+
+# Build the app
+npm run rebuild
 ```
 
 ## Run the desktop app ##
