@@ -5,13 +5,16 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
+    "clean": "node-gyp clean && rm -rf release* bin/",
     "rebuild": "electron-rebuild -f -w Hyppo-XD",
     "package-mac": "electron-packager ./ --overwrite --platform=darwin --arch=x64 --icon=logo/icon.icns --prune=true --out=release-builds --ignore=\\.gitignore --ignore=\\.gitmodules",
     "package-win": "electron-packager ./ --overwrite --platform=win32 --arch=ia32 --icon=logo/icon.ico --prune=true --out=release-builds --ignore=\\.gitignore --ignore=\\.gitmodules",
     "package-linux": "electron-packager ./ --overwrite --platform=linux --arch=armv7l --icon=logo/1024x1024.png --prune=true --out=release-builds --ignore=\\.gitignore --ignore=\\.gitmodules",
     "installer-mac": "electron-installer-dmg --icon=./logo/icon.icns --overwrite ./release-builds/Hyppo-XD-darwin-x64/Hyppo-XD.app ./release/Hyppo-XD",
     "installer-win": "electron-installer-windows --src release-builds/Hyppo-XD-win32-ia32/ --dest ./release/ --options.icon=logo/icon.ico",
-    "installer-linux": "electron-installer-debian --src release-builds/Hyppo-XD-linux-armv7l/ --dest ./release/ --arch amd64"
+    "installer-linux": "electron-installer-debian --src release-builds/Hyppo-XD-linux-armv7l/ --dest ./release/ --arch amd64",
+    "install-all": "node-gyp configure && node-gyp rebuild && npm run rebuild && npm run package-mac && npm run installer-mac && npm run package-linux && npm run installer-linux && npm run package-win && npm run installer-win",
+    "install": "npm run clean && npm run install-all"
   },
   "repository": {
     "type": "git",
