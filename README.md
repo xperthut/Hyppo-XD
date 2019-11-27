@@ -17,10 +17,10 @@ A desktop based cross platform application to generate mapper object from a data
 * [Clean and build the package](#clean-and-build-the-package)
 * [Run the desktop app](#run-the-desktop-app)
     * [Shortcut command](#Shortcut-command)
-* [Distribute app (Mac OSX host)](#distribute-app)
-    * [Target: Machintos OSX](#machintos-osx)
-    * [Target: Windows OS](#windows-os)
-    * [Target: Linux OS](#linux-os)
+* [Distribute app (Mac OSX host)](#distribute-app-mac-osx-host)
+    * [Target: Machintos OSX](#target-machintos-osx)
+    * [Target: Windows OS](#target-windows-os)
+    * [Target: Linux OS](#target-linux-os)
 * [Licence &amp; copyright](#licence--copyright)
 
 
