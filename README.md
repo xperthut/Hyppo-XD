@@ -16,6 +16,7 @@ A desktop based cross platform application to generate mapper object from a data
 * [Install required node packages](#install-required-node-packages)
 * [Clean and build the package](#clean-and-build-the-package)
 * [Run the desktop app](#run-the-desktop-app)
+    * [Shortcut command](#Shortcut-command)
 * [Distribute app (Mac OSX host)](#distribute-app)
     * [Target: Machintos OSX](#machintos-osx)
     * [Target: Windows OS](#windows-os)
@@ -144,6 +145,11 @@ Run following commands to build the solution as a desktop application
 # Three consecutive commands are concatenated by logical && operator
 # If anyone failed then it will not execute the subsequent commands
 node-gyp rebuild && npm run rebuild && npm start
+```
+### Shortcut command ###
+Run following command to clean and build the package and make the installer
+```bash
+npm run install
 ```
 
 ## Distribute app (Mac OSX host) ##
