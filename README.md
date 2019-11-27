@@ -168,6 +168,9 @@ npm run installer-win
 ```
 ### Target: Linux OS ###
 ```bash
+# Install this package
+brew install fakeroot dpkg
+
 # Build executable file
 npm run package-linux
 
