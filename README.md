@@ -16,10 +16,10 @@ A desktop based cross platform application to generate mapper object from a data
 * [Install required node packages](#install-required-node-packages)
 * [Clean and build the package](#clean-and-build-the-package)
 * [Run the desktop app](#run-the-desktop-app)
-* [Distribute app](#distribute-app)
-    * [Machintos OSX](#machintos-osx)
-    * [Windows OS](#windows-os)
-    * [Linux OS](#linux-os)
+* [Distribute app (Mac OSX host)](#distribute-app)
+    * [Target: Machintos OSX](#machintos-osx)
+    * [Target: Windows OS](#windows-os)
+    * [Target: Linux OS](#linux-os)
 * [Licence &amp; copyright](#licence--copyright)
 
 
@@ -74,14 +74,14 @@ Open terminal and redirect to the git folder prior running the following command
   # Install asar package
   npm install --save-dev asar
   
-  # For MAC user
+  # For MAC OsX
   npm install electron-installer-dmg --save-dev
   npm install electron-installer-dmg -g
   
-  # For WINDOWS user
+  # For WINDOWS Os
   npm install --save-dev electron-winstaller
   
-  # For LINUX user
+  # For LINUX Os
   npm install --save-dev  electron-installer-debian
   npm install -g electron-installer-debian
 ```
@@ -145,21 +145,33 @@ Run following commands to build the solution as a desktop application
 node-gyp rebuild && npm run rebuild && npm start
 ```
 
-## Distribute app ##
-Run following OS specific commands to generate distributed application.
-### Machintos OSX ###
+## Distribute app (Mac OSX host) ##
+Run following OS specific commands to generate distributed application. The following command can be run from the terminal of the Mac OSX.
+### Target: Machintos OSX ###
 ```bash
+# Build .app file
 npm run package-mac
+
+# Build .dmg file
 npm run installer-mac
 ```
-### Windows OS ###
+### Target: Windows OS ###
 ```bash
+# Download and install Wine using Homebrew
+brew cask install wine-stable
+
+# Build .exe file
 npm run package-win
+
+# Build .exe file
 npm run installer-win
 ```
-### Linux OS ###
+### Target: Linux OS ###
 ```bash
+# Build executable file
 npm run package-linux
+
+# Build executable file
 npm run installer-linux
 ```
 
