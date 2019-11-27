@@ -79,7 +79,8 @@ Open terminal and redirect to the git folder prior running the following command
   npm install electron-installer-dmg -g
   
   # For WINDOWS Os
-  npm install --save-dev electron-winstaller
+  npm install --save-dev electron-installer-windows
+  npm install -g electron-installer-windows
   
   # For LINUX Os
   npm install --save-dev  electron-installer-debian
@@ -94,16 +95,16 @@ After running all the commands, open the __package.json__ file. At the end of th
     "jquery": "^3.4.1",
     "nan": "^2.14.0"
   },
- "devDependencies": {
+  "devDependencies": {
     "asar": "^2.0.1",
     "electron": "^6.1.4",
     "electron-installer-debian": "^2.0.1",
     "electron-installer-dmg": "^3.0.0",
+    "electron-installer-windows": "^2.0.0",
     "electron-packager": "^14.1.0",
     "electron-rebuild": "^1.8.8",
-    "electron-winstaller": "^4.0.0",
     "rebuild": "^0.1.2"
-  },
+  }
 ```
 
 ## Clean and build the package ##
@@ -159,6 +160,9 @@ npm run installer-mac
 ```bash
 # Download and install Wine using Homebrew
 brew cask install wine-stable
+
+# Download and install mono using Homebrew
+brew install mono
 
 # Build .exe file
 npm run package-win
