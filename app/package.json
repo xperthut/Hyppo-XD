@@ -1,18 +1,17 @@
 {
-  "name": "interface",
-  "productName": "Hyppo-XD-Mac",
+  "name": "Hyppo-XD",
   "version": "1.0.1",
   "description": "Hypotheses extraction tool using visualization",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "rebuild": "electron-rebuild -f -w interface",
-    "package-mac": "electron-packager ./ Hyppo-XD-Mac --overwrite --platform=darwin --arch=x64 --icon=logo/icon.icns --prune=true --out=release-builds --ignore=\\.gitignore --ignore=\\.gitmodules",
-    "package-win": "electron-packager ./ Hyppo-XD-Windows --overwrite --platform=win32 --arch=ia32 --icon=logo/icon.ico --prune=true --out=release-builds --ignore=\\.gitignore --ignore=\\.gitmodules --version-string.FileDescription=CE --version-string.ProductName=\"Hyppo-XD-Windows\"",
-    "package-linux": "electron-packager ./ Hyppo-XD-Linux --overwrite --platform=linux --arch=armv7l --icon=logo/1024x1024.png --prune=true --out=release-builds --ignore=\\.gitignore --ignore=\\.gitmodules",
-    "installer-mac": "electron-installer-dmg --icon=./logo/icon.icns --overwrite ./release-builds/Hyppo-XD-Mac-darwin-x64/Hyppo-XD-Mac.app ./release/Hyppo-XD-Mac",
-    "installer-win": "node installers/windows/createinstaller.js",
-    "installer-linux": "electron-installer-debian --src release-builds/Hyppo-XD-linux-x64/ --arch amd64 --config debian.json"
+    "rebuild": "electron-rebuild -f -w Hyppo-XD",
+    "package-mac": "electron-packager ./ --overwrite --platform=darwin --arch=x64 --icon=logo/icon.icns --prune=true --out=release-builds --ignore=\\.gitignore --ignore=\\.gitmodules",
+    "package-win": "electron-packager ./ --overwrite --platform=win32 --arch=ia32 --icon=logo/icon.ico --prune=true --out=release-builds --ignore=\\.gitignore --ignore=\\.gitmodules",
+    "package-linux": "electron-packager ./ --overwrite --platform=linux --arch=armv7l --icon=logo/1024x1024.png --prune=true --out=release-builds --ignore=\\.gitignore --ignore=\\.gitmodules",
+    "installer-mac": "electron-installer-dmg --icon=./logo/icon.icns --overwrite ./release-builds/Hyppo-XD-darwin-x64/Hyppo-XD.app ./release/Hyppo-XD",
+    "installer-win": "electron-installer-windows --src release-builds/Hyppo-XD-win32-ia32/ --dest ./release/ --options.icon=logo/icon.ico",
+    "installer-linux": "electron-installer-debian --src release-builds/Hyppo-XD-linux-armv7l/ --dest ./release/ --arch amd64"
   },
   "repository": {
     "type": "git",
@@ -35,9 +34,9 @@
     "electron": "^6.1.4",
     "electron-installer-debian": "^2.0.1",
     "electron-installer-dmg": "^3.0.0",
+    "electron-installer-windows": "^2.0.0",
     "electron-packager": "^14.1.0",
     "electron-rebuild": "^1.8.8",
-    "electron-winstaller": "^4.0.0",
     "rebuild": "^0.1.2"
   },
   "gypfile": true
