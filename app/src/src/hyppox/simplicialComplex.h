@@ -18,9 +18,11 @@
 #ifndef simplicialComplex_h
 #define simplicialComplex_h
 
-#include "external/Gudhi/graph_simplicial_complex.h"
-#include "external/Gudhi/Simplex_tree.h"
-#include "external/Gudhi/Persistent_cohomology.h"
+/*
+include "external/Gudhi/graph_simplicial_complex.h"
+include "external/Gudhi/Simplex_tree.h"
+include "external/Gudhi/Persistent_cohomology.h"
+ */
 
 #include <iostream>
 #include <ctime>
@@ -29,6 +31,7 @@
 
 #include <unordered_map>
 #include <map>
+#include <set>
 #include <unordered_set>
 #include <list>
 #include <string>
@@ -36,11 +39,13 @@
 #include <vector>
 #include "performance.h"
 
+/*
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp >;
 using typeVectorVertex = std::vector<Simplex_tree::Vertex_handle>;
+*/
 
 namespace hyppox{
     namespace mapper{
@@ -77,7 +82,7 @@ namespace hyppox{
             void AddSimplicialComplex(PerfType* ph, float &filtration);
             void clearTracker();
             std::string PrintSimplex();
-            std::vector<float> getPersistentOverlap();
+            //std::vector<float> getPersistentOverlap();
             
             private:
             std::unordered_map<ClusterIDType, float> zeroSimplex;
@@ -115,9 +120,9 @@ namespace hyppox{
                     
                     if(Config::PH_JAVA_PLEX){
                         this->CreateSimplex(&ids, filtration);
-                    }else{
+                    }/*else{
                         this->CreateSimplexForGudhi(&ids, filtration);
-                    }
+                    }*/
                 }
             }
         }
@@ -141,6 +146,7 @@ namespace hyppox{
             return simplex;
         }
         
+    /*
         template<typename PerfType, typename ClusterIDType>
         std::vector<float> SimplicialComplex<PerfType,ClusterIDType>::getPersistentOverlap(){
             Simplex_tree st;
@@ -154,7 +160,7 @@ namespace hyppox{
             
             st.set_dimension(Config::FILTER+1);
             
-            /*
+            ////////////////////
              cout << "\nThe complex contains " << st.num_simplices() << " simplices - " << st.num_vertices() << " vertices "
              << endl;
              cout << "   - dimension " << st.dimension() << endl;
@@ -173,8 +179,8 @@ namespace hyppox{
              
              std::cout << "}" << std::endl;
              std::cout << "**************************************************************" << std::endl<<"Press any key to continue...";
-             */
-            
+             ////////////////////////////
+     
             // Compute the persistence diagram of the complex
             Persistent_cohomology pcoh(st);
             // initializes the coefficient field for homology
@@ -188,6 +194,7 @@ namespace hyppox{
             return pcoh.getPersistentFiltrationValue(Config::FILTER+1);
         }
         
+*/
         /////////////// Private Methods ////////////////////
         
         template<typename PerfType, typename ClusterIDType>

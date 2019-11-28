@@ -1,5 +1,6 @@
 const electron = require('electron');
 const { app, BrowserWindow } = electron;
+const path = require('path');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -7,19 +8,19 @@ let win;
 
 function createWindow () {
 	const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
-	//console.log(width+"/"+height);
+	console.log("Icon path:" + path.resolve(path.join(".","logo", "Icon.icns")));
   // Create the browser window.
   win = new BrowserWindow({
     width: width,
     height: height,
-    icon: __dirname + "/logo/Icon.icns",
+    icon: path.resolve(path.join(".","logo", "Icon.icns")),
     webPreferences: {
       nodeIntegration: true
     }
   });
 
   // and load the index.html of the app.
-  win.loadFile('view/topoview.html');
+  win.loadFile('src/view/topoview.html');
 
   // Open the DevTools.
   win.webContents.openDevTools();

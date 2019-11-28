@@ -11,7 +11,7 @@
         "src/interface.cpp"
       ],
       "libraries": [
-        "-lboost_filesystem", "-lboost_system"
+        #"-lboost_filesystem", "-lboost_system"
       ],
       "cflags_c": [
         "-std=c++14",

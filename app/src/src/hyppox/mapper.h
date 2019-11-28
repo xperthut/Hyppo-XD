@@ -858,14 +858,14 @@ namespace hyppox {
                 delete writeToFile;
                 
                 std::cout<<"\nDump the code of file: \""<<r<<"\" to Java file to generate barcode.";
-            }else{
+            }/*else{
                 std::vector<float> v = sc.getPersistentOverlap();
                 r = "\n Persistent overlap: ";
                 for(size_t i=0; i<v.size(); i++){
                     r += "\nDimension-" + std::to_string(i) + ", Overlap: " + std::to_string(v[i]) + "%";
                 }
                 //std::cout<<"\n Persistent overlap: "<<r<<"\n\n";
-            }
+            }*/
             
             return r;
         }

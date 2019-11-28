@@ -85,7 +85,8 @@ $(function () {
         this._graph = null;
         this.intFlareRank = [];
         this.__transform = null;
-        this.hasPieChart = true;
+        this.hasPieChart = false;
+        this.hasMemberShip = false;
         this.EdgeDirChg = false; //For pie
         this._analysis = [];
         this.sankey = null;
@@ -173,6 +174,7 @@ $(function () {
             var _dir = _common.getPath([this.workspace.wd, "Data", "json"]);
             var _folderList = this.getAllFiles(_dir);
 
+            // Get all folders under /json folder
             for(var i=0; i<_folderList.length; i++){
               if(_folderList[i].indexOf(".")===-1){
                 var _f={name:"", files:[]};
@@ -191,17 +193,34 @@ $(function () {
                 for(var j=0; j<this.workspace.files.length; j++){
                   if(this.workspace.files[j].csv === (_f.name + ".csv") || this.workspace.files[j].csv === (_f.name + ".CSV")){
                     csvIndex = j;
-                    //this.workspace.files[j].json = [];
                     break;
                   }
                 }
 
                 for(var j=0; j<_jList.length; j++){
                   if(_jList[j].substring(0, 6)!="coord_" && (_jList[j].indexOf('.json')>=0 || _jList[j].indexOf('.JSON')>=0)){
-                      if(csvIndex>-1 && this.workspace.files[csvIndex].json.indexOf(_jList[j])===-1) this.workspace.files[csvIndex].json.push(_jList[j]);
+                      if(csvIndex>-1 && this.workspace.files[csvIndex].json.indexOf(_jList[j])===-1){
+                        this.workspace.files[csvIndex].json.push(_jList[j]);
+                      }
 
-                      var fjson = _jList[j].split("__")[0];
-                      if(_f.files.indexOf(fjson) === -1) _f.files.push({sj:fjson, lj:_jList[j]});
+                      _f.files.push(_jList[j]);
+
+                      /*var fjson = _jList[j].split("__")[0];
+                      if(_f.files.length === 0) _f.files.push(_jList[j]);
+                      else {
+                        var m=false;
+                        for(var k=0; k<_f.files.length; k++){
+                          if(_f.files.sj === fjson){
+                            _f.files.lj.push(_jList[j]);
+                            m = true;
+                            break;
+                          }
+                        }
+
+                        if(!m){
+                          _f.files.push({sj:fjson, lj:[_jList[j]]});
+                        }
+                      }*/
                   }
                 }
 
@@ -242,7 +261,8 @@ $(function () {
             this._graph = null;
             this.intFlareRank = [];
             this.__transform = null;
-            this.hasPieChart = true;
+            this.hasPieChart = false;
+            this.hasMemberShip = false;
             this.EdgeDirChg = false; //For pie
             this._analysis = [];
             this.sankey = null;
@@ -1043,7 +1063,7 @@ $(function () {
         },
 
         getNodeCoordinate: function () {
-          var _path = _common.getPath([this.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].sj + ".json")]);
+          var _path = _common.getPath([this.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].split("__")[0] + ".json")]);
 
           if(this._fs.existsSync(_path)){
             var data = this._fs.readFileSync(_path, 'utf-8');
@@ -1111,7 +1131,7 @@ $(function () {
             });
             nPos += "}";
 
-            var _path = _common.getPath([gInstance.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].sj + ".json")]);
+            var _path = _common.getPath([gInstance.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].split("__")[0] + ".json")]);
 
             try{
               gInstance._fs.writeFileSync(_path, nPos);
@@ -1126,7 +1146,7 @@ $(function () {
 
             var s = JSON.stringify(gInstance._graph);
 
-            var _path = _common.getPath([gInstance.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].lj]);
+            var _path = _common.getPath([gInstance.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex]]);
 
             try{
               gInstance._fs.writeFileSync(_path, s);
@@ -1239,7 +1259,7 @@ $(function () {
           for(var i=0; i<this.workspace.files.length; i++){
             if(this.workspace.files[i].csv === selectedCSVFile){
               if(this.workspace.files[i].col.header.length===0){
-                var addon = require('bindings')('interface');
+                var addon = require('bindings')('hyppo-xd');
                 var srt = JSON.parse(addon.invoke("RCSVH", _common.getPath([this.workspace.wd, "Data","csv",selectedCSVFile])));
 
                 for(var h=0; h<srt.header.length; h++){
@@ -1347,10 +1367,13 @@ $(function () {
 
             this.hasPieChart = false;
             var s = "<fieldset><legend>Node attributes&nbsp;</legend><div>";
-            if (this._graph.nodes[0].pie.length > 0) {
+            if (this._graph.param.pie.length > 0) {
                 s += "<button id='btn_Pie' >Pie chart</button>&nbsp;";
                 this.hasPieChart = true;
             }
+
+            this.hasMemberShip = (this._graph.param.mem.length>0);
+
 
             for (var l in label) {
                 s += "<button id='btn_" + label[l] + "' seq='" + l + "'>" + label[l].replace("_", " ") + "</button>&nbsp;";
@@ -1574,6 +1597,24 @@ $(function () {
           }
 
           fName += "_";
+
+          if(nesVal.pie_attr.length > 0){
+            param.push("-PIEC");
+            s = "[";
+
+            for(var i=0; i<nesVal.pie_attr.length; i++){
+              if(i>0){
+                s += ",";
+                fName += "|";
+              }
+              s += nesVal.pie_attr[i];
+              fName += nesVal.pie_attr[i];
+            }
+            s += "]";
+            fName += "_";
+            param.push(s);
+          }
+
           fName += nesVal.ref_perf;
 
           if(nesVal.mem_attr.length > 0){
@@ -1592,22 +1633,6 @@ $(function () {
             param.push(s);
           }
 
-          if(nesVal.pie_attr.length > 0){
-            param.push("-PIEC");
-            s = "[";
-            fName += "_";
-            for(var i=0; i<nesVal.pie_attr.length; i++){
-              if(i>0){
-                s += ",";
-                fName += "|";
-              }
-              s += nesVal.pie_attr[i];
-              fName += nesVal.pie_attr[i];
-            }
-            s += "]";
-            param.push(s);
-          }
-
           fName += ".json";
 
           var chkFN = _common.getPath([this.workspace.wd,"Data", "json", this.fileName.split(".")[0], fName]);
@@ -1616,7 +1641,7 @@ $(function () {
           if(this._fs.existsSync(chkFN)){
             this.storeData(chkFN);
           }else{
-            var addon = require('bindings')('interface');
+            var addon = require('bindings')('hyppo-xd');
             var srt = addon.invoke("CRTMAPR", param);
 
             this.storeData(srt);
@@ -2362,7 +2387,7 @@ $(function () {
 
             s = "<li><input type='radio' name='feature' id='no-feature' value='no-feature' checked  /><label class='fa' for='no-feature'>Show graph (without feature) </label></li>" +
                     "<li><input type='radio' name='feature' id='fpath' value='fpath'  /><label class='fa' for='fpath'>Show interesting paths</label></li>";
-            if (this.hasPieChart) {
+            if (this.hasMemberShip) {
                 s += "<li><input type='radio' name='feature' id='fflare' value='fflare' /><label class='fa' for='fflare'>Show interesting flares</label></li>";
             }
 
@@ -2370,7 +2395,7 @@ $(function () {
 
             d3.select("#no-feature").on("change", gInstance.disableFeatures);
             d3.select("#fpath").on("change", gInstance.showInterestingPaths);
-            if (this.hasPieChart) {
+            if (this.hasMemberShip) {
                 d3.select("#fflare").on("change", gInstance.showInterestingFlares);
             }
         },
@@ -3217,7 +3242,7 @@ $(function () {
 
         loadData: function () {
 
-            var _path = _common.getPath([this.workspace.wd, "Data", "json", this.fl[this.fileIndex].split(".")[0], this.jfl[this.fileRIndex].files[this.fileCIndex].lj]);
+            var _path = _common.getPath([this.workspace.wd, "Data", "json", this.fl[this.fileIndex].split(".")[0], this.jfl[this.fileRIndex].files[this.fileCIndex]]);
             //alert(_path);
             var data = this._fs.readFileSync(_path, 'utf-8');
             this.initPage(JSON.parse(data));
@@ -3230,21 +3255,16 @@ $(function () {
             for (var i = 0; i < this.jfl.length; i++) {
                 if (this.jfl[i].name === filename) {
                     s = "";
-                    var sj = this.autoLoadData.length>0?this.autoLoadData[0].json.split("__")[0]:"", lj="";
-                    if(sj.length>0) lj = this.autoLoadData[0].json;
+                    var sj = this.autoLoadData.length>0?this.autoLoadData[0].json:"", ji = this.jfl[i].files.indexOf(sj);
+                    //if(sj.length>0) lj = this.autoLoadData[0].json;
 
                     for (var j = 0; j < this.jfl[i].files.length; j++) {
-                        if(sj.length>0){
-                          if(sj===this.jfl[i].files[j].sj){
-                            this.jfl[i].files[j].lj = lj;
-                            this.fileCIndex = j;//$opt.attr('seq');
-                            this.fileRIndex = i;//$opt.attr('row');
-                            s += "<option selected value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j].lj + "'>&nbsp; " + this.jfl[i].files[j].lj + "</option>";
-                          }else{
-                            s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j].lj + "'>&nbsp; " + this.jfl[i].files[j].lj + "</option>";
-                          }
+                        if(ji === j){
+                          this.fileCIndex = j;//$opt.attr('seq');
+                          this.fileRIndex = i;//$opt.attr('row');
+                          s += "<option selected value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.jfl[i].files[j] + "</option>";
                         }else{
-                          s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j].lj + "'>&nbsp; " + this.jfl[i].files[j].lj + "</option>";
+                          s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.jfl[i].files[j] + "</option>";
                         }
                     }
 

@@ -62,7 +62,7 @@
       </p>
 
       <script>
-        var addon = require('bindings')('interface');
+        var addon = require('bindings')('hyppo-xd');
         function txtClick(){
           var val = parseInt(document.getElementById("txtVal").value);
           var srt = addon.invoke("SQRT", val);

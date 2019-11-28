@@ -196,7 +196,7 @@ $(function () {
       }
       // Reload if the data loads before 5 mins
       if(this.workspace.files[csvIndex].col.header.length ===0 || Math.round((((dt-ldt) % 86400000) % 3600000) / 60000) > 5){
-        var addon = require('bindings')('interface');
+        var addon = require('bindings')('hyppo-xd');
         var srt = JSON.parse(addon.invoke("RCSVH", this.fileNameWithPath));
 
         this.hasIndexColumn = srt.index;
@@ -430,6 +430,20 @@ $(function () {
 
       fName += "_";
 
+      if(nesVal.pie_attr.length > 0){
+        param.push("-PIEC");
+        s = "[";
+        for(var i=0; i<nesVal.pie_attr.length; i++){
+          if(s.length>1) s += ",";
+          if(i>0) fName += "|";
+          s += nesVal.pie_attr[i];
+          fName += nesVal.pie_attr[i];
+        }
+        s += "]";
+        fName += "_";
+        param.push(s);
+      }
+
       fName += this.getHeaderName(nesVal.cluster_attr[nesVal.ref_perf_index], _header_names);
 
       if(nesVal.mem_attr.length > 0){
@@ -446,20 +460,6 @@ $(function () {
         param.push(s);
       }
 
-      if(nesVal.pie_attr.length > 0){
-        param.push("-PIEC");
-        s = "[";
-        fName += "_";
-        for(var i=0; i<nesVal.pie_attr.length; i++){
-          if(s.length>1) s += ",";
-          if(i>0) fName += "|";
-          s += nesVal.pie_attr[i];
-          fName += nesVal.pie_attr[i];
-        }
-        s += "]";
-        param.push(s);
-      }
-
       fName += ".json";
 
       var chkFN = _common.getPath([this.workspace.wd,"Data", "json", this.fileName.split(".")[0], fName]);
@@ -468,7 +468,7 @@ $(function () {
       if(this._fs.existsSync(chkFN)){
         this.storeData(chkFN);
       }else{
-        var addon = require('bindings')('interface');
+        var addon = require('bindings')('hyppo-xd');
         var srt = addon.invoke("CRTMAPR", param);
 
         this.storeData(srt);
