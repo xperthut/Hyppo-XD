@@ -6,12 +6,10 @@ A desktop based cross platform application to generate mapper object from a data
 
 # Pre-requisite for installation #
 
-1. Must need GCC version at least 5.0
-2. Download and Install [boost](https://www.boost.org/) library
+Must need GCC version at least 5.0
 
 
 # Instructions for a developer #
-* [Add library](#add-library)
 * [Create Node environment](#create-node-environment)
 * [Install required node packages](#install-required-node-packages)
 * [Clean and build the package](#clean-and-build-the-package)
@@ -22,13 +20,6 @@ A desktop based cross platform application to generate mapper object from a data
     * [Target: Windows OS](#target-windows-os)
     * [Target: Linux OS](#target-linux-os)
 * [Licence &amp; copyright](#licence--copyright)
-
-
-## Add library ##
-
-  1. Fork the git
-  2. Open __src__ directiry
-  3. Copy the [hyppox](https://github.com/xperthut/HYPPO-X/tree/master/Library) folder and paste it here.
 
 
 ## Create Node environment ##
