@@ -14,7 +14,7 @@
     <div id="scrollDiv">
       <div id="busyDiv"><img src="./../assets/css/images/busy.gif" /><label>Loading...</label></div>
       <fieldset id='fsWorkSpace'>
-        <label id="wpLabel">Working directory</label>
+        <label id="wpLabel">Working directory&nbsp;<i class="fas fa-info-circle tooltip"><span class="tooltiptext">This is a directory where you want to save your works.</span></i></label>
         <button id="btnWrkSpace">select a working directory</button>&nbsp</label>&nbsp<label id="lblWrkSpace"></label>
       </fieldset>
       <fieldset id='fsFileSelect'>
@@ -26,14 +26,13 @@
             <li>First raw should contains the headers.</li>
             <li>Each column name in the header raw should be alphanumeric without space.</li>
             <li>First column should be an index column which will contain the raw number. For instance, 1 for first row, 2 for second raw, ..., n for n-th raw.</li>
-            <li>Remove all missing values or replace missing values with appropriate values. For instance, if the missing value should be a number then replace it with a special number.</li>
           </ol>
         </div>
         <button id="file-input" name="btnFileChoose">Choose a csv file</button>&nbsp<label id="lblFileName"></label>
       </fieldset>
       <!-- Filter selection -->
       <fieldset id='fsFilterParams'>
-        <label id="fcLabel">Select a filter and its associated the number of windows and % overlap</label>
+        <label id="fcLabel">Select a filter, the number of windows and % overlap</label>
         <div id="filterContainer"></div>
         <span id='addFilter'><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp;Add filter</span>
       </fieldset>

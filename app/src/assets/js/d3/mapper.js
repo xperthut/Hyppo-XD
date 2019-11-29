@@ -19,6 +19,8 @@ $(function () {
 
     for(var i=1; i<=maxFilter; i++) this.filterCount.push(i);
 
+    this.filterCount.sort(function(a,b){return b-a;});
+
     this.workspace = _common.getWorkSpace();
   }
 
@@ -57,6 +59,7 @@ $(function () {
       this.addIndex = 0;
 
       for(var i=1; i<=this.maxFilter; i++) this.filterCount.push(i);
+      this.filterCount.sort(function(a,b){return b-a;});
     },
 
     createDir: function(loc){
@@ -319,7 +322,27 @@ $(function () {
       param.push(_common.getPath([this.workspace.wd, "Data" , "json"]));
       param.push("-FN");
       param.push(this.fileName);
-      param.push("-FC");
+
+      param.push("-GC");
+      param.push(nesVal.gen);
+
+      param.push("-LC");
+      var s = "[";
+      for(var i=0; i<nesVal.loc.length; i++){
+        if(i>0) s += ",";
+        s += nesVal.loc[i];
+      }
+      s += "]";
+      param.push(s);
+
+      param.push("-DTC");
+      var s = "[";
+      for(var i=0; i<nesVal.dt.length; i++){
+        if(i>0) s += ",";
+        s += nesVal.dt[i];
+      }
+      s += "]";
+      param.push(s);
 
       // Get the header list  and create file name using that List
       // If file alread exists then pull it otherwise run mapper
@@ -334,19 +357,23 @@ $(function () {
       /*
       {
         "filter" : [],
-        "filter_gen":[],
+        "filter_gen":$('#genFilter div.item').map((i, el) => el.getAttribute('data-value')).get(),
         "window" : [],
         "overlap" : [],
-        "cluster_algo": "DBSCAN",
-        "cluster_attr": [],
+        "cluster_algo": $("#selCluster option:selected").val(),
+        "cluster_attr": $('#clusterContainer div.item').map((i, el) => el.getAttribute('data-value')).get(),
         "cluster_param": [],
         "pie_attr": [],
         "mem_attr":[],
-        "ref_perf_index":0
+        "ref_perf_index":0,
+        "gen": $("#selGenotype option:selected").val(),
+        "loc": $('#selLocation div.item').map((i, el) => el.getAttribute('data-value')).get(),
+        "dt": $('#selDT div.item').map((i, el) => el.getAttribute('data-value')).get()
       }
       */
 
       var fName = "";
+      param.push("-FC");
       var s = "[";
       for(var i=0; i<nesVal.filter.length; i++){
         if(s.length>1) s += ",";
@@ -478,6 +505,8 @@ $(function () {
     addFilter: function(){
       if(this.filterCount.length === 0) return "";
 
+      if(this.filterCount.length>1)this.filterCount.sort(function(a,b){return b-a;});
+
       this.addIndex = this.filterCount.pop();
       if(this.filterCount.length === 0){
         $("#addFilter").css("display", "none");
@@ -522,7 +551,7 @@ $(function () {
                   "</div>" +
                 "</div>" +
                 "<div class='delCol'>" +
-                  "<span id='delFilter_" + this.addIndex + "' index='" + this.addIndex + "'><i class='fas fa-minus-square' aria-hidden='true'></i>&nbsp;Delete</span>" +
+                  ((this.filterCount.length<1)?("<span id='delFilter_" + this.addIndex + "' index='" + this.addIndex + "'><i class='fas fa-minus-square' aria-hidden='true'></i>&nbsp;Delete</span>"):"") +
                 "</div>" +
               "</div>";
 
@@ -615,8 +644,87 @@ $(function () {
       return s;
     },
 
+    getPhenomicsAttributes: function(){
+      var s = "<label id='phLabel'>Select parameters for phenomics dataset</label>" +
+            "<div id='PHParam'>" +
+              "<div class='selCol'>" +
+                "<label>Select genotype attribute</label>" +
+                "<select id='selGenotype' class='clusterSel'>" +
+                  "<option value='-1'>Select a genotype attribute</option>";
+
+                  for(var i=0; i<this.colNames.length; i++){
+                    s += "<option value='" + this.colIndex[i] + "'>" + this.colNames[i] + "</option>";
+                  }
+
+            s += "</select>" +
+              "</div>" +
+              "<div class='winCol'>" +
+                "<div class='dens' id='selLocation'>" +
+                  "<label>Select Location attributes</label>" +
+                  "<select id='location-select-state' multiple name='state[]' class='demo-default'>";
+
+                      for(var i=0; i<this.colNames.length; i++){
+                        s += "<option value='" + this.colIndex[i] + "'>" + this.colNames[i] + "</option>";
+                      }
+
+            s += "</select>" +
+                  "<script>" +
+            				"$('#location-select-state').selectize({" +
+            					"plugins: ['remove_button']," +
+            					"create          : true," +
+                      "placeholder     : 'Select location attributes'," +
+            				"});" +
+            				"</script>" +
+                "</div>" +
+              "</div>" +
+              "<div class='ovCol'>" +
+                "<div class='rads' id='selDT'>" +
+                  "<label>Select datetime attributes</label>" +
+                  "<select id='datetime-select-state' multiple name='state[]' class='demo-default'>";
+
+                      for(var i=0; i<this.colNames.length; i++){
+                        s += "<option value='" + this.colIndex[i] + "'>" + this.colNames[i] + "</option>";
+                      }
+
+            s += "</select>" +
+                  "<script>" +
+            				"$('#datetime-select-state').selectize({" +
+            					"plugins: ['remove_button']," +
+            					"create          : true," +
+                      "placeholder     : 'Select datetime attributes'," +
+            				"});" +
+            				"</script>" +
+                "</div>" +
+              "</div>" +
+              "<div class='selGen'>" +
+                "<div class='rads' id='genFilter'>" +
+                  "<label>Filter genotype codes</label>" +
+                  "<input type='text' id='txtgFilter' class='demo-default selectized' tabindex='-1' placeholder='e.g. A,B,C' value='' style='display: none;'/>" +
+                  "<script>" +
+            				"$('#txtgFilter').selectize({" +
+            					"plugins: ['remove_button']," +
+            					"create          : true," +
+                      "placeholder     : 'Add genotype to filter dataset'," +
+                      //"delimiter: ','," +
+                      "persist: false," +
+                      "create: function(input) {" +
+                          "return {" +
+                              "value: input," +
+                              "text: \"\" + input + \"\"" +
+                          "}" +
+                      "}" +
+            				"});" +
+            				"</script>" +
+                "</div>" +
+              "</div>" +
+            "</div>";
+
+
+      return s;
+    },
+
     getAdvanceAttributes: function(){
-      var s = this.getClusteringParams();// + this.getPieAttributes() + this.getMembershipAttributes();
+      var s = this.getClusteringParams() + this.getPhenomicsAttributes();
       return s;
     }
 
@@ -717,7 +825,7 @@ $(function () {
     });
 
     $("#delFilter_" + _mapper.addIndex + "").on("click", function(){
-      alert("x=" + $(this).attr("index"));
+      //alert("x=" + $(this).attr("index"));
       $("#filter_"+$(this).attr("index")).remove();
 
       _mapper.filterCount.push(parseInt($(this).attr("index")));
@@ -730,15 +838,18 @@ $(function () {
 
     var nesVal = {
       "filter" : [],
-      "filter_gen":[],
+      "filter_gen":$('#genFilter div.item').map((i, el) => el.getAttribute('data-value')).get(),
       "window" : [],
       "overlap" : [],
-      "cluster_algo": "DBSCAN",
-      "cluster_attr": [],
+      "cluster_algo": $("#selCluster option:selected").val(),
+      "cluster_attr": $('#clusterContainer div.item').map((i, el) => el.getAttribute('data-value')).get(),
       "cluster_param": [],
       "pie_attr": [],
       "mem_attr":[],
-      "ref_perf_index":0
+      "ref_perf_index":0,
+      "gen": parseInt($("#selGenotype option:selected").val())>1?$("#selGenotype option:selected").val():"",
+      "loc": $('#selLocation div.item').map((i, el) => el.getAttribute('data-value')).get(),
+      "dt": $('#selDT div.item').map((i, el) => el.getAttribute('data-value')).get()
     };
 
     for(var i=1; i<=_mapper.maxFilter; i++){
@@ -771,15 +882,9 @@ $(function () {
       }
     }
 
-    nesVal.cluster_attr = $('#clusterContainer div.item').map((i, el) => el.getAttribute('data-value')).get();
-    nesVal.cluster_algo = $("#selCluster option:selected").val();
     // radius then density
     nesVal.cluster_param.push($("#txtRadius").val());
     nesVal.cluster_param.push($("#txtDensity").val());
-
-    // From advance options
-    nesVal.pie_attr = $('#pieDiv div.item').map((i, el) => el.getAttribute('data-value')).get();
-    nesVal.mem_attr = $('#memDiv div.item').map((i, el) => el.getAttribute('data-value')).get();
 
     var errStatus = _mapper.checkMapperParams(nesVal);
     const {dialog, nativeImage} = require('electron').remote;
@@ -793,7 +898,7 @@ $(function () {
     if(errStatus.status===true){
       let options  = {
          buttons: ["Yes", "No"],
-         message: "Do you want to create the mapper with this settings.",
+         message: "Do you want to create a mapper with this settings.",
          icon: nativeIcon
        };
 

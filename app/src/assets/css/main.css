@@ -1181,7 +1181,8 @@ fieldset{
 #wpLabel,
 #fsLabel,
 #fcLabel,
-#ccLabel{
+#ccLabel,
+#phLabel{
   color: wheat;
   margin-left: 1em;
   margin-bottom: 1em;
@@ -1227,7 +1228,8 @@ fieldset{
 
 #filterContainer .rowDiv,
 #clusterContainer .rowDiv,
-#clusterParam{
+#clusterParam,
+#PHParam{
     display:flex;
     flex-direction:row;
     justify-content: space-around;
@@ -1236,7 +1238,8 @@ fieldset{
     border-bottom: 1px solid #101010;
 }
 
-#clusterParam{min-height: 60px;}
+#clusterParam,
+#PHParam{min-height: 60px;}
 
 #filterContainer .selCol,
 #clusterContainer .selCol,
@@ -1244,6 +1247,12 @@ fieldset{
     display:flex;
     flex-direction:column;
     width: 30%;
+}
+
+#PHParam .selCol{
+  display:flex;
+  flex-direction:column;
+  width: 24%;
 }
 
 #filterContainer .winCol,
@@ -1254,12 +1263,32 @@ fieldset{
     width: 28%;
 }
 
+#PHParam .winCol{
+  display:flex;
+  flex-direction:column;
+  width: 24%;
+}
+
 #filterContainer .ovCol,
 #clusterContainer .ovCol,
 #clusterParam .ovCol{
   display:flex;
   flex-direction:column;
   width: 28%;
+}
+
+#PHParam .ovCol{
+  display:flex;
+  flex-direction:column;
+  width: 24%;
+}
+
+#txtgFilter-selectized{color: orange;}
+
+#PHParam .selGen{
+  display:flex;
+  flex-direction:column;
+  width: 24%;
 }
 
 #filterContainer .delCol,
@@ -1324,6 +1353,32 @@ fieldset{
   float: left;
   margin: 1em 0em 0em 1em;
 }
+
+/** Tool tip on mouse over **/
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 300px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+/** End here **/
 
 /*Chrome*/
 @media screen and (-webkit-min-device-pixel-ratio:0) {

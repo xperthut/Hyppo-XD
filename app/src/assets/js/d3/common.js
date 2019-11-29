@@ -34,6 +34,8 @@ CommonOps.prototype={
       _tp = this._path.join(_tp, p[i]);
     }
 
+    console.log(_tp);
+
     return this._path.resolve(_tp);
   }
 };

@@ -298,6 +298,7 @@ $(function () {
         },
 
         initPage: function (gData) {
+          console.log("Call initPage");
             this.fileName = gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex];
             this.zoom_handler(this.svg);
             this.zoom_handler.scaleExtent([1 / 10, 10])
@@ -1475,7 +1476,27 @@ $(function () {
           param.push(_common.getPath([this.workspace.wd, "Data" , "json"]));
           param.push("-FN");
           param.push(this.fl[this.fileIndex]);
-          param.push("-FC");
+
+          param.push("-GC");
+          param.push(nesVal.gen);
+
+          param.push("-LC");
+          var s = "[";
+          for(var i=0; i<nesVal.loc.length; i++){
+            if(i>0) s += ",";
+            s += nesVal.loc[i];
+          }
+          s += "]";
+          param.push(s);
+
+          param.push("-DTC");
+          var s = "[";
+          for(var i=0; i<nesVal.dt.length; i++){
+            if(i>0) s += ",";
+            s += nesVal.dt[i];
+          }
+          s += "]";
+          param.push(s);
 
           /*
           {
@@ -1489,7 +1510,10 @@ $(function () {
             "pie_attr": $('#pieDiv div.item').map((i, el) => el.getAttribute('data-value')).get(),
             "mem_attr":[],
             "edge_sig":param.sig,
-            "ref_perf":param.rp
+            "ref_perf":param.rp,
+            "gen": param.gc,
+            "loc": param.loc,
+            "dt": param.dtc
           }
           */
 
@@ -1504,6 +1528,7 @@ $(function () {
           }
 
           var fName = "";
+          param.push("-FC");
           var s = "[";
           for(var i=0; i<nesVal.filter.length; i++){
             if(i>0){
@@ -1664,7 +1689,7 @@ $(function () {
           if(param){
             var nesVal = {
               "filter" : param.fc,
-              "filter_gen":[],
+              "filter_gen":param.fg,
               "window" : param.wx,
               "overlap" : param.gx,
               "cluster_algo": param.cls.name,
@@ -1673,11 +1698,14 @@ $(function () {
               "pie_attr": $('#pieDiv div.item').map((i, el) => el.getAttribute('data-value')).get(),
               "mem_attr":$('#memDiv div.item').map((i, el) => el.getAttribute('data-value')).get(),
               "edge_sig":param.sig,
-              "ref_perf":param.rp
+              "ref_perf":param.rp,
+              "gen": param.gc,
+              "loc": param.lc,
+              "dt": param.dtc
             };
 
             for(var i=1; i<=param.fc.length; i++){
-              if(parseInt($("#txtWin_"+i).val())!==nesVal.window[i-1]){
+              if(parseInt($("#txtWin_"+i).val()) > 0 && parseInt($("#txtWin_"+i).val())!==nesVal.window[i-1]){
                 nesVal.window[i-1] = parseInt($("#txtWin_"+i).val());
               }
 
@@ -1690,11 +1718,11 @@ $(function () {
               nesVal.cluster_algo = $("#selCluster option:selected").val();
             }
 
-            if(nesVal.cluster_param[0]!==parseFloat($("#txtRadius").val())){
+            if(parseFloat($("#txtRadius").val()) > 0 && nesVal.cluster_param[0]!==parseFloat($("#txtRadius").val())){
               nesVal.cluster_param[0] = parseFloat($("#txtRadius").val());
             }
 
-            if(nesVal.cluster_param[1] !== parseInt($("#txtDensity").val())){
+            if(parseInt($("#txtDensity").val()) > 0 && nesVal.cluster_param[1] !== parseInt($("#txtDensity").val())){
               nesVal.cluster_param[1] = parseInt($("#txtDensity").val());
             }
 
