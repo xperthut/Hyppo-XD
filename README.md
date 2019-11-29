@@ -66,6 +66,9 @@ Open terminal and redirect to the git folder prior running the following command
   # Install asar package
   npm install --save-dev asar
   
+  # Install logger
+  npm install --save electron-log
+  
   # For MAC OsX
   npm install electron-installer-dmg --save-dev
   npm install electron-installer-dmg -g
