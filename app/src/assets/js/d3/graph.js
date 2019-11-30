@@ -951,7 +951,7 @@ $(function () {
                     var gl = gInstance._graph.indv[i].split("#");
                     var gen = gl[0];
                     var loc = gl[1];
-                    s += " <li><input type='text' class='color_pick' r='" + (i + 1) + "' id='fcolor_" + (i + 1) + "' value='" + gInstance._graph.color[i] + "'/>" + gen + "&nbsp;in&nbsp;" + loc + "</li>";
+                    s += " <li><input type='text' class='color_pick' r='" + (i + 1) + "' id='fcolor_" + (i + 1) + "' value='" + gInstance._graph.color[i] + "'/>" + gen + "/" + loc + "</li>";
                 } else {
                     var gl = gInstance._graph.indv[i];
                     s += " <li><input type='text' class='color_pick' r='" + (i + 1) + "' id='fcolor_" + (i + 1) + "' value='" + gInstance._graph.color[i] + "'/>" + gInstance._graph.indv[i] + "</li>";
@@ -1477,26 +1477,33 @@ $(function () {
           param.push("-FN");
           param.push(this.fl[this.fileIndex]);
 
-          param.push("-GC");
-          param.push(nesVal.gen);
-
-          param.push("-LC");
-          var s = "[";
-          for(var i=0; i<nesVal.loc.length; i++){
-            if(i>0) s += ",";
-            s += nesVal.loc[i];
+          if(nesVal.gen.length > 0){
+            param.push("-GC");
+            param.push(nesVal.gen);
           }
-          s += "]";
-          param.push(s);
 
-          param.push("-DTC");
-          var s = "[";
-          for(var i=0; i<nesVal.dt.length; i++){
-            if(i>0) s += ",";
-            s += nesVal.dt[i];
+          if(nesVal.loc.length > 0){
+            param.push("-LC");
+            var s = "[";
+            for(var i=0; i<nesVal.loc.length; i++){
+              if(i>0) s += ",";
+              s += nesVal.loc[i];
+            }
+            s += "]";
+            param.push(s);
           }
-          s += "]";
-          param.push(s);
+
+          if(nesVal.dt.length > 0){
+            param.push("-DTC");
+            var s = "[";
+            for(var i=0; i<nesVal.dt.length; i++){
+              if(i>0) s += ",";
+              s += nesVal.dt[i];
+            }
+            s += "]";
+            param.push(s);
+          }
+
 
           /*
           {
@@ -3383,7 +3390,7 @@ $(function () {
               }
             });
             // Open the DevTools.
-            cWin.webContents.openDevTools();
+            //cWin.webContents.openDevTools();
 
             cWin.on('closed', function () {
               cWin = null;
@@ -3411,7 +3418,7 @@ $(function () {
               }
             });
             // Open the DevTools.
-            cWin.webContents.openDevTools();
+            //cWin.webContents.openDevTools();
 
             cWin.on('close', function () {
               cWin = null;

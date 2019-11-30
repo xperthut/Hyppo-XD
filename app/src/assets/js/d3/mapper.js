@@ -323,26 +323,32 @@ $(function () {
       param.push("-FN");
       param.push(this.fileName);
 
-      param.push("-GC");
-      param.push(nesVal.gen);
-
-      param.push("-LC");
-      var s = "[";
-      for(var i=0; i<nesVal.loc.length; i++){
-        if(i>0) s += ",";
-        s += nesVal.loc[i];
+      if(nesVal.gen.length > 0){
+        param.push("-GC");
+        param.push(nesVal.gen);
       }
-      s += "]";
-      param.push(s);
 
-      param.push("-DTC");
-      var s = "[";
-      for(var i=0; i<nesVal.dt.length; i++){
-        if(i>0) s += ",";
-        s += nesVal.dt[i];
+      if(nesVal.loc.length > 0){
+        param.push("-LC");
+        var s = "[";
+        for(var i=0; i<nesVal.loc.length; i++){
+          if(i>0) s += ",";
+          s += nesVal.loc[i];
+        }
+        s += "]";
+        param.push(s);
       }
-      s += "]";
-      param.push(s);
+
+      if(nesVal.dt.length > 0){
+        param.push("-DTC");
+        var s = "[";
+        for(var i=0; i<nesVal.dt.length; i++){
+          if(i>0) s += ",";
+          s += nesVal.dt[i];
+        }
+        s += "]";
+        param.push(s);
+      }
 
       // Get the header list  and create file name using that List
       // If file alread exists then pull it otherwise run mapper
@@ -756,7 +762,7 @@ $(function () {
           if(_mapper.createWorkingDir()){
             _mapper.reload();
 
-            alert("Please store all input csv files at: \"" + _mapper._path.join(_mapper.workspace.wd, "Data", "csv") + "\"");
+            alert("Please store all input csv files at: \"" + _common.getPath([_mapper.workspace.wd, "Data", "csv"]) + "\"");
           }else{
             alert("Can not create working directory in this location. Please select a different location.");
           }
