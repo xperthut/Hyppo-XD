@@ -119,6 +119,9 @@ rm -rf release-builds/
 
 # Remove release folder
 rm -rf release/
+
+# Shortcut: Just run following command to complete all the above actions of cleanup
+npm run clean
 ```
 
 Use following command to build the package
@@ -131,6 +134,9 @@ node-gyp rebuild
 
 # Build the app
 npm run rebuild
+
+# Shortcut: Just run following command to complete all the above actions to rebuild
+npm run builder
 ```
 
 ## Run the desktop app ##
@@ -139,9 +145,15 @@ Run following commands to build the solution as a desktop application
 # Three consecutive commands are concatenated by logical && operator
 # If anyone failed then it will not execute the subsequent commands
 node-gyp rebuild && npm run rebuild && npm start
+
+# Or
+npm run builder
+
+# After rebuilding the app, run following command to run the app locally
+npm start
 ```
 ### Shortcut command ###
-Run following command to clean and build the package and make the installer
+Run following command to clean and build the package and make the installer for all target OSs
 ```bash
 npm run install
 ```
@@ -155,6 +167,9 @@ npm run package-mac
 
 # Build .dmg file
 npm run installer-mac
+
+# Or run following command to do the above two action together
+npm run mac
 ```
 ### Target: Windows OS ###
 ```bash
@@ -169,6 +184,9 @@ npm run package-win
 
 # Build .exe file
 npm run installer-win
+
+# Or run following command to do the above two action together
+npm run win
 ```
 ### Target: Linux OS ###
 ```bash
@@ -180,6 +198,9 @@ npm run package-linux
 
 # Build executable file
 npm run installer-linux
+
+# Or run following command to do the above two action together
+npm run linux
 ```
 
 ## Licence &amp; copyright ##
