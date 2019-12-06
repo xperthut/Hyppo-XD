@@ -29,7 +29,7 @@ Must need GCC version at least 5.0
 
 
 ## Install required node packages ##
-Open terminal and redirect to the git folder prior running the following commands
+Open terminal and redirect to the [git folder]/app prior running the following commands
 
 ```bash
   # Update npm
