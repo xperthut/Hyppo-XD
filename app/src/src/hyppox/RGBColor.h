@@ -25,35 +25,25 @@
 #define MIN2(A, B) (A>B?B:A)
 
 namespace hyppox {
-    class RGB{
+    class RGBCode{
         private:
         short R,G,B;
+        
         public:
-        RGB()=default;
-        RGB(short R, short G, short B);
-        ~RGB()=default;
+        RGBCode() =default;
+        RGBCode(short R, short G, short B):R(R),G(G),B(B){}
+        ~RGBCode() =default;
         
         // Getter
-        short getR();
-        short getG();
-        short getB();
+        short getR(){return R;}
+        short getG(){return G;}
+        short getB(){return B;}
         
         // Setter
-        void setR(short R);
-        void setG(short G);
-        void setB(short B);
+        void setR(short R){this->R=R;}
+        void setG(short G){this->G=G;}
+        void setB(short B){this->B=B;}
     };
-    
-    RGB::RGB(short R, short G, short B){this->R=R;this->G=G;this->B=B;}
-    
-    short RGB::getR(){return R;}
-    short RGB::getG(){return G;}
-    short RGB::getB(){return B;}
-    
-    void RGB::setR(short R){this->R=R;}
-    void RGB::setG(short G){this->G=G;}
-    void RGB::setB(short B){this->B=B;}
-    
     
     class RGBColor{
         private:

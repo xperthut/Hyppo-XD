@@ -2844,12 +2844,12 @@ namespace hyppox {
             std::vector<flare::Coverage> _coverages;
             bool isCoverage;
 
-            std::vector<RGB> generateColors(size_t totalColors){
+            std::vector<RGBCode> generateColors(size_t totalColors){
 
                 if(totalColors<1) totalColors=1;
 
-                std::vector<RGB> rgb(totalColors);
-                RGB ra(255,0,0), rb(255,255,0), rc(0,255,0), rd(0,255,255), re(0,0,255);
+                std::vector<RGBCode> rgb(totalColors);
+                RGBCode ra(255,0,0), rb(255,255,0), rc(0,255,0), rd(0,255,255), re(0,0,255);
 
                 if(totalColors<=5){
                     switch (totalColors) {
@@ -2929,7 +2929,7 @@ namespace hyppox {
                             float d2 = ABS(ta-i);
                             short gray = ceil((255*d2)/d1);
 
-                            RGB r(255,gray,0);
+                            RGBCode r(255,gray,0);
                             rgb[counter] = r;
 
                         }else if(counter>interval && counter<(2*interval)){
@@ -2938,7 +2938,7 @@ namespace hyppox {
                             float d2 = ABS(tb-i);
                             short red = ceil((255*d2)/d1);
 
-                            RGB r(red,255,0);
+                            RGBCode r(red,255,0);
                             rgb[counter] = r;
                         }else if(counter>(2*interval) && counter<(3*interval)){
 
@@ -2946,7 +2946,7 @@ namespace hyppox {
                             float d2 = ABS(tb-i);
                             short blue = ceil((255*d2)/d1);
 
-                            RGB r(0,255,blue);
+                            RGBCode r(0,255,blue);
                             rgb[counter] = r;
                         }else if(counter>(3*interval) && counter<totalColors-1){
 
@@ -2954,7 +2954,7 @@ namespace hyppox {
                             float d2 = ABS(tc-i);
                             short grey = ceil((255*d2)/d1);
 
-                            RGB r(0,grey,255);
+                            RGBCode r(0,grey,255);
                             rgb[counter] = r;
                         }
                     }
@@ -2975,7 +2975,7 @@ namespace hyppox {
 
                 //size_t totalPaths=IPList->size();
 
-                //std::vector<RGB> rgb = this->generateColors(totalPaths);
+                //std::vector<RGBCode> rgb = this->generateColors(totalPaths);
 
                 unsigned int pathCounter=0;
                 //RGBColor c;
@@ -3007,7 +3007,7 @@ namespace hyppox {
 
                 std::sort(this->_coverages.begin(), this->_coverages.end(), flare::Coverage::compareFlares);
 
-                //std::vector<RGB> rgb = this->generateColors(this->_coverages.size());
+                //std::vector<RGBCode> rgb = this->generateColors(this->_coverages.size());
                 //RGBColor c;
 
                 for(size_t i=0;i<this->_coverages.size(); i++){
