@@ -2431,13 +2431,13 @@ namespace hyppox {
 
         template<typename PerfType, typename RNType, typename REType>
         float IsolatedSubGraph<PerfType,RNType,REType>::adjustSize(float size){
-            float max = hyppox::Config::NODE_SIZE_RANGE[1], min = hyppox::Config::NODE_SIZE_RANGE[0],
+            float _max = hyppox::Config::NODE_SIZE_RANGE[1], _min = hyppox::Config::NODE_SIZE_RANGE[0],
             Rmin = this->nodeSizeRange[0], Rmax = this->nodeSizeRange[1];
 
-            if(Rmax==Rmin) return (min+max)/2;
+            if(Rmax==Rmin) return (_min+_max)/2;
 
-            float k = (max-min)/(Rmax-Rmin),
-            alpha = min + (k*(size-Rmin));
+            float k = (_max-_min)/(Rmax-Rmin),
+            alpha = _min + (k*(size-Rmin));
 
             return alpha;
         }

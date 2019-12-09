@@ -120,7 +120,7 @@ namespace hyppox {
             void createCluster(std::list<PerfType*> *pList, bool setUniqueId);
             void assignUniqueClusterIds();
             void createUniqueClusters();
-            bool isEligibleForClustering(std::vector<float> &min, std::vector<float> &max, size_t boxID);
+            bool isEligibleForClustering(std::vector<float> &_min, std::vector<float> &_max, size_t boxID);
             bool isValidCluster(std::list<PerfType *> *pList, std::unordered_set<size_t>* mainClsID);
             void manageCluster(std::list<PerfType *> *pList, size_t minClsId, size_t maxClsId, std::unordered_set<size_t>* mainClsID);
             void assignClusterIdsForOverlapingRegion(std::vector<float> overlap);
@@ -133,7 +133,7 @@ namespace hyppox {
             void constructGraphComponents(GType*& graph);
             void constructGraph(GType*& graph);
             
-            void testRange(std::vector<float>& min, std::vector<float>& max, std::list<PerfType*>& clPhList);
+            void testRange(std::vector<float>& _min, std::vector<float>& _max, std::list<PerfType*>& clPhList);
             
         };
         
@@ -269,7 +269,7 @@ namespace hyppox {
         void Mapper<PerfType,DPType,QTType,GType,FHType,ClusterIDType,RowIDType,ClusterType>::assignUniqueClusterIds(){
             std::cout<<"\nCompleted filtering step"<<std::endl<<"Started clustering...\n";
             
-            std::vector<float> min(hyppox::Config::FILTER, 0.0), max(hyppox::Config::FILTER, 0.0);
+            std::vector<float> _min(hyppox::Config::FILTER, 0.0), _max(hyppox::Config::FILTER, 0.0);
             std::list<PerfType*> clPhList;
             std::list<DPType*> dpList;
             size_t boxID = 1, lastID, thisID;
@@ -280,23 +280,23 @@ namespace hyppox {
                         for(short f=0; f<hyppox::Config::FILTER; f++){
                             float c = this->mesh[i][j].center[f];
                             float l = this->gridLength[f]/2;
-                            min[f] = c - l;
-                            max[f] = c + l;
+                            _min[f] = c - l;
+                            _max[f] = c + l;
                             
-                            if(min[f] < this->minPos[f]) min[f] = this->minPos[f];
-                            if(max[f] > this->maxPos[f]) max[f] = this->maxPos[f];
+                            if(_min[f] < this->minPos[f]) _min[f] = this->minPos[f];
+                            if(_max[f] > this->maxPos[f]) _max[f] = this->maxPos[f];
                         }
                         
                         clPhList.clear();
                         dpList.clear();
                         
-                        this->treeRoot.SearchSurface(min, max, &clPhList, &dpList, boxID);
+                        this->treeRoot.SearchSurface(_min, _max, &clPhList, &dpList, boxID);
                         
-                        //std::cout<<"("<<i<<","<<j<<")={("<<min[0]<<","<<min[1]<<"),("<<max[0]<<","<<max[1]<<")}: ";
+                        //std::cout<<"("<<i<<","<<j<<")={("<<_min[0]<<","<<_min[1]<<"),("<<_max[0]<<","<<_max[1]<<")}: ";
                         
                         if(clPhList.size() > 0){
                             
-                            //testRange(min, max, clPhList);
+                            //testRange(_min, _max, clPhList);
                             
                             // The following commented code is just to test whether same point contians different PerfTypes or not
                             /*map<size_t, list<vector<float>>> _tmpCV;
@@ -384,11 +384,11 @@ namespace hyppox {
         }
         
         template<typename PerfType, typename DPType, typename QTType, typename GType, typename FHType, typename ClusterIDType, typename RowIDType, typename ClusterType>
-        bool Mapper<PerfType,DPType,QTType,GType,FHType,ClusterIDType,RowIDType,ClusterType>::isEligibleForClustering(std::vector<float> &min, std::vector<float> &max, size_t boxID){
+        bool Mapper<PerfType,DPType,QTType,GType,FHType,ClusterIDType,RowIDType,ClusterType>::isEligibleForClustering(std::vector<float> &_min, std::vector<float> &_max, size_t boxID){
             
             std::unordered_set<size_t> bxIdList;
             
-            this->treeRoot.SearchDataPoints(min, max, &bxIdList);
+            this->treeRoot.SearchDataPoints(_min, _max, &bxIdList);
             
             if(bxIdList.size()>0){
                 if(bxIdList.find(boxID) != bxIdList.end()){
@@ -503,7 +503,7 @@ namespace hyppox {
         
         template<typename PerfType, typename DPType, typename QTType, typename GType, typename FHType, typename ClusterIDType, typename RowIDType, typename ClusterType>
         void Mapper<PerfType,DPType,QTType,GType,FHType,ClusterIDType,RowIDType,ClusterType>::assignClusterIdsForOverlapingRegion(std::vector<float> overlap){
-            std::vector<float> min(hyppox::Config::FILTER, 0.0), max(hyppox::Config::FILTER, 0.0);
+            std::vector<float> _min(hyppox::Config::FILTER, 0.0), _max(hyppox::Config::FILTER, 0.0);
             std::list<PerfType*> clPhList;
             std::list<DPType*> dpList;
             size_t boxID = 1, prevClsId, thisClsId;
@@ -517,22 +517,22 @@ namespace hyppox {
                         for(short f=0; f<hyppox::Config::FILTER; f++){
                             float c = this->mesh[i][j].center[f];
                             float l = (this->gridLength[f]*(1+overlap[f]))/2;
-                            min[f] = c - l;
-                            max[f] = c + l;
+                            _min[f] = c - l;
+                            _max[f] = c + l;
                             
-                            if(min[f] < this->minPos[f]) min[f] = this->minPos[f];
-                            if(max[f] > this->maxPos[f]) max[f] = this->maxPos[f];
+                            if(_min[f] < this->minPos[f]) _min[f] = this->minPos[f];
+                            if(_max[f] > this->maxPos[f]) _max[f] = this->maxPos[f];
                         }
                         
                         clPhList.clear();
                         dpList.clear();
                         phListTrack.clear();
                         
-                        if(isEligibleForClustering(min, max, boxID)){
-                            this->treeRoot.SearchSurface(min, max, &clPhList, &dpList, boxID);
+                        if(isEligibleForClustering(_min, _max, boxID)){
+                            this->treeRoot.SearchSurface(_min, _max, &clPhList, &dpList, boxID);
                         }
                         
-                        //std::cout<<"~~("<<i<<","<<j<<")={("<<min[0]<<","<<min[1]<<"),("<<max[0]<<","<<max[1]<<")}: ";
+                        //std::cout<<"~~("<<i<<","<<j<<")={("<<_min[0]<<","<<_min[1]<<"),("<<_max[0]<<","<<_max[1]<<")}: ";
                         
                         if(clPhList.size() > 0){
                             prevClsId = ClsType::GetClusterID();
@@ -553,7 +553,7 @@ namespace hyppox {
                             }
                         }
                         
-                        /*cout<<"\nx1="<<min[0]<<", x2="<<max[0]<<"=>";
+                        /*cout<<"\nx1="<<_min[0]<<", x2="<<_max[0]<<"=>";
                          for(list<PerfType*>::iterator itr=clPhList.begin(); itr!=clPhList.end(); itr++){
                          PerfType* ph = *itr;
                          cout<<"\n"<<ph->getIndividualId()<<":"<<ph->GetClusterIdList();
@@ -570,16 +570,16 @@ namespace hyppox {
         }
         
         template<typename PerfType, typename DPType, typename QTType, typename GType, typename FHType, typename ClusterIDType, typename RowIDType, typename ClusterType>
-        void Mapper<PerfType,DPType,QTType,GType,FHType,ClusterIDType,RowIDType,ClusterType>::testRange(std::vector<float> &min, std::vector<float> &max, std::list<PerfType *> &clPhList){
+        void Mapper<PerfType,DPType,QTType,GType,FHType,ClusterIDType,RowIDType,ClusterType>::testRange(std::vector<float> &_min, std::vector<float> &_max, std::list<PerfType *> &clPhList){
             std::cout<<"\nTesting:"<<std::endl;
             for(auto itr=clPhList.begin(); itr!=clPhList.end(); itr++){
                 PerfType* ph = *itr;
                 
-                for(size_t i=0; i<min.size(); i++){
-                    if(max[i]>min[i]){
+                for(size_t i=0; i<_min.size(); i++){
+                    if(_max[i]>_min[i]){
                         auto f = ph->getFilter(i);
                         
-                        if(f<min[i] || f>max[i]){
+                        if(f<_min[i] || f>_max[i]){
                             std::cout<<ph->getID()<<":"<<f<<",";
                         }
                     }
@@ -591,7 +591,7 @@ namespace hyppox {
         void Mapper<PerfType,DPType,QTType,GType,FHType,ClusterIDType,RowIDType,ClusterType>::assignClusterIdsForOverlapingRegion(std::list<PerfType*>* overlappedPhList, std::vector<float> overlap){
             std::cout<<"Still clustering, your patience is appreciating...\n";
             
-            std::vector<float> min(hyppox::Config::FILTER, 0.0), max(hyppox::Config::FILTER, 0.0);
+            std::vector<float> _min(hyppox::Config::FILTER, 0.0), _max(hyppox::Config::FILTER, 0.0);
             std::list<PerfType*> clPhList;
             std::list<DPType*> dpList;
             size_t boxID = 1, prevClsId, thisClsId;
@@ -610,26 +610,26 @@ namespace hyppox {
                         for(short f=0; f<hyppox::Config::FILTER; f++){
                             float c = this->mesh[i][j].center[f];
                             float l = (this->gridLength[f]*(1+overlap[f]))/2;
-                            min[f] = c - l;
-                            max[f] = c + l;
+                            _min[f] = c - l;
+                            _max[f] = c + l;
                             
-                            if(min[f] < this->minPos[f]) min[f] = this->minPos[f];
-                            if(max[f] > this->maxPos[f]) max[f] = this->maxPos[f];
+                            if(_min[f] < this->minPos[f]) _min[f] = this->minPos[f];
+                            if(_max[f] > this->maxPos[f]) _max[f] = this->maxPos[f];
                         }
                         
                         clPhList.clear();
                         dpList.clear();
                         phListTrack.clear();
                         
-                        if(isEligibleForClustering(min, max, boxID)){
-                            this->treeRoot.SearchSurface(min, max, &clPhList, &dpList, boxID);
+                        if(isEligibleForClustering(_min, _max, boxID)){
+                            this->treeRoot.SearchSurface(_min, _max, &clPhList, &dpList, boxID);
                         }
                         
-                        //std::cout<<"("<<i<<","<<j<<")={("<<min[0]<<","<<min[1]<<"),("<<max[0]<<","<<max[1]<<")}: ";
+                        //std::cout<<"("<<i<<","<<j<<")={("<<_min[0]<<","<<_min[1]<<"),("<<_max[0]<<","<<_max[1]<<")}: ";
                         
                         if(clPhList.size() > 0){
                             /*if(i==6){
-                             testRange(min, max, clPhList);
+                             testRange(_min, _max, clPhList);
                              }*/
                             
                             prevClsId = ClsType::GetClusterID();
@@ -665,7 +665,7 @@ namespace hyppox {
                             }
                         }
                         
-                        /*cout<<"\nx1="<<min[0]<<", x2="<<max[0]<<"=>";
+                        /*cout<<"\nx1="<<_min[0]<<", x2="<<_max[0]<<"=>";
                          for(list<PerfType*>::iterator itr=clPhList.begin(); itr!=clPhList.end(); itr++){
                          PerfType* ph = *itr;
                          cout<<"\n"<<ph->getIndividualId()<<":"<<ph->GetClusterIdList();
@@ -733,7 +733,7 @@ namespace hyppox {
         template<typename PerfType, typename DPType, typename QTType, typename GType, typename FHType, typename ClusterIDType, typename RowIDType, typename ClusterType>
         void Mapper<PerfType,DPType,QTType,GType,FHType,ClusterIDType,RowIDType,ClusterType>::generateEdgeListFromOverlappingClusters(std::list<PerfType*>* overlappedPhList, std::vector<float> overlap){
             
-            std::vector<float> min(hyppox::Config::FILTER,0.0), max(hyppox::Config::FILTER,0.0);
+            std::vector<float> _min(hyppox::Config::FILTER,0.0), _max(hyppox::Config::FILTER,0.0);
             std::list<PerfType*> clPhList;
             std::list<DPType*> dpList;
             std::unordered_set<size_t> indvSet;
@@ -753,14 +753,14 @@ namespace hyppox {
                             float c1 = this->mesh[i-1][j].center[f];
                             
                             float l = (this->gridLength[f]*(1+overlap[f]))/2;
-                            min[f] = c2 - l;
-                            max[f] = c1 + l;
+                            _min[f] = c2 - l;
+                            _max[f] = c1 + l;
                             
-                            if(min[f] < this->minPos[f]) min[f] = this->minPos[f];
-                            if(max[f] > this->maxPos[f]) max[f] = this->maxPos[f];
+                            if(_min[f] < this->minPos[f]) _min[f] = this->minPos[f];
+                            if(_max[f] > this->maxPos[f]) _max[f] = this->maxPos[f];
                         }
                         
-                        this->treeRoot.SearchSurface(min, max, &clPhList, &dpList, boxID);
+                        this->treeRoot.SearchSurface(_min, _max, &clPhList, &dpList, boxID);
                     }
                     
                     if(j>0){
@@ -769,14 +769,14 @@ namespace hyppox {
                             float c1 = this->mesh[i][j-1].center[f];
                             
                             float l = (this->gridLength[f]*(1+overlap[f]))/2;
-                            min[f] = c2 - l;
-                            max[f] = c1 + l;
+                            _min[f] = c2 - l;
+                            _max[f] = c1 + l;
                             
-                            if(min[f] < this->minPos[f]) min[f] = this->minPos[f];
-                            if(max[f] > this->maxPos[f]) max[f] = this->maxPos[f];
+                            if(_min[f] < this->minPos[f]) _min[f] = this->minPos[f];
+                            if(_max[f] > this->maxPos[f]) _max[f] = this->maxPos[f];
                         }
                         
-                        this->treeRoot.SearchSurface(min, max, &clPhList, &dpList, boxID);
+                        this->treeRoot.SearchSurface(_min, _max, &clPhList, &dpList, boxID);
                     }
                     
                     boxID++;
@@ -789,7 +789,7 @@ namespace hyppox {
         
         template<typename PerfType, typename DPType, typename QTType, typename GType, typename FHType, typename ClusterIDType, typename RowIDType, typename ClusterType>
         void Mapper<PerfType,DPType,QTType,GType,FHType,ClusterIDType,RowIDType,ClusterType>::addSimplicialComplex(SCType *sc, float overlap){
-            std::vector<float> min(hyppox::Config::FILTER, 0.0), max(hyppox::Config::FILTER, 0.0);
+            std::vector<float> _min(hyppox::Config::FILTER, 0.0), _max(hyppox::Config::FILTER, 0.0);
             
             // Make it 50%
             overlap *=50;
@@ -810,14 +810,14 @@ namespace hyppox {
                         for(short f=0; f<hyppox::Config::FILTER; f++){
                             float c = this->mesh[i][j].center[f];
                             float l = this->gridLength[f]/2;
-                            min[f] = c - l;
-                            max[f] = c + l;
+                            _min[f] = c - l;
+                            _max[f] = c + l;
                             
-                            if(min[f] < this->minPos[f]) min[f] = this->minPos[f];
-                            if(max[f] > this->maxPos[f]) max[f] = this->maxPos[f];
+                            if(_min[f] < this->minPos[f]) _min[f] = this->minPos[f];
+                            if(_max[f] > this->maxPos[f]) _max[f] = this->maxPos[f];
                         }
                         
-                        this->treeRoot.SearchSurface(min, max, &clPhList, &dpList, boxID);
+                        this->treeRoot.SearchSurface(_min, _max, &clPhList, &dpList, boxID);
                         
                         for(auto pItr = clPhList.begin(); pItr!=clPhList.end(); pItr++){
                             PerfType* ph = *pItr;
@@ -898,7 +898,7 @@ namespace hyppox {
             std::cout<<"Total Nodes:"<<this->connectedComponents.size()<<std::endl;
             std::cout<<"Total Edges:"<<this->edgeList.size()<<std::endl;
             
-            std::vector<float> min(hyppox::Config::FILTER, 0.0), max(hyppox::Config::FILTER,0.0);
+            std::vector<float> _min(hyppox::Config::FILTER, 0.0), _max(hyppox::Config::FILTER,0.0);
             
             if(graph==nullptr) graph = new GType();
             graph->setConnectedComponents(size);
@@ -917,14 +917,14 @@ namespace hyppox {
                         for(short f=0; f<hyppox::Config::FILTER; f++){
                             float c = this->mesh[i][j].center[f];
                             float l = this->gridLength[f]/2;
-                            min[f] = c - l;
-                            max[f] = c + l;
+                            _min[f] = c - l;
+                            _max[f] = c + l;
                             
-                            if(min[f] < this->minPos[f]) min[f] = this->minPos[f];
-                            if(max[f] > this->maxPos[f]) max[f] = this->maxPos[f];
+                            if(_min[f] < this->minPos[f]) _min[f] = this->minPos[f];
+                            if(_max[f] > this->maxPos[f]) _max[f] = this->maxPos[f];
                         }
                         
-                        this->treeRoot.SearchSurface(min, max, &clPhList, &dpList, boxID);
+                        this->treeRoot.SearchSurface(_min, _max, &clPhList, &dpList, boxID);
                         
                         for(auto pItr = clPhList.begin(); pItr!=clPhList.end(); pItr++){
                             PerfType* ph = *pItr;

@@ -38,9 +38,9 @@ namespace hyppox {
             void setRoot(std::vector<NodePosType> _start, std::vector<NodePosType> _len);
             void AddDataToNode(mapper::DataPoint<PerfType,PosType>* data);
             void PrintQuadTree();
-            void SearchSurface(std::vector<NodePosType> min, std::vector<NodePosType> max, std::list<PerfType> *phList, std::list<mapper::DataPoint<PerfType,PosType>*> *dpList, size_t boxID);
-            void SearchDataPoints(std::vector<NodePosType> min, std::vector<NodePosType> max, std::unordered_set<size_t> *boxIdList);
-            void SearchAndGetDataPointOfBoxId(std::vector<NodePosType> min, std::vector<NodePosType> max, size_t boxID);
+            void SearchSurface(std::vector<NodePosType> _min, std::vector<NodePosType> _max, std::list<PerfType> *phList, std::list<mapper::DataPoint<PerfType,PosType>*> *dpList, size_t boxID);
+            void SearchDataPoints(std::vector<NodePosType> _min, std::vector<NodePosType> _max, std::unordered_set<size_t> *boxIdList);
+            void SearchAndGetDataPointOfBoxId(std::vector<NodePosType> _min, std::vector<NodePosType> _max, size_t boxID);
             void ResetClusterInformation();
             
             private:
@@ -48,12 +48,12 @@ namespace hyppox {
             
             int PrintNode(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType>* node);
             // Has error here, do not use for now
-            int SearchSurfaceInNode(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> min, std::vector<NodePosType> max, std::list<PerfType> *phList, std::list<mapper::DataPoint<PerfType,PosType>*> *dpList, size_t boxID);
+            int SearchSurfaceInNode(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> _min, std::vector<NodePosType> _max, std::list<PerfType> *phList, std::list<mapper::DataPoint<PerfType,PosType>*> *dpList, size_t boxID);
             // Use this
-            int SearchDataInSerface(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> min, std::vector<NodePosType> max, std::list<PerfType> *phList, std::list<mapper::DataPoint<PerfType,PosType>*> *dpList, size_t boxID, std::unordered_set<size_t>*& pointSet);
-            int SearchDataPoint(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> min, std::vector<NodePosType> max, std::unordered_set<size_t> *boxIdList);
+            int SearchDataInSerface(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> _min, std::vector<NodePosType> _max, std::list<PerfType> *phList, std::list<mapper::DataPoint<PerfType,PosType>*> *dpList, size_t boxID, std::unordered_set<size_t>*& pointSet);
+            int SearchDataPoint(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> _min, std::vector<NodePosType> _max, std::unordered_set<size_t> *boxIdList);
             int ResetClusterInformation(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType>* node);
-            std::vector<bool> CheckMembership(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> min, std::vector<NodePosType> max);
+            std::vector<bool> CheckMembership(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> _min, std::vector<NodePosType> _max);
             
         };
         
@@ -97,18 +97,18 @@ namespace hyppox {
         }
         
         template<typename PerfType, typename PosType, typename NodePosType>
-        void QuadTree<PerfType,PosType,NodePosType>::SearchSurface(std::vector<NodePosType> min, std::vector<NodePosType> max, std::list<PerfType> *phList, std::list<mapper::DataPoint<PerfType,PosType>*> *dpList, size_t boxID){
+        void QuadTree<PerfType,PosType,NodePosType>::SearchSurface(std::vector<NodePosType> _min, std::vector<NodePosType> _max, std::list<PerfType> *phList, std::list<mapper::DataPoint<PerfType,PosType>*> *dpList, size_t boxID){
             
-            //this->SearchSurfaceInNode(this->root, min, max, phList, dpList, boxID);
+            //this->SearchSurfaceInNode(this->root, _min, _max, phList, dpList, boxID);
             
             std::unordered_set<size_t> pointSet, *ptSet = &pointSet;
-            this->SearchDataInSerface(this->root, min, max, phList, dpList, boxID, ptSet);
+            this->SearchDataInSerface(this->root, _min, _max, phList, dpList, boxID, ptSet);
         }
         
         template<typename PerfType, typename PosType, typename NodePosType>
-        void QuadTree<PerfType,PosType,NodePosType>::SearchDataPoints(std::vector<NodePosType> min, std::vector<NodePosType> max, std::unordered_set<size_t> *boxIdList){
+        void QuadTree<PerfType,PosType,NodePosType>::SearchDataPoints(std::vector<NodePosType> _min, std::vector<NodePosType> _max, std::unordered_set<size_t> *boxIdList){
             
-            this->SearchDataPoint(this->root, min, max, boxIdList);
+            this->SearchDataPoint(this->root, _min, _max, boxIdList);
             
         }
         
@@ -156,7 +156,7 @@ namespace hyppox {
         // Any corner of the search cube is inside the node cube
         // Also check whether all the corners of a node inside the search cube or not
         template<typename PerfType, typename PosType, typename NodePosType>
-        std::vector<bool> QuadTree<PerfType,PosType,NodePosType>::CheckMembership(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> min, std::vector<NodePosType> max){
+        std::vector<bool> QuadTree<PerfType,PosType,NodePosType>::CheckMembership(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> _min, std::vector<NodePosType> _max){
             
             std::vector<NodePosType> _v(hyppox::Config::FILTER, 0.0);
             bool allCorner = true, anyCorner=false;
@@ -173,11 +173,11 @@ namespace hyppox {
                 // For each position identify the bit 1 position, make that position
                 for(short j=0;j<hyppox::Config::FILTER; j++,k>>=1){
                     if(k&1){
-                        nodeCorner &= min[j]<=_end[j] && _end[j]<=max[j];
-                        searchCorner &= _start[j]<=max[j]&&max[j]<=_end[j];
+                        nodeCorner &= _min[j]<=_end[j] && _end[j]<=_max[j];
+                        searchCorner &= _start[j]<=_max[j]&&_max[j]<=_end[j];
                     }else{
-                        nodeCorner &= min[j]<=_start[j] && _start[j]<=max[j];
-                        searchCorner &= _start[j]<=min[j]&&min[j]<=_end[j];
+                        nodeCorner &= _min[j]<=_start[j] && _start[j]<=_max[j];
+                        searchCorner &= _start[j]<=_min[j]&&_min[j]<=_end[j];
                     }
                 }
                 
@@ -192,14 +192,14 @@ namespace hyppox {
         
         // Need to check, has error
         template<typename PerfType, typename PosType, typename NodePosType>
-        int QuadTree<PerfType,PosType,NodePosType>::SearchSurfaceInNode(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> min, std::vector<NodePosType> max, std::list<PerfType> *phList, std::list<mapper::DataPoint<PerfType,PosType>*> *dpList, size_t boxID){
+        int QuadTree<PerfType,PosType,NodePosType>::SearchSurfaceInNode(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> _min, std::vector<NodePosType> _max, std::list<PerfType> *phList, std::list<mapper::DataPoint<PerfType,PosType>*> *dpList, size_t boxID){
             if(node == nullptr) return 0;
             if(node->GetNodeData()!=nullptr){
                 mapper::DataPoint<PerfType,PosType>* d = node->GetNodeData();
                 
                 bool _m = true;
                 for(short i=0;i<hyppox::Config::FILTER;i++){
-                    _m &= min[i]<=d->getPosition(i) && d->getPosition(i)<=max[i];
+                    _m &= _min[i]<=d->getPosition(i) && d->getPosition(i)<=_max[i];
                 }
                 
                 if(_m){
@@ -218,17 +218,17 @@ namespace hyppox {
                 return 0;
             }
             
-            std::vector<bool> status = this->CheckMembership(node, min, max);
+            std::vector<bool> status = this->CheckMembership(node, _min, _max);
             
             // If all corners of a node is inside the search cube,
             // Collect all data belongs in the node at its subsequent child
             if(status[1]){
-                return this->SearchDataInSerface(node, min, max, phList, dpList, boxID);
+                return this->SearchDataInSerface(node, _min, _max, phList, dpList, boxID);
             }
             // If any corner belongs in the search cube then search for each child
             else if(status[0]){
                 for(unsigned int i=0; i<(unsigned int)hyppox::Config::QUAD_TREE_CHILDREN; i++){
-                    this->SearchSurfaceInNode(node->GetChild(i), min, max, phList, dpList, boxID);
+                    this->SearchSurfaceInNode(node->GetChild(i), _min, _max, phList, dpList, boxID);
                 }
             }
             
@@ -236,7 +236,7 @@ namespace hyppox {
         }
         
         template<typename PerfType, typename PosType, typename NodePosType>
-        int QuadTree<PerfType,PosType,NodePosType>::SearchDataInSerface(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> min, std::vector<NodePosType> max, std::list<PerfType> *phList, std::list<mapper::DataPoint<PerfType,PosType>*> *dpList, size_t boxID, std::unordered_set<size_t>*& pointSet){
+        int QuadTree<PerfType,PosType,NodePosType>::SearchDataInSerface(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> _min, std::vector<NodePosType> _max, std::list<PerfType> *phList, std::list<mapper::DataPoint<PerfType,PosType>*> *dpList, size_t boxID, std::unordered_set<size_t>*& pointSet){
             if(node == nullptr) return 0;
             
             if(node->GetNodeData()!=nullptr){
@@ -244,7 +244,7 @@ namespace hyppox {
                 
                 bool _m = true;
                 for(short i=0;i<hyppox::Config::FILTER;i++){
-                    _m &= min[i]<=d->getPosition(i) && d->getPosition(i)<=max[i];
+                    _m &= _min[i]<=d->getPosition(i) && d->getPosition(i)<=_max[i];
                 }
                 
                 if(_m){
@@ -274,18 +274,18 @@ namespace hyppox {
             }
             
             for(unsigned int i=0; i<(unsigned int)hyppox::Config::QUAD_TREE_CHILDREN; i++){
-                this->SearchDataInSerface(node->GetChild(i), min, max, phList, dpList, boxID, pointSet);
+                this->SearchDataInSerface(node->GetChild(i), _min, _max, phList, dpList, boxID, pointSet);
             }
             
             return 0;
         }
         
         template<typename PerfType, typename PosType, typename NodePosType>
-        int QuadTree<PerfType,PosType,NodePosType>::SearchDataPoint(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> min, std::vector<NodePosType> max, std::unordered_set<size_t> *boxIdList){
+        int QuadTree<PerfType,PosType,NodePosType>::SearchDataPoint(QuadNode<mapper::DataPoint<PerfType,PosType>,NodePosType> *node, std::vector<NodePosType> _min, std::vector<NodePosType> _max, std::unordered_set<size_t> *boxIdList){
             if(node == nullptr) return 0;
             
             for(unsigned int i=0; i<(unsigned int)hyppox::Config::QUAD_TREE_CHILDREN; i++){
-                this->SearchDataPoint(node->GetChild(i), min, max, boxIdList);
+                this->SearchDataPoint(node->GetChild(i), _min, _max, boxIdList);
             }
             
             mapper::DataPoint<PerfType,PosType>* d = node->GetNodeData();
@@ -294,7 +294,7 @@ namespace hyppox {
                 
                 bool m = true;
                 for(short i=0;i<hyppox::Config::FILTER;i++){
-                    m &= min[i]<=d->getPosition(i) && d->getPosition(i)<=max[i];
+                    m &= _min[i]<=d->getPosition(i) && d->getPosition(i)<=_max[i];
                 }
                 
                 if(m){
