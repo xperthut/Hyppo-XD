@@ -274,7 +274,7 @@ $(function () {
             this.shEdgeSig = false;
             this.shEdgeRank = false;
             this.selectedFeature = [false, false];
-            this.defaultEdgeColor = "#a4a4a4";
+            //this.defaultEdgeColor = "#a4a4a4";
             this.IPEdgeWeight = 1;
             this.IFEdgeWeight = 1;
             this.csvData = null;
@@ -2381,7 +2381,7 @@ $(function () {
                     "<fieldset><legend>Edge attributes&nbsp;</legend><ul class='attr_legend'></ul></fieldset>" +
                     "<fieldset><legend>Features&nbsp;</legend><ul class='feature_legend'></ul></fieldset>");
 
-            $(".view_attr_legend").html("<li><input type='text' class='color_pick' id='viewBC' value='#000'/>&nbsp;Background color</li>");
+            $(".view_attr_legend").html("<li><input type='text' class='color_pick' id='viewBC' value='" + this.svgBGColor + "'/>&nbsp;Background color</li>");
 
             $("#viewBC").spectrum({color: this.svgBGColor});
             $("#viewBC").spectrum({

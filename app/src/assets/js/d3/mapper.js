@@ -537,8 +537,8 @@ $(function () {
                 "<div class='winCol'>" +
                   "<div>" +
                     "<label>Select windows</label>" +
-                    "<input type='range' min='1' max='100' value='50' step='1' class='slider' id='myRangeWin_" + this.addIndex + "' index='" + this.addIndex + "'/>&nbsp;" +
-                    "<label id='winLabel_" + this.addIndex + "'>50</label>" +
+                    "<input type='range' min='1' max='100' value='30' step='1' class='slider' id='myRangeWin_" + this.addIndex + "' index='" + this.addIndex + "'/>&nbsp;" +
+                    "<label id='winLabel_" + this.addIndex + "'>30</label>" +
                   "</div>" +
                   "<div id='ceWin_" + this.addIndex + "'>" +
                     "<label>Custom entry</label>" +
@@ -635,13 +635,13 @@ $(function () {
               "<div class='winCol'>" +
                 "<div class='dens'>" +
                   "<label>Density</label>" +
-                  "<input type='text' id='txtDensity' placeholder='4' value='4' onkeypress='return isFloatingNumberKey(event, this)' />" +
+                  "<input type='text' id='txtDensity' placeholder='2' value='2' onkeypress='return isFloatingNumberKey(event, this)' />" +
                 "</div>" +
               "</div>" +
               "<div class='ovCol'>" +
                 "<div class='rads'>" +
                   "<label>Radius</label>" +
-                  "<input type='text' id='txtRadius' placeholder='1.00' value='1.00' onkeypress='return isFloatingNumberKey(event, this)' />" +
+                  "<input type='text' id='txtRadius' placeholder='0.60' value='0.60' onkeypress='return isFloatingNumberKey(event, this)' />" +
                 "</div>" +
               "</div>" +
             "</div>";

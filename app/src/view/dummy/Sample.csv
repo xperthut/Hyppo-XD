@@ -1,4 +1,4 @@
-rID,DaysAfterPlanting,Genotype,Location,Humidity,GDD,Growth.rate
+rID,DaysAfterPlanting,Genotype,Location,Humidity,GrowingDegreeDays,GrowthRate
 1,1,Gen-A,Loc-K,52.82,8.5,-0.626926185
 2,2,Gen-A,Loc-K,60.94,22,-0.625258877
 3,3,Gen-A,Loc-K,81.27,38.5,-0.623447456
