@@ -1398,9 +1398,10 @@ $(function () {
             // dev version
             s += "<button id='get_coord' title='Assign saved node position to the graph'>Restore nodes positions</button>&nbsp;" +
                     "<button id='set_coord' title='Save node positions'>Save nodes positions</button>&nbsp;" +
-                    "<button id='set_color' title='Save colors whatever you changed'>Save colors</button>&nbsp;" +
-                    "<button id='color_bar' title='Color bar'>Color bar</button>&nbsp;" +
-                    "<button id='node_analysis' title='Explore nodes' style='display:none;'>Analysis</button>&nbsp;";
+                    "<button id='set_color' title='Save colors whatever you changed'>Save colors</button>&nbsp;";
+            if(this._graph.param.fc.length===1) s += "<button id='color_bar' title='Color bar'>Color bar</button>&nbsp;";
+
+            s += "<button id='node_analysis' title='Explore nodes' style='display:none;'>Analysis</button>&nbsp;";
 
             s += "</fieldset>";
 
@@ -1422,7 +1423,7 @@ $(function () {
             d3.select("#get_coord").style("color", "wheat").on("click", gInstance.clickGetCoordinates);
             d3.select("#set_coord").style("color", "wheat").on("click", gInstance.setCoordinates);
             d3.select("#set_color").style("color", "wheat").on("click", gInstance.saveColors);
-            d3.select("#color_bar").style("color", "wheat").on("click", gInstance.createColorBar);
+            if(d3.select("#color_bar")) d3.select("#color_bar").style("color", "wheat").on("click", gInstance.createColorBar);
             d3.select("#node_analysis").style("color", "wheat").on("click", gInstance.analyzeNodes);
             d3.select("#wdtf-btn").style("color", "wheat").on("click", gInstance.writeDataToFile);
             d3.select("#clearNIDs").style("color", "wheat").on("click", gInstance.removeSelection);
