@@ -140,14 +140,14 @@ namespace hyppox {
             }
             
             std::vector<RowIDType> v[hyppox::Config::CLUSTER];
-            RowIDType max = 0;
+            RowIDType _max = 0;
             
             // Copy the points to a vector for set operation
             for(short i=0; i<hyppox::Config::CLUSTER; i++){
                 if(s[i].size()>0){
                     v[i].insert(v[i].begin(), s[i].begin(), s[i].end());
                     //sort(v[i].begin(), v[i].end());
-                    if(max<s[i].size()) max = s[i].size();
+                    if(_max<s[i].size()) _max = s[i].size();
                     s[i].clear();
                 }
             }
@@ -158,7 +158,7 @@ namespace hyppox {
             if(hyppox::Config::CLUSTER==1){
                 vPoints.insert(vPoints.begin(), v[0].begin(), v[0].end());
             }else{
-                vPoints.assign(max, 0);
+                vPoints.assign(_max, 0);
                 for(int i=0;i<hyppox::Config::CLUSTER; i++){
                     if(v[i].size()>0){
                         std::vector<RowIDType> tv(v[i]);

@@ -238,9 +238,9 @@ namespace hyppox{
                 //idList->sort();
                 
                 std::bitset<BIT_SET_SIZE> idBitSet;
-                ClusterIDType max = pow(2, k)-1;
+                ClusterIDType _max = pow(2, k)-1;
                 
-                for(ClusterIDType i=1; i<=max; i++){
+                for(ClusterIDType i=1; i<=_max; i++){
                     idBitSet = i;
                     
                     
