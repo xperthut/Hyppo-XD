@@ -102,7 +102,7 @@ After running all the commands, open the __package.json__ file. At the end of th
   }
 ```
 
-## Clean and build the package ##
+## (UNIX users)Clean and build the package ##
 Use following commands to clean the solutions that you built earlier:
 ```bash
 # Clean node-gyp
@@ -152,11 +152,6 @@ npm run builder
 # After rebuilding the app, run following command to run the app locally
 npm start
 ```
-### Shortcut command ###
-Run following command to clean and build the package and make the installer for all target OSs
-```bash
-npm run install
-```
 
 ## Distribute app (Mac OSX host) ##
 Run following OS specific commands to generate distributed application. The following command can be run from the terminal of the Mac OSX.
@@ -171,6 +166,11 @@ npm run installer-mac
 # Or run following command to do the above two action together
 npm run mac
 ```
+#### Full command ####
+```bash
+npm run clean && npm run builder && npm run mac
+```
+
 ### Target: Windows OS ###
 ```bash
 # Download and install Wine using Homebrew
@@ -188,6 +188,12 @@ npm run installer-win
 # Or run following command to do the above two action together
 npm run win
 ```
+
+#### Full command ####
+```bash
+npm run clean-win && npm run builder && npm run win
+```
+
 ### Target: Linux OS ###
 ```bash
 # Install this package
@@ -202,6 +208,18 @@ npm run installer-linux
 # Or run following command to do the above two action together
 npm run linux
 ```
+
+#### Full command ####
+```bash
+npm run clean && npm run builder && npm run linux
+```
+
+### Generate solution for all target OSs (Discourage to run this) ###
+Run following command to clean and build the package and make the installer for all target OSs
+```bash
+npm run install
+```
+
 
 ## Licence &amp; copyright ##
 
