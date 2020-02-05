@@ -166,7 +166,7 @@ npm run installer-mac
 # Or run following command to do the above two action together
 npm run mac
 ```
-#### Full command ####
+#### Complete commands for OSX ####
 ```bash
 npm run clean && npm run builder && npm run mac
 ```
@@ -189,7 +189,7 @@ npm run installer-win
 npm run win
 ```
 
-#### Full command ####
+#### Complete commands for WINDOWS ####
 ```bash
 npm run clean-win && npm run builder && npm run win
 ```
@@ -209,7 +209,7 @@ npm run installer-linux
 npm run linux
 ```
 
-#### Full command ####
+#### Complete commands for LINUX ####
 ```bash
 npm run clean && npm run builder && npm run linux
 ```
