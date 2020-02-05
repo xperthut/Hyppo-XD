@@ -21,6 +21,7 @@ Must need GCC version at least 5.0
         * [Complete commands for WINDOWS](#complete-commands-for-windows)
     * [Target: Linux OS](#target-linux-os)
         * [Complete commands for LINUX](#complete-commands-for-linux)
+* [Generate solution for all target OSs (Discourage to use this)](#generate-solution-for-all-target-oss-discourage-to-use-this)
 * [Licence &amp; copyright](#licence--copyright)
 
 
