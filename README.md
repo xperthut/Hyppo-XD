@@ -14,11 +14,13 @@ Must need GCC version at least 5.0
 * [Install required node packages](#install-required-node-packages)
 * [Clean and build the package](#clean-and-build-the-package)
 * [Run the desktop app](#run-the-desktop-app)
-    * [Shortcut command](#Shortcut-command)
 * [Distribute app (Mac OSX host)](#distribute-app-mac-osx-host)
     * [Target: Machintos OSX](#target-machintos-osx)
+        * [Complete commands for OSX](#complete-commands-for-osx)
     * [Target: Windows OS](#target-windows-os)
+        * [Complete commands for WINDOWS](#complete-commands-for-windows)
     * [Target: Linux OS](#target-linux-os)
+        * [Complete commands for LINUX](#complete-commands-for-linux)
 * [Licence &amp; copyright](#licence--copyright)
 
 
@@ -102,8 +104,8 @@ After running all the commands, open the __package.json__ file. At the end of th
   }
 ```
 
-## (UNIX users)Clean and build the package ##
-Use following commands to clean the solutions that you built earlier:
+## Clean and build the package ##
+(UNIX users) Use following commands to clean the solutions that you built earlier:
 ```bash
 # Clean node-gyp
 node-gyp clean
@@ -214,7 +216,7 @@ npm run linux
 npm run clean && npm run builder && npm run linux
 ```
 
-### Generate solution for all target OSs (Discourage to run this) ###
+### Generate solution for all target OSs (Discourage to use this) ###
 Run following command to clean and build the package and make the installer for all target OSs
 ```bash
 npm run install
