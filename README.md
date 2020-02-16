@@ -45,6 +45,7 @@ Open terminal and redirect to the [git folder]/app prior running the following c
   npm install --save nan
   
   # Install bindings for external sources
+  npm install --save bindings
   npm install -g bindings
   
   # Install rebuild package
