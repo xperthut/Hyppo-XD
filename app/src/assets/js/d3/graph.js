@@ -1541,7 +1541,7 @@ $(function () {
           for(var i=0; i<nesVal.filter.length; i++){
             if(i>0){
               s += ",";
-              fName += "|";
+              fName += "-";
             }
             s += nesVal.filter[i];
             fName += this.getHeaderName(nesVal.filter[i], _header_names);
@@ -1555,7 +1555,7 @@ $(function () {
           for(var i=0; i<nesVal.window.length; i++){
             if(i>0){
               s += ",";
-              fName += "|";
+              fName += "-";
             }
             s += nesVal.window[i];
             fName += nesVal.window[i];
@@ -1569,7 +1569,7 @@ $(function () {
           for(var i=0; i<nesVal.overlap.length; i++){
             if(i>0){
               s += ",";
-              fName += "|";
+              fName += "-";
             }
             s += nesVal.overlap[i];
             fName += parseFloat(nesVal.overlap[i]).toFixed(2);
@@ -1580,11 +1580,11 @@ $(function () {
 
           param.push("-CP");
           s = "[";
-          fName += nesVal.cluster_algo + "|";
+          fName += nesVal.cluster_algo + "-";
           for(var i=0; i<nesVal.cluster_param.length; i++){
             if(i>0){
               s += ",";
-              fName += "|";
+              fName += "-";
             }
             s += nesVal.cluster_param[i];
 
@@ -1603,7 +1603,7 @@ $(function () {
           for(var i=0; i<nesVal.cluster_attr.length; i++){
             if(i>0){
               s += ",";
-              fName += "|";
+              fName += "-";
             }
             s += nesVal.cluster_attr[i];
             fName += this.getHeaderName(nesVal.cluster_attr[i], _header_names);
@@ -1619,7 +1619,7 @@ $(function () {
             for(var i=0; i<nesVal.filter_gen.length; i++){
               if(i>0){
                 s += ",";
-                fName += "|";
+                fName += "-";
               }
               s += nesVal.filter_gen[i];
               fName += nesVal.filter_gen[i];
@@ -1638,7 +1638,7 @@ $(function () {
             for(var i=0; i<nesVal.pie_attr.length; i++){
               if(i>0){
                 s += ",";
-                fName += "|";
+                fName += "-";
               }
               s += nesVal.pie_attr[i];
               fName += nesVal.pie_attr[i];
@@ -1657,7 +1657,7 @@ $(function () {
             for(var i=0; i<nesVal.mem_attr.length; i++){
               if(i>0){
                 s += ",";
-                fName += "|";
+                fName += "-";
               }
               s += nesVal.mem_attr[i];
               fName += nesVal.mem_attr[i];

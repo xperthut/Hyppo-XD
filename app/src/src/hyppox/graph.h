@@ -2671,6 +2671,7 @@ namespace hyppox {
                     d3Edges += "]";
 
                     std::string fName = "", tmpFN="";
+                    const std::string fCascad = "-";
 
                     //std::cout<<"Data generation completed, now starting file creation..."<<std::endl;
                     
@@ -2694,7 +2695,7 @@ namespace hyppox {
                     tmpFN="";
                     paramJS += "\"fc\":[";
                     for(int i=0; i<hyppox::Config::FILTER; i++){
-                        if(tmpFN.length()>0) tmpFN += "|";
+                        if(tmpFN.length()>0) tmpFN += fCascad;
                         tmpFN += hyppox::Config::FILTER_NAMES[i];
                         
                         if(i>0) paramJS += ",";
@@ -2707,7 +2708,7 @@ namespace hyppox {
                     tmpFN="";
                     paramJS += "\"wx\":[";
                     for(int i=0;i<hyppox::Config::FILTER;i++){
-                        if(tmpFN.length()>0) tmpFN += "|";
+                        if(tmpFN.length()>0) tmpFN += fCascad;
                         tmpFN += std::to_string(hyppox::Config::WINDOWS[i]);
                         
                         if(i>0) paramJS += ",";
@@ -2720,7 +2721,7 @@ namespace hyppox {
                     tmpFN="";
                     paramJS += "\"gx\":[";
                     for(size_t i=0;i<hyppox::Config::GAIN.size();i++){
-                        if(tmpFN.length()>0) tmpFN += "|";
+                        if(tmpFN.length()>0) tmpFN += fCascad;
                         tmpFN += fixPrecision((hyppox::Config::GAIN[i]<0.98)?(hyppox::Config::GAIN[i]/2)*100:50, 2);
                         
                         if(i>0) paramJS += ",";
@@ -2732,8 +2733,8 @@ namespace hyppox {
                     // Filternames_windows_overlap_clusterParams
                     paramJS += "\"cls\":{\"name\":\"" + hyppox::Config::CLUSTER_METHOD + "\", \"param\":[";
                     if(hyppox::Config::CLUSTER_METHOD.compare("DBSCAN")==0){
-                        fName += "_" + hyppox::Config::CLUSTER_METHOD + "|" + fixPrecision(hyppox::Config::CLUSTER_PARAM[0], 2)+
-                            "|" + fixPrecision(hyppox::Config::CLUSTER_PARAM[1], 0);
+                        fName += fCascad + hyppox::Config::CLUSTER_METHOD + fCascad + fixPrecision(hyppox::Config::CLUSTER_PARAM[0], 2)+
+                            fCascad + fixPrecision(hyppox::Config::CLUSTER_PARAM[1], 0);
                         
                         paramJS += fixPrecision(hyppox::Config::CLUSTER_PARAM[0], 2)+ "," + fixPrecision(hyppox::Config::CLUSTER_PARAM[1], 0);
                     }
@@ -2743,7 +2744,7 @@ namespace hyppox {
                     tmpFN="";
                     paramJS += "\"cla\":[";
                     for(short i=0; i<hyppox::Config::CLUSTER; i++){
-                        if(tmpFN.length()>0) tmpFN += "|";
+                        if(tmpFN.length()>0) tmpFN += fCascad;
                         tmpFN += hyppox::Config::CLUSTER_NAMES[i];
                         
                         if(i>0) paramJS += ",";
@@ -2757,7 +2758,7 @@ namespace hyppox {
                     if(hyppox::Config::FILTER_GENOTYPE.size()>0){
                         tmpFN="";
                         for(size_t i=0; i<hyppox::Config::FILTER_GENOTYPE.size(); i++){
-                            if(tmpFN.length()>0) tmpFN += "|";
+                            if(tmpFN.length()>0) tmpFN += fCascad;
                             tmpFN += hyppox::Config::FILTER_GENOTYPE[i];
                             
                             if(i>0) paramJS += ",";
@@ -2775,7 +2776,7 @@ namespace hyppox {
                     if(hyppox::Config::COL_PIECHART.size()>0){
                         tmpFN = "";
                         for(size_t i=0; i<hyppox::Config::COL_PIECHART.size(); i++){
-                            if(tmpFN.length()>0) tmpFN += "|";
+                            if(tmpFN.length()>0) tmpFN += fCascad;
                             tmpFN += std::to_string(hyppox::Config::COL_PIECHART[i]);
                             
                             if(i>0) paramJS += ",";
@@ -2791,7 +2792,7 @@ namespace hyppox {
                     bool tmpParamJSFlag = true;
                     for(int i=0; i<hyppox::Config::FILTER; i++){
                         if(1<<i & hyppox::Config::FILTER_SIGNATURE_MATCHING){
-                            if(tmpFN.length()>0) tmpFN += "|";
+                            if(tmpFN.length()>0) tmpFN += fCascad;
                             tmpFN += hyppox::Config::FILTER_NAMES[hyppox::Config::FILTER-i-1];
                             
                             if(tmpParamJSFlag) tmpParamJSFlag = false;
@@ -2812,7 +2813,7 @@ namespace hyppox {
                     if(hyppox::Config::COL_MEMBERSHIP.size()>0){
                         tmpFN = "";
                         for(size_t i=0; i<hyppox::Config::COL_MEMBERSHIP.size(); i++){
-                            if(tmpFN.length()>0) tmpFN += "|";
+                            if(tmpFN.length()>0) tmpFN += fCascad;
                             tmpFN += std::to_string(hyppox::Config::COL_MEMBERSHIP[i]);
                             
                             if(i>0) paramJS += ",";
@@ -2829,6 +2830,7 @@ namespace hyppox {
                     // Save data into file
                     FHType* writeToFile = new FHType("");
                     _filePath = writeToFile->WriteDataToFile(hyppox::Config::WRITE_DIR+fName, ".json", d3Data, false);
+                    std::cout<<"Write file to:"<<_filePath<<std::endl;
                     delete writeToFile;
                 }
 
