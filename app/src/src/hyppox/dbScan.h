@@ -176,7 +176,7 @@ namespace hyppox {
                 }
             }
 
-            delete v;
+            delete[] v;
 
             // Remove all item whose value is 0
             vPoints.erase(remove(vPoints.begin(), vPoints.end(), 0), vPoints.end());

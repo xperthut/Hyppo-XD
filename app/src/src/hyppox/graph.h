@@ -2674,16 +2674,16 @@ namespace hyppox {
                     const std::string fCascad = "-";
 
                     //std::cout<<"Data generation completed, now starting file creation..."<<std::endl;
-                    
+
                     paramJS += "\"gc\":\"" + std::to_string(hyppox::Config::COL_GENOTYPE) + "\",";
-                    
+
                     paramJS += "\"lc\":[";
                     for(size_t i=0; i<hyppox::Config::COL_LOCATION.size(); i++){
                         if(i>0) paramJS += ",";
                         paramJS += std::to_string(hyppox::Config::COL_LOCATION[i]);
                     }
                     paramJS += "],";
-                    
+
                     paramJS += "\"dtc\":[";
                     for(size_t i=0; i<hyppox::Config::COL_DATETIME.size(); i++){
                         if(i>0) paramJS += ",";
@@ -2697,7 +2697,7 @@ namespace hyppox {
                     for(int i=0; i<hyppox::Config::FILTER; i++){
                         if(tmpFN.length()>0) tmpFN += fCascad;
                         tmpFN += hyppox::Config::FILTER_NAMES[i];
-                        
+
                         if(i>0) paramJS += ",";
                         paramJS += std::to_string(hyppox::Config::COL_FILTER[i]);
                     }
@@ -2710,7 +2710,7 @@ namespace hyppox {
                     for(int i=0;i<hyppox::Config::FILTER;i++){
                         if(tmpFN.length()>0) tmpFN += fCascad;
                         tmpFN += std::to_string(hyppox::Config::WINDOWS[i]);
-                        
+
                         if(i>0) paramJS += ",";
                         paramJS += std::to_string(hyppox::Config::WINDOWS[i]);
                     }
@@ -2723,7 +2723,7 @@ namespace hyppox {
                     for(size_t i=0;i<hyppox::Config::GAIN.size();i++){
                         if(tmpFN.length()>0) tmpFN += fCascad;
                         tmpFN += fixPrecision((hyppox::Config::GAIN[i]<0.98)?(hyppox::Config::GAIN[i]/2)*100:50, 2);
-                        
+
                         if(i>0) paramJS += ",";
                         paramJS += fixPrecision((hyppox::Config::GAIN[i]<0.98)?(hyppox::Config::GAIN[i]/2)*100:50, 2);
                     }
@@ -2733,20 +2733,20 @@ namespace hyppox {
                     // Filternames_windows_overlap_clusterParams
                     paramJS += "\"cls\":{\"name\":\"" + hyppox::Config::CLUSTER_METHOD + "\", \"param\":[";
                     if(hyppox::Config::CLUSTER_METHOD.compare("DBSCAN")==0){
-                        fName += fCascad + hyppox::Config::CLUSTER_METHOD + fCascad + fixPrecision(hyppox::Config::CLUSTER_PARAM[0], 2)+
+                        fName += "_" + hyppox::Config::CLUSTER_METHOD + fCascad + fixPrecision(hyppox::Config::CLUSTER_PARAM[0], 2)+
                             fCascad + fixPrecision(hyppox::Config::CLUSTER_PARAM[1], 0);
-                        
+
                         paramJS += fixPrecision(hyppox::Config::CLUSTER_PARAM[0], 2)+ "," + fixPrecision(hyppox::Config::CLUSTER_PARAM[1], 0);
                     }
                     paramJS += "]},";
-                    
+
                     // Filternames_windows_overlap_clusterParams_Performances
                     tmpFN="";
                     paramJS += "\"cla\":[";
                     for(short i=0; i<hyppox::Config::CLUSTER; i++){
                         if(tmpFN.length()>0) tmpFN += fCascad;
                         tmpFN += hyppox::Config::CLUSTER_NAMES[i];
-                        
+
                         if(i>0) paramJS += ",";
                         paramJS += std::to_string(hyppox::Config::COL_CLUSTER[i]);
                     }
@@ -2760,7 +2760,7 @@ namespace hyppox {
                         for(size_t i=0; i<hyppox::Config::FILTER_GENOTYPE.size(); i++){
                             if(tmpFN.length()>0) tmpFN += fCascad;
                             tmpFN += hyppox::Config::FILTER_GENOTYPE[i];
-                            
+
                             if(i>0) paramJS += ",";
                             paramJS += "\"" + hyppox::Config::FILTER_GENOTYPE[i] + "\"";
                         }
@@ -2770,7 +2770,7 @@ namespace hyppox {
 
                     // Separator __
                     fName += "_";
-                    
+
                     // Filternames_windows_overlap_clusterParams_Genfilter__PieChart
                     paramJS += "\"pie\":[";
                     if(hyppox::Config::COL_PIECHART.size()>0){
@@ -2778,7 +2778,7 @@ namespace hyppox {
                         for(size_t i=0; i<hyppox::Config::COL_PIECHART.size(); i++){
                             if(tmpFN.length()>0) tmpFN += fCascad;
                             tmpFN += std::to_string(hyppox::Config::COL_PIECHART[i]);
-                            
+
                             if(i>0) paramJS += ",";
                             paramJS += std::to_string(hyppox::Config::COL_PIECHART[i]);
                         }
@@ -2794,16 +2794,16 @@ namespace hyppox {
                         if(1<<i & hyppox::Config::FILTER_SIGNATURE_MATCHING){
                             if(tmpFN.length()>0) tmpFN += fCascad;
                             tmpFN += hyppox::Config::FILTER_NAMES[hyppox::Config::FILTER-i-1];
-                            
+
                             if(tmpParamJSFlag) tmpParamJSFlag = false;
                             else paramJS += ",";
-                            
+
                             paramJS += std::to_string(hyppox::Config::COL_FILTER[i]);
                         }
                     }
                     if(tmpFN.length()>0) fName += "_" + tmpFN;
                     paramJS += "],";
-                    
+
                     // Filternames_windows_overlap_clusterParams_Performances_Genfilter__PieChart_Signature_RefPerformance
                     fName += "_" + hyppox::Config::CLUSTER_NAMES[hyppox::Config::REFERENCE_PH_INDEX];
                     paramJS += "\"rp\":[\"" + hyppox::Config::CLUSTER_NAMES[hyppox::Config::REFERENCE_PH_INDEX] + "\"]";
@@ -2815,7 +2815,7 @@ namespace hyppox {
                         for(size_t i=0; i<hyppox::Config::COL_MEMBERSHIP.size(); i++){
                             if(tmpFN.length()>0) tmpFN += fCascad;
                             tmpFN += std::to_string(hyppox::Config::COL_MEMBERSHIP[i]);
-                            
+
                             if(i>0) paramJS += ",";
                             paramJS += std::to_string(hyppox::Config::COL_MEMBERSHIP[i]);
                         }
