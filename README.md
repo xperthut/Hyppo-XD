@@ -64,9 +64,6 @@ Open terminal and redirect to the [git folder]/app prior running the following c
   # Install jquery package
   npm install --save jquery
   
-  # Install jquery package
-  npm install --save jquery
-  
   # Install asar package
   npm install --save-dev asar
   
