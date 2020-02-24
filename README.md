@@ -29,6 +29,7 @@ Must need GCC version at least 5.0
 
   1. Download and install [nodeJS __v12.13.1__](https://nodejs.org/download/release/v12.13.1/). Current __V8__ interface is campatible with this version.
   2. Need python >= 2.7
+  3. Install visual studio (For windows user)
 
 
 ## Install required node packages ##
@@ -192,7 +193,12 @@ npm run win
 
 #### Complete commands for WINDOWS ####
 ```bash
-npm run clean-win && npm run builder && npm run win
+# Run cleanup command
+npm run clean-win
+# If you see error after clean command, discard those errors
+
+# Run the builder and distribution command
+npm run builder && npm run win
 ```
 
 ### Target: Linux OS ###
