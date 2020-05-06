@@ -126,18 +126,23 @@ namespace file_handler{
         if(s.length()>0 && line[col]) line[col]= (this->isValidNumber(s))?true:false;
     }
 
+    // Check whether the string is a valid number or not
     bool isValidNumber(std::string s){
       try{
           size_t i=0;
           std::stod(s, &i);
-          //std::cout<<s.length()<<", "<<i<<std::endl;
+
+          // i holds the number of characters that stod method can parse.
           if(i==s.length()) return true;
-          else return false;
+          else{
+            std::cout<<s<<"::"<<s.length()<<", "<<i<<std::endl;
+            return false;
+          }
       }catch (const std::invalid_argument& e) {
-          //std::cout<<"invalid_argument: "<<e.what()<<std::endl;
+          std::cout<<"invalid_argument: "<<e.what()<<std::endl<<"Data:"<<s<<std::endl;
           return false;
       }catch (std::exception &e) {
-          //std::cout<<"Other: "<<e.what()<<std::endl;
+          std::cout<<"Other: "<<e.what()<<std::endl<<"Data:"<<s<<std::endl;
           return false;
       }
     }
@@ -162,13 +167,19 @@ namespace file_handler{
                 }else if(ch==','){
                     if(start) s+= ch;
                     else{
-                      if(!this->isValidNumber(s)) return false;
+                      if(!this->isValidNumber(s)) {
+                        std::cout<<"Invalid index"<<std::endl<<"Data:["<<line<<"]"<<std::endl;
+                        return false;
+                      }
 
                       std::stringstream sstream(s);
                       size_t index;
                       sstream >> index;
 
-                      if(fSet.find(index)!=fSet.end()) return false;
+                      if(fSet.find(index)!=fSet.end()){
+                        std::cout<<"Duplicate index"<<std::endl<<"Data:["<<index<<"]"<<std::endl;
+                        return false;
+                      }
                       fSet.insert(index);
 
                       s="";
@@ -219,7 +230,7 @@ namespace file_handler{
 
       line += "]}";
 
-      //std::cout<<line<<std::endl;
+      std::cout<<line<<std::endl;
 
       return line;
     }
