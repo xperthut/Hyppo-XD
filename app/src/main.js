@@ -9,12 +9,14 @@ let win;
 function createWindow () {
 	const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
 	console.log("Icon path:" + path.resolve(path.join(".","logo", "Icon.icns")));
+
   // Create the browser window.
   win = new BrowserWindow({
     width: width,
     height: height,
     icon: path.resolve(path.join(".","logo", "Icon.icns")),
     webPreferences: {
+			//sandbox: true,
       nodeIntegration: true
     }
   });

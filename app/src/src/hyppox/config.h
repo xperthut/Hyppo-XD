@@ -45,7 +45,7 @@ std::vector<std::string> getTime(T t){
         return {std::to_string(t/3600),"hr"};
     }else{
         float d = t/86400;
-        
+
         if(d>1&&d<30) return {std::to_string(d),"days"};
         else if(d>=30&&d<365) return {std::to_string(d/30),"mn"};
         else{
@@ -87,9 +87,9 @@ const std::string GetCurrentDateTime() {
     struct tm  tstruct;
     char       buf[80];
     tstruct = *localtime(&now);
-    
+
     strftime(buf, sizeof(buf), "%Y-%m-%d_%X", &tstruct);
-    
+
     return buf;
 }
 
@@ -97,22 +97,22 @@ const std::string GetCurrentDateTime() {
 const std::string fixPrecision(float value, int precision){
     std::string pValue = std::to_string(value);
     size_t pos = 0;
-    
+
     if((pos = pValue.find(".")) != std::string::npos){
-        
+
         if(pValue.length()-pos-1 > (size_t)precision){
             if(precision>0) return pValue.substr(0, pos+1+precision);
             return pValue.substr(0, pos);
         }
     }
-    
+
     return pValue;
 }
 
 // @brief html colors
 const std::string getHTMLColor(size_t index){
-    const std::vector<std::string> s={"#ff0000", "#EED6C4", "#5CD4EC", "#DDDDCB", "#68466E", "#EBD7DE", "#7843DF", "#5EB8E7", "#BEE967", "#3AF0B3", "#E3B330", "#C4F1A5", "#E7F5F7", "#D1BBC7", "#EABAAB", "#5299E2", "#ED90B9", "#B07490", "#E7ACD2", "#E7F3A1", "#98E1E7", "#73F142", "#EFA9AC", "#C1EFCA", "#A6B6EA", "#C1C593", "#D63EEB", "#BD5E4F", "#42E885", "#E568A5", "#DCE872", "#E47885", "#B49FBB", "#A8CBAB", "#DD3090", "#379CB0", "#7AC5B9", "#F03CC7", "#A0D1EB", "#9B9AEF", "#71A883", "#AA65E0", "#CBF0E4", "#E56DD2", "#6FF1F1", "#9FE67D", "#E39267", "#D1E5B5", "#D1E0F4", "#8AA1B1", "#59ECDD", "#DBF240", "#B8CED3", "#C79FDD", "#D4B890", "#E4C6EB", "#ECB66B", "#F097DF", "#7E806C", "#BFE6EE", "#AF2DAB", "#B78983", "#ABF5ED", "#E63F6C", "#EEEFB5", "#446FC5", "#F0E7C2", "#44EF76", "#9C4893", "#58BE6B", "#E1D62D", "#66C73C", "#8DF275", "#96EAC5", "#7CEDB2", "#87CE93", "#F1E264", "#5F4CAC", "#7AC0D1", "#EE612D", "#579C55", "#ADAD9B", "#B0A943", "#DAC87F", "#E46FEC", "#8179E6", "#F4F1E9", "#B4C8BD", "#5FE69A", "#E8D879", "#2A5637", "#878A46", "#99DE39", "#DB9132", "#55E5C0", "#C787E2", "#8876AF", "#6183AF", "#B5C57E", "#A1F7AC", "#3BC5CA"};
-    
+    const std::vector<std::string> s={"#FF0000","#7F0000","#770000","#707000","#007700","#007F00","#00FF00","#00F070","#00007F","#0000FF"};
+
     return s[index%s.size()];
 }
 
@@ -127,13 +127,13 @@ const std::string getHTMLColorList(size_t size){
 }
 
 namespace hyppox{
-    
+
     class Config{
         private:
         // Stop creating object of this class
         Config()=default;
         ~Config()=default;
-        
+
         public:
         static short COL_GENOTYPE;
         static std::vector<std::string> FILTER_GENOTYPE;
@@ -151,92 +151,93 @@ namespace hyppox{
         static std::string READ_DIR;
         static std::string WRITE_DIR;
         static std::vector<std::string> HEADER_NAMES;
-        
+
         // Sort the nodes in the graph based on this filter values
         static short SORT_FILTER_INDEX;
-        
+
         // Considering each edge length is 1
         static short MINIMUM_PATH_LENGTH;
-        
+
         // A threshold under which we will allow to grow the path if any bit of the signature does not match
         static float DELTA_CHANGE;
-        
+
         // Flag forces to build path along increasing DAP
         static bool INCREASE_DAP;
-        
+
         // Flag to enable/disable signature matching
         static bool MATCH_SIGNATURE;
-        
+
         // Print all graphs for barcode
         static bool PRINT_BARCODE;
-        
+
         // Generate code fit for javaplex simplex
         static bool PH_JAVA_PLEX;
-        
+
         // Residual graph
         static bool REFERENCE_PERFORMANCE;
         static short REFERENCE_PH_INDEX; // Edge direction based on this indexed phenotypic value
         static short REFERENCE_ENV_INDEX;
         // End
-        
+
         // Edge width on a path
         static short EDGE_WIDTH;
-        
+
         // Edge color of nin path
         static std::string EDGE_COLOR;
-        
+
         // Node size range
         static std::vector<float> NODE_SIZE_RANGE;
-        
+
         // true: heatmap coloring scheme at each connected compoment (CC) separately
         // false: apply gloal heatmap coloring scheme for all connected component
         static bool HEATMAP_EACH_CC;
-        
+
         // Weight of periferal points during clusting
         static float PERIF_WEIGHT;
-        
+
         // Weight fector of core points with respect to periferal points
         static float CORE_BY_PREIF;
-        
+
         // Weight of core points during clustering
         static float CORE_POINT_WEIGHT;
-        
+
         // The number of filters
         static short FILTER;
-        
+
         // The number of cluster attribites
         static short CLUSTER;
-        
+
         // Maximum number of possible cluster ids in a overlap
         static short TOTAL_CLUSTER_IDS;
-        
+
         // If edge weight is zero then replace zero with this value
         static float NEGLIGIBLE_WEIGHT;
-        
+
         // Quad tree child
         static short QUAD_TREE_CHILDREN;
-        
+
         // Name of the filter attribute
         static std::vector<std::string> FILTER_NAMES;
-        
+
         // Name of the filter attribute
         static std::vector<std::string> CLUSTER_NAMES;
-        
+
         // Phenomics data file name with absolute path
         static std::string DATA_FILE_NAME;
-        
+
         // Which filter is used for edge direction matching
         static short FILTER_SIGNATURE_MATCHING;
-        
+
         static void setParams(short genotypeCol, std::vector<std::string> filterGen, std::vector<short> locationCol, std::vector<short> dateTimeCol, std::vector<short> otherInfoCol, std::vector<short> memCol, std::vector<short> pieCol, std::vector<short> filterCol, std::vector<short> clusterCol, short clusterIndexForEdgeDirection, std::string clusterName, std::vector<float> clusterParams, std::vector<short> windows, std::vector<float> overlap, std::string readDir, std::string writeDir, short minPathLen, float deltaChanges, bool increaseTime, bool signatureMatch, bool printBarcode, bool printBarcodeUsingJavaplex, bool refPerformance, short filterRefIndex, short intPathWidth, std::string edgeColor, std::vector<float> nodeSizeRange, bool heatmapEachConComp, std::string fileName, short sortFilterIndex, std::vector<short> filterSignatureMatching);
-        
+
         static void printAllConfig();
-        
+
         template<typename IType, typename OType>
         static void printOP(short terminal){}
-        
+        static void reset();
+
     };
-    
+
     short Config::COL_GENOTYPE;
     std::vector<std::string> Config::FILTER_GENOTYPE;
     std::vector<short> Config::COL_LOCATION;
@@ -279,9 +280,9 @@ namespace hyppox{
     std::vector<std::string> Config::FILTER_NAMES;
     std::string Config::DATA_FILE_NAME = "";
     short Config::FILTER_SIGNATURE_MATCHING = 0;
-    
+
     void Config::setParams(short genotypeCol, std::vector<std::string> filterGen, std::vector<short> locationCol, std::vector<short> dateTimeCol, std::vector<short> otherInfoCol, std::vector<short> memCol, std::vector<short> pieCol, std::vector<short> filterCol, std::vector<short> clusterCol, short clusterIndexForEdgeDirection, std::string clusterName, std::vector<float> clusterParams, std::vector<short> windows, std::vector<float> overlap, std::string readDir, std::string writeDir, short minPathLen, float deltaChanges, bool increaseTime, bool signatureMatch, bool printBarcode, bool printBarcodeUsingJavaplex, bool refPerformance, short filterRefIndex, short intPathWidth, std::string edgeColor, std::vector<float> nodeSizeRange, bool heatmapEachConComp, std::string fileName, short sortFilterIndex, std::vector<short> filterSignatureMatching){
-        
+
         COL_GENOTYPE = genotypeCol;
         FILTER_GENOTYPE = filterGen;
         COL_LOCATION = locationCol;
@@ -312,16 +313,16 @@ namespace hyppox{
         DATA_FILE_NAME = fileName;
         REFERENCE_PH_INDEX = clusterIndexForEdgeDirection;
         SORT_FILTER_INDEX = sortFilterIndex;
-        
+
         FILTER = COL_FILTER.size();
         CLUSTER = COL_CLUSTER.size();
-        
+
         TOTAL_CLUSTER_IDS = 1;
         for(int i=0;i<FILTER;i++)TOTAL_CLUSTER_IDS*=2;
-        
+
         QUAD_TREE_CHILDREN = 1;
         for(int i=0;i<FILTER;i++)QUAD_TREE_CHILDREN*=2;
-        
+
         // Adjust gain value
         for(int i=0;i<FILTER;i++){
             if(GAIN[i]>1){
@@ -331,14 +332,14 @@ namespace hyppox{
                 if(GAIN[i]>1) GAIN[i] /=2;
             }
         }
-        
+
         if(filterSignatureMatching.size()>0){
             FILTER_SIGNATURE_MATCHING = 0;
             for(short d:filterSignatureMatching){
                 FILTER_SIGNATURE_MATCHING += (short)pow(2, FILTER-d);
             }
         }
-        
+
         // Any one of the column parameter is empty then fill with other
         /*if(COL_MEMBERSHIP.size()==0 && COL_PIECHART.size()>0){
             COL_MEMBERSHIP.clear();
@@ -347,10 +348,10 @@ namespace hyppox{
             COL_PIECHART.clear();
             COL_PIECHART.assign(COL_MEMBERSHIP.begin(), COL_MEMBERSHIP.end());
         }*/
-        
+
         //std::cout<<"FILTER_SIGNATURE_MATCHING:"<<FILTER_SIGNATURE_MATCHING<<std::endl;
     }
-    
+
     void Config::printAllConfig(){
         std::cout<<"COL_GENOTYPE:"<<Config::COL_GENOTYPE<<std::endl;
         if(Config::FILTER_GENOTYPE.size()>0){
@@ -477,6 +478,52 @@ namespace hyppox{
         std::cout<<"DATA_FILE_NAME:"<<Config::DATA_FILE_NAME<<std::endl;
         std::cout<<"FILTER_SIGNATURE_MATCHING:"<<Config::FILTER_SIGNATURE_MATCHING<<std::endl;
     }
+
+    void Config::reset(){
+      std::cout<<"Reset all configurations"<<std::endl;
+      Config::COL_GENOTYPE=1;
+      Config::FILTER_GENOTYPE.clear();
+      Config::COL_LOCATION.clear();
+      Config::COL_DATETIME.clear();
+      Config::COL_OTHER.clear();
+      Config::COL_MEMBERSHIP.clear();
+      Config::COL_PIECHART.clear();
+      Config::COL_FILTER.clear();
+      Config::COL_CLUSTER.clear();
+      Config::CLUSTER_METHOD.clear();
+      Config::CLUSTER_PARAM.clear();
+      Config::WINDOWS.clear();
+      Config::GAIN.clear();
+      Config::SORT_FILTER_INDEX=0;
+      Config::READ_DIR="";
+      Config::WRITE_DIR="";
+      Config::HEADER_NAMES.clear();
+      Config::MINIMUM_PATH_LENGTH=3;
+      Config::DELTA_CHANGE=0.0;
+      Config::INCREASE_DAP=false;
+      Config::MATCH_SIGNATURE=true;
+      Config::PRINT_BARCODE=false;
+      Config::PH_JAVA_PLEX=false;
+      Config::REFERENCE_PERFORMANCE=true;
+      Config::REFERENCE_PH_INDEX=0;
+      Config::REFERENCE_ENV_INDEX=0;
+      Config::EDGE_WIDTH=2;
+      Config::EDGE_COLOR="#a4a4a4";
+      Config::NODE_SIZE_RANGE.clear();
+      Config::HEATMAP_EACH_CC=false;
+      Config::PERIF_WEIGHT = 0.5;
+      Config::CORE_BY_PREIF = 2.0;
+      Config::CORE_POINT_WEIGHT = (PERIF_WEIGHT*CORE_BY_PREIF);
+      Config::FILTER = 2;
+      Config::CLUSTER = 1;
+      Config::CLUSTER_NAMES.clear();
+      Config::TOTAL_CLUSTER_IDS = 2;
+      Config::NEGLIGIBLE_WEIGHT = 0.00001;
+      Config::QUAD_TREE_CHILDREN = 2;
+      Config::FILTER_NAMES.clear();
+      Config::DATA_FILE_NAME = "";
+      Config::FILTER_SIGNATURE_MATCHING = 0;
+    }
 }
 
 
@@ -578,7 +625,7 @@ namespace hyppox{
 //static void resetSettings();
 
 /*void Config::setAttributes(){
-    
+
     if(GENOME==0){
         DATA_FILE_NAME = "input.csv";
         if(FILTER==1){
@@ -587,7 +634,7 @@ namespace hyppox{
             ASSIGN_PATH_COLOR_MANUAL = false;
             PATH_LIST.clear();
             PATH_COLOR.clear();
-            
+
             if(FILTER_1==0){
                 CLUSTER_RADIUS = 0.6;
                 OVERLAP = 0.50;
@@ -674,7 +721,7 @@ namespace hyppox{
         }
     }else{
         DATA_FILE_NAME = "input_B.csv";
-        
+
         if(FILTER_2==1){
             CLUSTER_RADIUS = 0.6;
             OVERLAP = 0.92;
@@ -746,49 +793,49 @@ namespace hyppox{
 }
 
 void Config::resetSettings(){
-    
+
     ifstream read("param.config");
-    
+
     if(!read.is_open()){
         cout<<"Can't read config file.."<<endl<<endl<<"Press any key to exit..."<<endl;
         cin.get();
-        
+
         exit(0);
     }
-    
+
     string line, flag, value;
     size_t pos;
-    
+
     // Read line that is neither empty nor a comment
     while(getline(read, line)){
         if(line.length()==0 || line[0]=='#') continue;
         // Remove all spaces from the line
         line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-        
+
         // Remove ending ;
         line.erase(std::remove(line.begin(), line.end(), ';'),line.end());
-        
+
         pos = line.find("=");
         if(pos!=string::npos){
             flag = line.substr(0, pos);
             value = line.substr(pos+1, line.length()-pos-1);
         }
-        
+
         transform(flag.begin(), flag.end(), flag.begin(), ::toupper);
-        
+
         if(flag.compare("DATA_FILE_NAME")==0){
             try {
                 if(value.length()==0){
                     cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                     cin.get();
-                    
+
                     exit(0);
                 }
                 DATA_FILE_NAME = value;
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("GENOME")==0){
@@ -797,7 +844,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("FILTER")==0){
@@ -807,7 +854,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("FILTER_1")==0){
@@ -816,7 +863,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("FILTER_2")==0){
@@ -826,7 +873,7 @@ void Config::resetSettings(){
                 if(FILTER>1){
                     cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                     cin.get();
-                    
+
                     exit(0);
                 }
             }
@@ -836,7 +883,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("CLUSTER_DENSITY")==0){
@@ -845,7 +892,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("CLUSTER_RADIUS")==0){
@@ -854,7 +901,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("OVERLAP")==0){
@@ -863,7 +910,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("WINDOW_X")==0){
@@ -872,7 +919,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("WINDOW_Y")==0){
@@ -881,7 +928,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("ENV_ATTR")==0){
@@ -890,7 +937,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("PLANT_ID_LIST")==0){
@@ -902,14 +949,14 @@ void Config::resetSettings(){
                 }else{
                     cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                     cin.get();
-                    
+
                     exit(0);
                 }
-                
+
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("PERIF_WEIGHT")==0){
@@ -918,7 +965,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("CORE_BY_PREIF")==0){
@@ -927,7 +974,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("NEGLIGIBLE_WEIGHT")==0){
@@ -936,7 +983,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("MINIMUM_PATH_LENGTH")==0){
@@ -945,7 +992,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("DELTA_CHANGE")==0){
@@ -954,7 +1001,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("INCREASE_DAP")==0){
@@ -966,11 +1013,11 @@ void Config::resetSettings(){
                 }else{
                     INCREASE_DAP = false;
                 }
-                
+
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("MATCH_SIGNATURE")==0){
@@ -982,11 +1029,11 @@ void Config::resetSettings(){
                 }else{
                     MATCH_SIGNATURE = true;
                 }
-                
+
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("PRINT_BARCODE")==0){
@@ -998,11 +1045,11 @@ void Config::resetSettings(){
                 }else{
                     PRINT_BARCODE = false;
                 }
-                
+
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("PH_JAVA_PLEX")==0){
@@ -1014,11 +1061,11 @@ void Config::resetSettings(){
                 }else{
                     PH_JAVA_PLEX = false;
                 }
-                
+
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("REFERENCE_PERFORMANCE")==0){
@@ -1030,11 +1077,11 @@ void Config::resetSettings(){
                 }else{
                     REFERENCE_PERFORMANCE = true;
                 }
-                
+
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("REFERENCE_ENV_INDEX")==0){
@@ -1043,7 +1090,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("EDGE_WIDTH")==0){
@@ -1052,7 +1099,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("EDGE_COLOR")==0){
@@ -1060,14 +1107,14 @@ void Config::resetSettings(){
                 if(value.length()==0||value[0]!='#'||value.length()<4||value.length()>7){
                     cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                     cin.get();
-                    
+
                     exit(0);
                 }
                 EDGE_COLOR = value;
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("NODE_SIZE_MAX")==0){
@@ -1076,7 +1123,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("NODE_SIZE_MIN")==0){
@@ -1085,7 +1132,7 @@ void Config::resetSettings(){
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }else if(flag.compare("HEATMAP_EACH_CC")==0){
@@ -1097,19 +1144,19 @@ void Config::resetSettings(){
                 }else{
                     HEATMAP_EACH_CC = false;
                 }
-                
+
             } catch (exception e) {
                 cout<<"The value of "<<flag<<" in param.config file is wrong."<<endl<<endl<<"Press any key to exit..."<<endl;;
                 cin.get();
-                
+
                 exit(0);
             }
         }
     }
-    
+
     if(FILTER==1) GENOME=0;
     else GENOME = 1;
-    
+
     if(FILTER_1==0){
         FILTER_NAMES[0] = "DAP";
         if(FILTER>1){
@@ -1176,13 +1223,12 @@ void Config::resetSettings(){
             }
         }
     }
-    
+
     OVERLAP_X = OVERLAP_Y = OVERLAP;
     CORE_POINT_WEIGHT = (PERIF_WEIGHT*CORE_BY_PREIF);
     TOTAL_CLUSTER_IDS = 1;
     for(int i=0;i<FILTER;i++)TOTAL_CLUSTER_IDS*=2;
-    
+
     QUAD_TREE_CHILDREN = 1;
     for(int i=0;i<FILTER;i++)QUAD_TREE_CHILDREN*=2;
 }*/
-

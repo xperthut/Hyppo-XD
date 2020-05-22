@@ -130,6 +130,7 @@ $(function () {
 
         // Get all JSON files
         getAllFiles: function(_folder){
+          _logger.addLog("graph.js getAllFiles");
           try {
             var files = this._fs.readdirSync(_folder);
             return files;
@@ -139,7 +140,9 @@ $(function () {
 
         // Function to get all file names in a directory
         getAllCsvFiles: function(){
+          _logger.addLog("graph.js getAllCsvFiles");
           var flist = [];
+          _logger.addLog(this.workspace);
 
           if(this.workspace && this._fs.existsSync(this.workspace.wd)){
             var _dir = _common.getPath([this.workspace.wd, "Data", "csv"]);
@@ -168,6 +171,7 @@ $(function () {
 
         // Get all JSON files
         getAllJsonFiles: function(){
+          _logger.addLog("graph.js getAllJsonFiles");
           var _fList = [];
 
           if(this.workspace && this._fs.existsSync(this.workspace.wd)){
@@ -240,6 +244,7 @@ $(function () {
         },
 
         setDefault: function () {
+            _logger.addLog("graph.js setDefault");
             this.link = null;
             this.node = null;
             this.labelText = "";
@@ -298,6 +303,7 @@ $(function () {
         },
 
         initPage: function (gData) {
+          _logger.addLog("graph.js initPage");
           console.log("Call initPage");
             this.fileName = gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex];
             this.zoom_handler(this.svg);
@@ -344,6 +350,7 @@ $(function () {
         },
 
         showHideSubGraph: function () {
+          _logger.addLog("graph.js showHideSubGraph");
             var _nid = [],
                     _show = $(this).prop("checked"),
                     c = parseInt($(this).attr("r"));
@@ -397,6 +404,7 @@ $(function () {
         },
 
         createSubGraphLegends: function () {
+          _logger.addLog("graph.js createSubGraphLegends");
             $("#cc-details").html("");
             $("#cc-details").html("<fieldset><legend>Connected subgraphs&nbsp;</legend><ul class='cc_legend'></ul></fieldset>");
 
@@ -425,11 +433,13 @@ $(function () {
         },
 
         selectButton: function (holder, e) {
+          _logger.addLog("graph.js selectButton");
             $("#" + holder + " button").removeClass("button_bc");
             $("#" + e.attr("id")).addClass("button_bc");
         },
 
         saveImage: function () {
+          _logger.addLog("graph.js saveImage");
             gInstance.selectButton("other-btn", $(this));
 
             var html = d3.select("svg")
@@ -460,6 +470,7 @@ $(function () {
         },
 
         changeIndvcolor: function (e, col) {
+          _logger.addLog("graph.js changeIndvcolor");
             var c = parseInt($(e).attr("r"));
 
             gInstance._graph.color[c - 1] = col;
@@ -468,6 +479,7 @@ $(function () {
         },
 
         changeFlarecolor: function (e, col) {
+          _logger.addLog("graph.js changeFlarecolor");
             var c = parseInt($(e).attr("r"));
 
             gInstance._graph.IFC[c - 1] = col;
@@ -492,7 +504,7 @@ $(function () {
 
         // Show only flare edges
         showIFs: function () {
-
+          _logger.addLog("graph.js showIFs");
             if ($(this).prop("checked") === true) {
                 var activeFlares = 0;
                 gInstance.hideIFRank = [];
@@ -617,7 +629,7 @@ $(function () {
         },
 
         showAllFlares: function () {
-
+          _logger.addLog("graph.js showAllFlares");
             var _allIntFlares = $("#saf").prop("checked");
 
             gInstance.selectedFeature[0] = gInstance.selectedFeature[1] = false;
@@ -675,6 +687,7 @@ $(function () {
         },
 
         showHideIntFlare: function () {
+          _logger.addLog("graph.js showHideIntFlare");
             var _nid = [],
                     _show = $(this).prop("checked"),
                     c = parseInt($(this).attr("r")),
@@ -830,6 +843,7 @@ $(function () {
         },
 
         createFlareLegends: function () {
+          _logger.addLog("graph.js createFlareLegends");
             $("#int-flare").css("display", "block");
 
             $("#flare-details").html("");
@@ -911,6 +925,7 @@ $(function () {
         },
 
         changeIFWidth: function () {
+          _logger.addLog("graph.js changeIFWidth");
             var val = $("#fw").val();
             $("#fwl").html(val + "%");
 
@@ -924,6 +939,7 @@ $(function () {
         },
 
         showHidePattern: function () {
+          _logger.addLog("graph.js showHidePattern");
             gInstance.piePattern = false;
             if ($(this).prop("checked") === true) {
                 gInstance.piePattern = true;
@@ -937,6 +953,7 @@ $(function () {
         },
 
         createPieColorLegend: function () {
+          _logger.addLog("graph.js createPieColorLegend");
             gInstance.selectButton("attr-btn", $(this));
 
             //$("#int-path").css("display", "none");
@@ -977,6 +994,7 @@ $(function () {
         },
 
         getFontColor: function (d, i) {
+          //_logger.addLog("graph.js getFontColor");
             var c = d.Color[i];
 
             if (gInstance.grayNode) {
@@ -1000,6 +1018,7 @@ $(function () {
         },
 
         resetFontSize: function () {
+          _logger.addLog("graph.js resetFontSize");
             var t = $(".labels").find("*");
             t.each(function (i) {
                 var _a = $(t[i]),
@@ -1012,6 +1031,7 @@ $(function () {
         },
 
         grayScaleNode: function () {
+          _logger.addLog("graph.js grayScaleNode");
             gInstance.grayNode = false;
 
             if ($(this).prop("checked") === true)
@@ -1020,6 +1040,7 @@ $(function () {
         },
 
         changeNodeColor: function (index, e) {
+          _logger.addLog("graph.js changeNodeColor");
             gInstance.selectButton("attr-btn", e);
 
             gInstance.lIndex = parseInt(index);
@@ -1064,6 +1085,7 @@ $(function () {
         },
 
         getNodeCoordinate: function () {
+          _logger.addLog("graph.js getNodeCoordinate");
           var _path = _common.getPath([this.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].split("__")[0] + ".json")]);
 
           if(this._fs.existsSync(_path)){
@@ -1101,7 +1123,7 @@ $(function () {
         },
 
         getCoordinates: function () {
-
+          _logger.addLog("graph.js getCoordinates");
             if (gInstance.coordData) {
                 gInstance.node.each(function (d) {
                     var __coord = gInstance.coordData["nid_" + d.Id];
@@ -1117,11 +1139,13 @@ $(function () {
         },
 
         clickGetCoordinates: function () {
+          _logger.addLog("graph.js clickGetCoordinates");
             gInstance.selectButton("other-btn", $(this));
             gInstance.getCoordinates();
         },
 
         setCoordinates: function () {
+            _logger.addLog("graph.js setCoordinates");
             gInstance.selectButton("other-btn", $(this));
 
             var nPos = "{";
@@ -1143,6 +1167,7 @@ $(function () {
         },
 
         saveColors: function () {
+          _logger.addLog("graph.js saveColors");
             gInstance.selectButton("other-btn", $(this));
 
             var s = JSON.stringify(gInstance._graph);
@@ -1157,6 +1182,7 @@ $(function () {
         },
 
         createColorBar: function () {
+          _logger.addLog("graph.js createColorBar");
             gInstance.selectButton("other-btn", $(this));
 
             var pos = [];
@@ -1256,6 +1282,7 @@ $(function () {
         },
 
         getColumnNames: function(){
+          _logger.addLog("graph.js getColumnNames");
           var selectedCSVFile = this.fl[this.fileIndex];
           for(var i=0; i<this.workspace.files.length; i++){
             if(this.workspace.files[i].csv === selectedCSVFile){
@@ -1277,6 +1304,7 @@ $(function () {
         },
 
         getPieAttributes: function(header){
+          _logger.addLog("graph.js getPieAttributes");
           //var header = this.getColumnNames();
           if(header.length===0) return "";
 
@@ -1311,7 +1339,7 @@ $(function () {
         },
 
         getFlareMemAttributes:function(header){
-
+          _logger.addLog("graph.js getFlareMemAttributes");
           if(header.length===0) return "";
 
           var colNames = [], colIndex=[];
@@ -1345,7 +1373,7 @@ $(function () {
         },
 
         createButtons: function () {
-
+          _logger.addLog("graph.js createButtons");
             $("#thumbnails").css("display", "block");
 
             var label = [];
@@ -1453,11 +1481,12 @@ $(function () {
             $("#map-details-details .jsonDetails table tr").css({"width":"100%"});
             $("#map-details-details .jsonDetails table td").css({"width":"33%", "border":"1px solid black", "text-align":"center", "padding":"2%"});
 
-            d3.select("#make_pie_chart").style("display", "block").style("color", "wheat").style("float", "right").on("click", gInstance.generateMapper);
+            d3.select("#generate_mapper").style("display", "block").style("color", "wheat").style("float", "right").on("click", gInstance.generateMapper);
 
         },
 
         getHeaderName: function(index, header){
+          _logger.addLog("graph.js getHeaderName");
           index = parseInt(index);
           for(var i=1; i<=header.length; i++){
             if(parseInt(header[i-1].index) === index){
@@ -1469,6 +1498,8 @@ $(function () {
         },
 
         createMapper: function(nesVal){
+          _logger.addLog("graph.js createMapper");
+          _logger.addLog(nesVal);
           var param = [];
 
           param.push("-RD");
@@ -1670,6 +1701,7 @@ $(function () {
 
           var chkFN = _common.getPath([this.workspace.wd,"Data", "json", this.fileName.split(".")[0], fName]);
           console.log(chkFN);
+          _logger.addLog(param);
 
           if(this._fs.existsSync(chkFN)){
             this.storeData(chkFN);
@@ -1684,6 +1716,7 @@ $(function () {
         },
 
         storeData: function(ofn){
+          _logger.addLog("graph.js storeData");
           try{
             this._fs.writeFileSync(_common.getPath([__dirname, "tmp.sp"]), JSON.stringify([{'csv':this.fl[this.fileIndex], 'json':this._path.basename(ofn)}]));
           }catch(err){
@@ -1692,7 +1725,9 @@ $(function () {
         },
 
         generateMapper: function(){
+          _logger.addLog("graph.js generateMapper");
           var param = (gInstance._graph.param)?gInstance._graph.param:null;
+          _logger.addLog(param);
 
           if(param){
             var nesVal = {
@@ -1741,6 +1776,7 @@ $(function () {
         },
 
         reload: function(){
+          _logger.addLog("graph.js reload");
           this.workspace = _common.getWorkSpace();
           this.fl = this.getAllCsvFiles();
           this.jfl = this.getAllJsonFiles();
@@ -1748,7 +1784,7 @@ $(function () {
         },
 
         changeEdgeColor: function (col) {
-
+          _logger.addLog("graph.js changeEdgeColor");
             for (var i = 0; i < gInstance._linkData.length; i++) {
                 if (gInstance._linkData[i].W === 2) {
                     gInstance._linkData[i].C = col;
@@ -1772,6 +1808,7 @@ $(function () {
         },
 
         showEdgeArrow: function () {
+          _logger.addLog("graph.js showEdgeArrow");
             gInstance.shEdgeArrow = false;
             if ($(this).prop("checked") === true) {
                 gInstance.shEdgeArrow = true;
@@ -1785,6 +1822,7 @@ $(function () {
         },
 
         showEdgeRank: function () {
+          _logger.addLog("graph.js showEdgeRank");
             gInstance.shEdgeRank = false;
             gInstance.shEdgeSig = false;
             if ($(this).prop("checked") === true) {
@@ -1800,6 +1838,7 @@ $(function () {
         },
 
         showEdgeSig: function () {
+          _logger.addLog("graph.js showEdgeSig");
             gInstance.shEdgeSig = false;
             gInstance.shEdgeRank = false;
             if ($(this).prop("checked") === true) {
@@ -1815,6 +1854,7 @@ $(function () {
         },
 
         changePathcolor: function (e, col) {
+          _logger.addLog("graph.js changePathcolor");
             var c = parseInt($(e).attr("r"));
 
             if(col.length>3){
@@ -1842,6 +1882,7 @@ $(function () {
         },
 
         showAllEdges: function () {
+          _logger.addLog("graph.js showAllEdges");
             if ($(this).prop("checked") === true) {
                 $("#ips").prop("checked", false);
             }
@@ -1857,6 +1898,7 @@ $(function () {
         },
 
         showIPs: function () {
+          _logger.addLog("graph.js showIPs");
             if ($(this).prop("checked") === true) {
                 $("#sa").prop("checked", false);
             }
@@ -1904,6 +1946,7 @@ $(function () {
         },
 
         showAllIPs: function () {
+          _logger.addLog("graph.js showAllIPs");
             var _allIntPaths = $("#sap").prop("checked");
 
             gInstance.selectedFeature[0] = gInstance.selectedFeature[1] = false;
@@ -1948,6 +1991,7 @@ $(function () {
         },
 
         showHideIntPath: function () {
+          _logger.addLog("graph.js showHideIntPath");
             var _nid = [],
                     _show = $(this).prop("checked"),
                     c = parseInt($(this).attr("r")),
@@ -2049,6 +2093,7 @@ $(function () {
         },
 
         changeIPWidth: function () {
+          _logger.addLog("graph.js changeIPWidth");
             var val = $("#pw").val();
             $("#pwl").html((val - 100) + "%");
 
@@ -2062,6 +2107,7 @@ $(function () {
         },
 
         getAllRowIdsOfANode: function (nodeID) {
+          _logger.addLog("graph.js getAllRowIdsOfANode");
             var rIDs = [];
             gInstance.node.each(function (d) {
                 if (d.Id === nodeID) {
@@ -2078,6 +2124,7 @@ $(function () {
         },
 
         getAllRowIdsOfAPath: function (pathRank) {
+          _logger.addLog("graph.js getAllRowIdsOfAPath");
             var rIDs = [];
             var nc = [];
             gInstance.link.each(function (d) {
@@ -2113,6 +2160,7 @@ $(function () {
         },
 
         pickData: function (rawIDs) {
+          _logger.addLog("graph.js pickData");
             rawIDs.sort();
             var _data = [];
             var _file = "Data/csv/" + gInstance.fl[gInstance.fileIndex] + "?t=" + (new Date).getTime();
@@ -2149,6 +2197,7 @@ $(function () {
         },
 
         nodeAnalysis:function(){
+          _logger.addLog("graph.js nodeAnalysis");
             var _l = $("#txtPA").val();
             if (_l.toUpperCase() === 'ALL') {
                 _l = "";
@@ -2196,6 +2245,7 @@ $(function () {
         },
 
         pathAnalysis: function () {
+          _logger.addLog("graph.js pathAnalysis");
             var _l = $("#txtPA").val();
             if (_l.toUpperCase() === 'ALL') {
                 _l = "";
@@ -2232,6 +2282,7 @@ $(function () {
         },
 
         createPathLegends: function () {
+          _logger.addLog("graph.js createPathLegends");
             $("#int-path").css("display", "block");
 
             $("#path-details").html("");
@@ -2323,6 +2374,7 @@ $(function () {
         },
 
         disableFeatures: function () {
+          _logger.addLog("graph.js disableFeatures");
             $("#int-path").css("display", "none");
             //$("#pie-legend").css("display", "none");
             $("#int-flare").css("display", "none");
@@ -2338,6 +2390,7 @@ $(function () {
         },
 
         showInterestingPaths: function () {
+          _logger.addLog("graph.js showInterestingPaths");
             $("#int-path").css("display", "block");
             //$("#pie-legend").css("display", "none");
             $("#int-flare").css("display", "none");
@@ -2351,6 +2404,7 @@ $(function () {
         },
 
         showInterestingFlares: function () {
+          _logger.addLog("graph.js showInterestingFlares");
             $("#int-path").css("display", "none");
             //$("#pie-legend").css("display", "block");
             $("#int-flare").css("display", "block");
@@ -2364,6 +2418,7 @@ $(function () {
         },
 
         showHideToolTip: function () {
+          _logger.addLog("graph.js showHideToolTip");
             gInstance.showToolTip = false;
             d3.select("#tooltip").style("display", "none");
 
@@ -2373,12 +2428,13 @@ $(function () {
         },
 
         createAttributes: function () {
+          _logger.addLog("graph.js createAttributes");
             $("#map-details").css("display", "block");
 
             $("#attr-ctrl").css("display", "block");
             $("#attr-details").html("");
             $("#attr-details").html("<fieldset><legend>View attributes&nbsp;</legend><ul class='view_attr_legend'></ul></fieldset>" +
-                    "<fieldset style='display:none;'><legend>Tooltip&nbsp;</legend><ul class='node_attr_legend'></ul></fieldset>" +
+                    "<fieldset><legend>Tooltip&nbsp;</legend><ul class='node_attr_legend'></ul></fieldset>" +
                     "<fieldset><legend>Edge attributes&nbsp;</legend><ul class='attr_legend'></ul></fieldset>" +
                     "<fieldset><legend>Features&nbsp;</legend><ul class='feature_legend'></ul></fieldset>");
 
@@ -2437,6 +2493,7 @@ $(function () {
         },
 
         writeDataToFile: function () {
+          _logger.addLog("graph.js writeDataToFile");
             var rIDs = [];
 
             for (var i = 0; i < gInstance._analysis.length; i++) {
@@ -2500,6 +2557,7 @@ $(function () {
         },
 
         adjustSelectedAttr: function () {
+          _logger.addLog("graph.js adjustSelectedAttr");
             var s = "";
             for (var i = 1; i <= gInstance._graph.HN.length; i++) {
                 if ($("#ancb_" + i).prop("checked") === true) {
@@ -2517,6 +2575,7 @@ $(function () {
         },
 
         adjustSelectedNodes: function () {
+          _logger.addLog("graph.js adjustSelectedNodes");
             var s = "";
             for (var i = 0; i < gInstance._analysis.length; i++) {
                 if (s.length > 0)
@@ -2533,6 +2592,7 @@ $(function () {
         },
 
         nodeRightClick: function (d) {
+          _logger.addLog("graph.js nodeRightClick");
             d3.event.preventDefault();
 
             return false;
@@ -2607,6 +2667,7 @@ $(function () {
         },
 
         removeSelection: function () {
+          _logger.addLog("graph.js removeSelection");
             for (var i = 0; i < gInstance._analysis.length; i++) {
                 var _cid = "#node_" + gInstance._analysis[i];
                 d3.select(_cid).style("stroke", "")
@@ -2619,6 +2680,7 @@ $(function () {
         },
 
         ticked: function () {
+          //_logger.addLog("graph.js ticked");
             gInstance.link
                     .attr("x1", function (d) {
                         var a = d.source;
@@ -2668,6 +2730,7 @@ $(function () {
         },
 
         dragstarted: function (d) {
+          _logger.addLog("graph.js dragstarted");
             $("#top-nav").css("display", "none");
             if (!d3.event.active)
                 gInstance.simulation.alphaTarget(0.3).restart();
@@ -2676,12 +2739,14 @@ $(function () {
         },
 
         dragged: function (d) {
+          //_logger.addLog("graph.js dragged");
             $("#top-nav").css("display", "none");
             d.fx = d3.event.x;
             d.fy = d3.event.y;
         },
 
         dragended: function (d) {
+          _logger.addLog("graph.js dragended");
             $("#top-nav").css("display", "none");
             if (!d3.event.active)
                 gInstance.simulation.alphaTarget(0);
@@ -2693,6 +2758,7 @@ $(function () {
         },
 
         createPallete: function () {
+          _logger.addLog("graph.js createPallete");
             var _piCol = gInstance._graph.color;
             var _patternPath = [
                 'M 0 0 L 10 10 M 9 -1 L 11 1 M -1 9 L 1 11',
@@ -2726,6 +2792,7 @@ $(function () {
         },
 
         createLinkArrow: function () {
+          _logger.addLog("graph.js createLinkArrow");
             d3.selectAll("marker").remove();
             var i = 1;
             gInstance.link.each(function (d) {
@@ -2754,7 +2821,7 @@ $(function () {
         },
 
         nodeMouseOver: function (d) {
-
+          //_logger.addLog("graph.js nodeMouseOver");
             if (!gInstance.showToolTip) {
                 return false;
             }
@@ -2777,47 +2844,12 @@ $(function () {
             d3.select("#type").attr("value", gInstance._graph.cols.Perf.toString());
             d3.select("#data").attr("value", tIDs.toString());
             d3.select("#folderName").attr("value", gInstance.fl[gInstance.fileIndex]);
-            d3.select("#fileName").attr("value", "");
-            var form = $("#frm");
 
-            $.ajax({
-                type: "POST",
-                url: "./datahandler/getperf?t=" + new Date().getTime(),
-                data: form.serialize(),
-                success: function (json, d) {
-                    if (json !== "404") {
-                        gInstance.tooltipDiv.transition()
-                                .duration(200);
 
-                        var s = "";
-                        var _jData = JSON.parse(json);
-                        for (var i = 0; i < gInstance._graph.cols.Perf.length; i++) {
-                            if (s.length > 0)
-                                s += "<br />";
-                            s += "<strong>" + gInstance._graph.btn[i].toString() + ":</strong>&nbsp;";
-
-                            var k = [];
-                            for (var j = 0; j < _jData.length; j++) {
-                                k.push(parseFloat(_jData[j][i]));
-                            }
-                            k.sort();
-
-                            s += k.toString().replace(/,/g, ", ");
-                            ;
-                        }
-
-                        //d3.select("#tooltip").style("display", "block");
-                        //gInstance.tooltipDiv.html("<strong>Node id:</strong>&nbsp;" + gInstance.selectedNodeId + "<br /><strong>Total points:</strong>&nbsp;" + tIDs.length +
-                      //        "<br />" + s);
-                    }
-                },
-                error: function (request, err, ex) {
-                    alert("Error to post data")
-                }
-            });
         },
 
         nodeMouseOut: function () {
+          //_logger.addLog("graph.js nodeMouseOut");
             if (!gInstance.showToolTip) {
                 return false;
             }
@@ -2830,6 +2862,7 @@ $(function () {
         },
 
         getFeatureWidth: function (d) {
+          //_logger.addLog("graph.js getFeatureWidth");
             if (gInstance.selectedFeature[0]) {
                 if (d.W > 2)
                     return (2 + ((d.W - 2) * gInstance.IPEdgeWeight));
@@ -2844,6 +2877,7 @@ $(function () {
         },
 
         getFeatureColor: function (d) {
+          //_logger.addLog("graph.js getFeatureColor");
             if (gInstance.selectedFeature[0]) {
                 if (d.W > 2)
                     return d.C;
@@ -2856,6 +2890,7 @@ $(function () {
         },
 
         convertHexToDec: function (hex_val) {
+          _logger.addLog("graph.js convertHexToDec");
             if (hex_val.length === 0)
                 return 0;
             if (hex_val.slice(0, 2) !== "0x") {
@@ -2866,6 +2901,7 @@ $(function () {
         },
 
         convertHexToRGB: function (hex_col) {
+          _logger.addLog("graph.js convertHexToRGB");
             if (hex_col[0] === '#')
                 hex_col = hex_col.slice(1, hex_col.length);
 
@@ -2884,6 +2920,7 @@ $(function () {
         },
 
         convertDecToHex: function (dec_val) {
+          _logger.addLog("graph.js convertDecToHex");
             var a = dec_val.toString(16);
             if (a.length < 2)
                 return "0" + a;
@@ -2891,6 +2928,7 @@ $(function () {
         },
 
         convertToGrayScale: function (aColor) {
+          _logger.addLog("graph.js convertToGrayScale");
             if (typeof aColor === "string") {
                 aColor = this.convertHexToRGB(aColor);
             }
@@ -2904,6 +2942,7 @@ $(function () {
         },
 
         draw: function (index) {
+          _logger.addLog("graph.js draw");
             this.lIndex = index;
             this.dpie = false;
             this.labelIndex = index;
@@ -3107,6 +3146,7 @@ $(function () {
         },
 
         getPieData: function (d) {
+          //_logger.addLog("graph.js getPieData");
             var pc = [];
             var kl = "";
             for (var i = 0; i < d.pie.length; i++) {
@@ -3123,6 +3163,7 @@ $(function () {
         },
 
         drawPie: function () {
+          _logger.addLog("graph.js drawPie");
             for (var i = 0; i < this._linkData.length; i++) {
                 if (this.EdgeDirChg && this._linkData[i].ED === 0) {
                     var tmp = this._linkData[i].source;
@@ -3277,7 +3318,7 @@ $(function () {
         },
 
         loadData: function () {
-
+          _logger.addLog("graph.js loadData");
             var _path = _common.getPath([this.workspace.wd, "Data", "json", this.fl[this.fileIndex].split(".")[0], this.jfl[this.fileRIndex].files[this.fileCIndex]]);
             //alert(_path);
             var data = this._fs.readFileSync(_path, 'utf-8');
@@ -3285,6 +3326,8 @@ $(function () {
         },
 
         loadDD: function (filename) {
+          _logger.addLog("graph.js loadDD");
+
             $("#top-nav").css("display", "none");
             $("#jsonheader").css("display", "block");
             var s = "";
@@ -3329,6 +3372,7 @@ $(function () {
         },
 
         getJSONFileDetails: function(){
+          _logger.addLog("graph.js getJSONFileDetails");
           //{"fc":[2],"wx":[30],"gx":[25.00],"cls":{"name":"DBSCAN", "param":[0.60,2]},"cla":[7],"sig":[],"rp":["GrowthRate"]}
           if(this.fnParam){
 
@@ -3365,7 +3409,7 @@ $(function () {
             s += "</fieldset>";
             s += "<fieldset id='pieDiv'><legend>Pie chart features</legend>" + this.getPieAttributes(_header_names) + "</fieldset>";
             s += "<fieldset id='memDiv'><legend>Flare membership features</legend>" + this.getFlareMemAttributes(_header_names) + "</fieldset>" +
-              "<button id='make_pie_chart' title='Generate mapper' style='display:none;'>Generate mapper</button>";
+              "<button id='generate_mapper' title='Generate mapper' style='display:none;'>Generate mapper</button>";
             return s+scrpt;
           }
 
@@ -3373,6 +3417,7 @@ $(function () {
         },
 
         loadMapperWindow: function(){
+          _logger.addLog("graph.js loadMapperWindow");
           const modalPath = this._path.join('file://', __dirname, 'mapper.html');
           const mBound = this._electron.remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
 
@@ -3380,6 +3425,8 @@ $(function () {
           if(this.workspace.wd.length===0){
 
             const { BrowserWindow } = require('electron').remote;
+
+          	//clog.transports.file.getFile();
             cWin = new BrowserWindow({
               width: mBound.width-80,
               height: mBound.height-80,
@@ -3387,6 +3434,7 @@ $(function () {
               title: "Create a mapper object",
               modal: true,
               webPreferences: {
+                //sandbox: true,
                 nodeIntegration: true
               }
             });
@@ -3415,6 +3463,7 @@ $(function () {
               parent: this._electron.remote.getCurrentWindow(),
               title: "Create a mapper object",
               webPreferences: {
+                //sandbox: true,
                 nodeIntegration: true
               }
             });
@@ -3434,6 +3483,7 @@ $(function () {
         },
 
         getStoredData: function(ofn){
+          _logger.addLog("graph.js getStoredData");
           try{
             var data = this._fs.readFileSync(_common.getPath([__dirname, "tmp.sp"]), 'utf-8');
             if(data.length>0) this.autoLoadData = JSON.parse(data);
@@ -3445,6 +3495,7 @@ $(function () {
         },
 
         loadFiles: function (e) {
+          _logger.addLog("graph.js loadFiles");
           this.autoLoadData = [];
           if(e) this.loadMapperWindow();
           else{
@@ -3607,7 +3658,8 @@ $(function () {
         });
     });
 
-    var _common = new CommonOps();
+    var _logger = new Logger();
+    var _common = new CommonOps(_logger);
     var gInstance = new Graph();//(fl, jfl);
     var cWin = null;
 

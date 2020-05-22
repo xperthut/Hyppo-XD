@@ -2538,7 +2538,15 @@ namespace hyppox {
                 std::string d3Data = "";
                 std::string d3Nodes = "\"nodes\": [\n\t";
                 std::vector<std::string> btn(hyppox::Config::CLUSTER_NAMES);
+
+                std::cout<<"Total clusters: "<<hyppox::Config::CLUSTER_NAMES.size()<<std::endl;
+                std::cout<<"Total filters: "<<hyppox::Config::FILTER_NAMES.size()<<std::endl;
+
                 btn.insert(btn.end(),hyppox::Config::FILTER_NAMES.begin(), hyppox::Config::FILTER_NAMES.end());
+
+                for(std::string sst:btn){
+                  std::cout<<sst<<std::endl;
+                }
 
                 // All individual colors based on pie chart
                 for(size_t i=0; i<this->pie_color.size(); i++){
@@ -2566,6 +2574,7 @@ namespace hyppox {
                     if(i<btn.size()-1) buttons += ",";
                 }
                 buttons += "]";
+                std::cout<<"Buttons: "<<buttons<<std::endl;
 
                 // Create column indices based on user input
                 // Genotype column index

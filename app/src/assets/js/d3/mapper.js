@@ -28,6 +28,8 @@ $(function () {
     constructor: Mapper,
 
     reload: function(){
+      _logger.addLog("mapper.js reload");
+      _logger.addLog(this.workspace);
       if(this.workspace.wd.length>0){
         $("#btnWrkSpace").html("Change working directory");
         $("#lblWrkSpace").html("Selected working directory: <strong>" + this.workspace.wd + "</strong>");
@@ -46,6 +48,7 @@ $(function () {
     },
 
     reset: function(){
+      _logger.addLog("mapper.js reset");
       this.fileNameWithPath="";
       this.fileName = "";
       this.colNames = [];
@@ -63,6 +66,7 @@ $(function () {
     },
 
     createDir: function(loc){
+      _logger.addLog("mapper.js createDir");
       if(!this._fs.existsSync(loc)){
         try{
           this._fs.mkdirSync(loc);
@@ -79,6 +83,7 @@ $(function () {
     },
 
     getAllFiles: function(_folder){
+      _logger.addLog("mapper.js getAllFiles");
       try {
         var files = this._fs.readdirSync(_folder);
         return files;
@@ -87,6 +92,7 @@ $(function () {
     },
 
     loadAllCsvFiles: function(){
+      _logger.addLog("mapper.js loadAllCsvFiles");
       if(this.workspace && this._fs.existsSync(this.workspace.wd)){
         var _dir = _common.getPath([this.workspace.wd, "Data", "csv"]);
         var files = this.getAllFiles(_dir);
@@ -110,6 +116,7 @@ $(function () {
 
     // Get all JSON files
     loadAllJsonFiles: function(){
+      _logger.addLog("mapper.js loadAllJsonFiles");
       if(this.workspace && this._fs.existsSync(this.workspace.wd)){
         var _dir = _common.getPath([this.workspace.wd, "Data", "json"]);
         var _folderList = this.getAllFiles(_dir);
@@ -142,6 +149,7 @@ $(function () {
     },
 
     createWorkingDir: function(){
+      _logger.addLog("mapper.js createWorkingDir");
       var f = this.createDir(_common.getPath([this.workspace.wd, "Data"])) |
               this.createDir(_common.getPath([this.workspace.wd, "Data", "csv"])) |
               this.createDir(_common.getPath([this.workspace.wd, "Data", "json"])) |
@@ -171,6 +179,7 @@ $(function () {
     },
 
     extractFileName: function(){
+      _logger.addLog("mapper.js extractFileName");
       //alert(this.fileNameWithPath);
       // /Users/methun/Sites/hyppox/Data/csv/Sample_18.csv
       this.fileName = this._path.basename(this.fileNameWithPath);
@@ -181,6 +190,7 @@ $(function () {
     },
 
     getColumnNameList: function(){
+      _logger.addLog("mapper.js getColumnNameList");
       var dt = new Date();
       var ldt = new Date();
       var csvIndex = -1;
@@ -250,6 +260,7 @@ $(function () {
     },
 
     storeData: function(ofn){
+      _logger.addLog("mapper.js storeData");
       try{
         this._fs.writeFileSync(_common.getPath([__dirname, "tmp.sp"]), JSON.stringify([{'csv':this._path.basename(this.fileNameWithPath), 'json':this._path.basename(ofn)}]));
 
@@ -270,6 +281,7 @@ $(function () {
     },
 
     checkMapperParams: function(nesVal){
+      _logger.addLog("mapper.js checkMapperParams");
       var errStatus = {status:true, msg:[]};
 
       if(nesVal.filter.length===0){
@@ -303,6 +315,7 @@ $(function () {
     },
 
     getHeaderName: function(index, header){
+      _logger.addLog("mapper.js getHeaderName");
       index = parseInt(index);
       for(var i=1; i<=header.length; i++){
         if(parseInt(header[i-1].index) === index){
@@ -314,7 +327,9 @@ $(function () {
     },
 
     createMapper: function(nesVal){
+      _logger.addLog("mapper.js addFilter");
       var param = [];
+      _logger.addLog(nesVal);
 
       param.push("-RD");
       param.push(_common.getPath([this.workspace.wd, "Data" , "csv"]));
@@ -323,10 +338,10 @@ $(function () {
       param.push("-FN");
       param.push(this.fileName);
 
+      param.push("-GC");
       if(nesVal.gen.length > 0){
-        param.push("-GC");
         param.push(nesVal.gen);
-      }
+      }else param.push("1");
 
       if(nesVal.loc.length > 0){
         param.push("-LC");
@@ -497,6 +512,7 @@ $(function () {
 
       var chkFN = _common.getPath([this.workspace.wd,"Data", "json", this.fileName.split(".")[0], fName]);
       console.log(chkFN);
+      _logger.addLog(param);
 
       if(this._fs.existsSync(chkFN)){
         this.storeData(chkFN);
@@ -509,6 +525,7 @@ $(function () {
     },
 
     addFilter: function(){
+      _logger.addLog("mapper.js addFilter");
       if(this.filterCount.length === 0) return "";
 
       if(this.filterCount.length>1)this.filterCount.sort(function(a,b){return b-a;});
@@ -565,6 +582,7 @@ $(function () {
     },
 
     getClusteringAttributes: function(){
+      _logger.addLog("mapper.js getClusteringAttributes");
       var s = "<select id='select-state' multiple name='state[]' class='demo-default' style='width:50%'>";
 
       for(var i=0; i<this.numericColNames.length; i++){
@@ -584,6 +602,7 @@ $(function () {
     },
 
     getPieAttributes: function(){
+      _logger.addLog("mapper.js getPieAttributes");
       var s = "<div class='ddiv' id='pieDiv'><label>Select attributes for pie chart</label>" +
               "<select id='pie-select-state' multiple name='state[]' class='demo-default' style='width:50%'>";
               console.log("total cols: " + this.colNames.length);
@@ -604,6 +623,7 @@ $(function () {
     },
 
     getMembershipAttributes: function(){
+      _logger.addLog("mapper.js getMembershipAttributes");
       var s = "<div class='ddiv' id='memDiv'><label>Select attributes for flare membership</label>" +
               "<select id='mem-select-state' multiple name='state[]' class='demo-default' style='width:50%'>";
 
@@ -624,6 +644,7 @@ $(function () {
     },
 
     getClusteringParams: function(){
+      _logger.addLog("mapper.js getClusteringParams");
       var s = "<label id='ccLabel'>Select a clustering algorithm and its associated parameters</label>" +
             "<div id='clusterParam'>" +
               "<div class='selCol'>" +
@@ -651,6 +672,7 @@ $(function () {
     },
 
     getPhenomicsAttributes: function(){
+      _logger.addLog("mapper.js getPhenomicsAttributes");
       var s = "<label id='phLabel'>Select parameters for phenomics dataset</label>" +
             "<div id='PHParam'>" +
               "<div class='selCol'>" +
@@ -730,6 +752,7 @@ $(function () {
     },
 
     getAdvanceAttributes: function(){
+      _logger.addLog("mapper.js getAdvanceAttributes");
       var s = this.getClusteringParams() + this.getPhenomicsAttributes();
       return s;
     }
@@ -749,6 +772,7 @@ $(function () {
   });
 
   $("#btnWrkSpace").click(function(){
+    _logger.addLog("mapper.js Workspace select button pressed");
     const {dialog} = require('electron').remote;
     dialog.showOpenDialog({
           properties: ['openDirectory'],
@@ -770,6 +794,7 @@ $(function () {
   });
 
   $("#file-input").on("click", (e)=>{
+    _logger.addLog("mapper.js File chooser button pressed");
     showBusyIndicator();
 
     const {width, height, x, y} = require('electron').remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
@@ -805,6 +830,7 @@ $(function () {
   });
 
   $("#addFilter").on("click", (e)=>{
+    _logger.addLog("mapper.js Add filter button pressed");
     $("#filterContainer").css("display", "block");
     var s = _mapper.addFilter();
     if(s.length>0) $("#filterContainer").append(s);
@@ -840,6 +866,7 @@ $(function () {
   });
 
   $("#btnCrMpr").click(function(){
+    _logger.addLog("mapper.js Create mapper button pressed");
     showBusyIndicator();
 
     var nesVal = {
@@ -857,6 +884,9 @@ $(function () {
       "loc": $('#selLocation div.item').map((i, el) => el.getAttribute('data-value')).get(),
       "dt": $('#selDT div.item').map((i, el) => el.getAttribute('data-value')).get()
     };
+
+    _logger.addLog("Check this");
+    _logger.addLog(nesVal);
 
     for(var i=1; i<=_mapper.maxFilter; i++){
       if(_mapper.filterCount.indexOf(i)===-1){
@@ -938,7 +968,8 @@ $(function () {
     hideBusyIndicator();
   });
 
-  var _common = new CommonOps();
+  var _logger = new Logger();
+  var _common = new CommonOps(_logger);
   var _mapper = new Mapper(2);
 
   _mapper.reload();

@@ -73,7 +73,7 @@ void GetMessage(const v8::FunctionCallbackInfo<v8::Value>& info) {
       // For Node 10X
       //v8::Local<v8::Value> jsElement = jsArr->Get(i);
       v8::Local<v8::Value> jsElement = Nan::Get(jsArr, i).ToLocalChecked();
-      
+
       v8::String::Utf8Value tps(isolate, jsElement); // take the string arg and convert it to v8::string
       std::string ps(*tps);
 

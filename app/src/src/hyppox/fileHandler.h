@@ -167,6 +167,7 @@ namespace hyppox {
 
                                 for(int fc:hyppox::Config::COL_CLUSTER){
                                     if(fc==col){
+                                        std::cout<<"cc1:"<<fc<<std::endl;
                                         hyppox::Config::CLUSTER_NAMES.push_back(s);
                                         break;
                                     }
@@ -192,6 +193,7 @@ namespace hyppox {
 
                         for(int fc:hyppox::Config::COL_CLUSTER){
                             if(fc==col){
+                                std::cout<<"cc2:"<<fc<<std::endl;
                                 hyppox::Config::CLUSTER_NAMES.push_back(s);
                                 break;
                             }
@@ -321,11 +323,11 @@ namespace hyppox {
                                     for(int fc:hyppox::Config::COL_CLUSTER){
                                         if(fc==col){
                                             ClusterType _ct;
-                                            
+
                                             if(!convert_to<ClusterType>(s, _ct)){
                                                 _ct = (ClusterType)INT_MAX;
                                             }
-                                            
+
                                             _clsValue.push_back(_ct);
 
                                             break;
@@ -538,6 +540,8 @@ namespace hyppox {
                 std::cout<<"\nError to read file"<<std::endl;
                 return -1;
             }
+
+            std::cout<<"clusters: "<<hyppox::Config::CLUSTER_NAMES.size()<<std::endl;
 
             return 0;
         }

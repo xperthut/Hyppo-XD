@@ -56,7 +56,7 @@ namespace hyppox {
         using GType = graph::Graph<PerfType,FHType>;
         using MType = mapper::Mapper<PerfType,mapper::DataPoint<PerfType*,float>,quadtree::QuadTree<PerfType*,float,float>,GType,FHType,ClusterIDType,RowIDType,ClusterType>;
 
-        Hyppox()=default;
+        Hyppox(){hyppox::Config::reset();}
         ~Hyppox()=default;
 
         std::string getD3GraphObject(int argc, const char * argv[]);
@@ -548,7 +548,7 @@ namespace hyppox {
                     while(pos!=std::string::npos){
                         std::string s1 = s.substr(0, pos);
                         s = s.substr(pos+1, s.length()-pos-1);
-                        
+
                         short _tmp;
                         convert_to<short>(trim(s," \t"), _tmp);
                         filterSignatureMatching.push_back(_tmp);

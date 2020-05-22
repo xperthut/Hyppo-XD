@@ -4,7 +4,7 @@
   "description": "Hypotheses extraction tool using visualization",
   "main": "src/main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "electron --no-sandbox .",
     "rebuild": "electron-rebuild -f -w Hyppo-XD",
     "clean": "node-gyp clean && rm -rf release* bin/ src/view/wp.sp src/view/tmp.sp",
     "clean-win": "node-gyp clean && DEL /S/Q src\\view\\wp.sp src\\view\\tmp.sp && RD /S/Q bin release-builds",
@@ -33,6 +33,7 @@
   "homepage": "https://github.com/xperthut/Hyppo-XD#readme",
   "dependencies": {
     "bindings": "^1.5.0",
+    "electron-installer-redhat": "^3.0.0",
     "electron-log": "^3.0.9",
     "jquery": "^3.4.1",
     "nan": "^2.14.0"

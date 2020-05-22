@@ -1,7 +1,8 @@
-function CommonOps(){
+function CommonOps(logger){
   this._electron = require('electron');
   this._fs = require('fs');
   this._path = require("path");
+  this._logger = logger;
 }
 
 CommonOps.prototype={
@@ -9,6 +10,7 @@ CommonOps.prototype={
 
   // Load the getWorkSpace
   getWorkSpace: function(){
+    this._logger.addLog("common.js getWorkSpace");
     try {
       return JSON.parse(this._fs.readFileSync(this.getPath([__dirname, "wp.sp"]), 'utf-8'));
     }catch(err) {
@@ -18,6 +20,7 @@ CommonOps.prototype={
   },
 
   saveWorkSpace: function(wp){
+    this._logger.addLog("common.js saveWorkSpace");
     try {
       this._fs.writeFileSync(this.getPath([__dirname, "wp.sp"]), JSON.stringify(wp));
 
@@ -28,6 +31,7 @@ CommonOps.prototype={
   },
 
   getPath: function(p){
+    this._logger.addLog("common.js getPath");
     if(p.length===0) return "";
     var _tp=p[0];
     for(var i=1; i<p.length; i++){
