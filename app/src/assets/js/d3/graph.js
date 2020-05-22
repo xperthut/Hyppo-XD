@@ -2838,14 +2838,37 @@ $(function () {
                     .style("left", (x + (d.x * k) + 100) + "px")
                     .style("top", (y + (d.y * k) - 28) + "px");
 
-            gInstance.tooltipDiv.html("");
+            var tt = "<p>";
+            tt += "<span>Total points: " + d.NP + "</span><br />";
+            for(var i=0; i<this._graph.btn.length; i++){
+              tt += "<span>Mean " + this._graph.btn[i] + ": " + d.Label[i] + "</span><br />";
+            }
 
-            var tIDs = gInstance.getAllRowIdsOfANode(d.Id);
-            d3.select("#type").attr("value", gInstance._graph.cols.Perf.toString());
-            d3.select("#data").attr("value", tIDs.toString());
-            d3.select("#folderName").attr("value", gInstance.fl[gInstance.fileIndex]);
+            if(d.tooltip.length>0){
+              tt += "<hr /><strong>Pie chart legends</strong><br />"
 
+              for(var i=0; i<d.tooltip.length; i++){
+                tt += "<span> Total " + this._graph.HN[this._graph.param.pie[i]-1] + ": " + d.tooltip[i].total + "</span><br /><span>";
+                var f = false;
 
+                for(var j=0; j<d.tooltip[i].names.length; j++){
+                  if(f) tt += ",";
+                  tt +=d.tooltip[i].names[j];
+
+                  if(j>5){
+                    tt += ",...";
+                    break;
+                  }
+                  f=true;
+                }
+
+                tt += "</span><br />"
+              }
+            }
+
+            tt += "</p>";
+            d3.select("#tooltip").style("display", "block");
+            gInstance.tooltipDiv.html(tt);
         },
 
         nodeMouseOut: function () {

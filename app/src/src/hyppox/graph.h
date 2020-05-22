@@ -228,6 +228,7 @@ namespace hyppox {
                 std::set<size_t> getPieCoverage();
                 float getWeightOfAMember(std::set<size_t> indv, std::unordered_map<std::string, size_t>*& memIndexMap);
                 std::string getPieChart();
+                std::string getToolTip();
 
                 //void setSize(float size);
                 void addInDegree();
@@ -581,6 +582,53 @@ namespace hyppox {
                 }
 
                 return "[" + pie + "]";
+            }
+
+            template<typename PerfType>
+            std::string rNode<PerfType>::getToolTip(){
+                if(hyppox::Config::COL_PIECHART.size()==0) return "[]";
+
+                std::set<std::string> ts;
+                std::vector<std::set<std::string>> pv(hyppox::Config::COL_PIECHART.size(), ts);
+
+                auto mp =this->points.getMap();
+
+                for(auto p:mp){
+                    std::string sk = p.second->getPieChart();
+                    if(hyppox::Config::COL_PIECHART.size()==1) pv[0].insert(sk);
+                    else{
+                        for(short i=0; i<(short)hyppox::Config::COL_PIECHART.size(); i++){
+                            size_t pos = sk.find("#");
+                            if(pos!=std::string::npos){
+                                pv[i].insert(sk.substr(0, pos));
+                                sk = sk.substr(pos+1, sk.length()-pos-1);
+                            }else if(sk.length()>0) pv[i].insert(sk);
+                        }
+                    }
+                }
+
+                std::string tt = "[";
+                bool f=false;
+
+                for(auto p:pv){
+                    if(f) tt+= ",";
+
+                    tt += "{\"total\":" + std::to_string(p.size());
+                    tt += ",\"names\":[";
+
+                    bool ft=false;
+
+                    for(std::string pis:p){
+                        if(ft) tt += ",";
+                        tt += "\"" + pis + "\"";
+                        ft = true;
+                    }
+                    tt += "]}";
+                    f=true;
+                }
+
+                tt += "]";
+                return tt;
             }
 
             template<typename PerfType>
@@ -2371,7 +2419,7 @@ namespace hyppox {
                 std::string node = "{\"Id\":" + std::to_string(n->getID()) + ",\"Size\":" +
                     //((hyppox::Config::FILTER==1)?"15":fixPrecision(adjustSize(n->getSize()), 2)) +
                     _nodeSize + ",\"NP\":" + fixPrecision(n->getSize(), 2) +
-                    ",\"Color\":" + color + ",\"pie\":" + n->getPieChart()+ ",\"Label\":" + label + ",\"Ph\":" +
+                    ",\"Color\":" + color + ",\"pie\":" + n->getPieChart()+ ",\"tooltip\":" + n->getToolTip()+ ",\"Label\":" + label + ",\"Ph\":" +
                     n->getPhIdListForD3() +
                     "}";
                 //n->getPhListForD3() + "}";
