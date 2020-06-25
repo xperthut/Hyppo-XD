@@ -3348,6 +3348,14 @@ $(function () {
             this.initPage(JSON.parse(data));
         },
 
+        getFittedString: function(s, l){
+          if(s.length>l){
+            s = s.substr(0, l) + "...";
+          }
+
+          return s;
+        },
+
         loadDD: function (filename) {
           _logger.addLog("graph.js loadDD");
 
@@ -3364,9 +3372,9 @@ $(function () {
                         if(ji === j){
                           this.fileCIndex = j;//$opt.attr('seq');
                           this.fileRIndex = i;//$opt.attr('row');
-                          s += "<option selected value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.jfl[i].files[j] + "</option>";
+                          s += "<option selected value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.getFittedString(this.jfl[i].files[j],90) + "</option>";
                         }else{
-                          s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.jfl[i].files[j] + "</option>";
+                          s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.getFittedString(this.jfl[i].files[j],90) + "</option>";
                         }
                     }
 

@@ -48,6 +48,25 @@ namespace hyppox {
 
             FileHandler(std::string fileName);
             ~FileHandler() = default;
+            bool isAlphaNumeric(char ch){
+                return (ch>='a' && ch<='z') || (ch>='A'&&ch<='Z') || (ch>='0'&&ch<='9');
+            }
+            void formatColumnName(std::string& s, char subs=':'){
+                size_t i=0, j=0;
+
+                while(i<s.length()){
+                    if(!this->isAlphaNumeric(s[i])){
+                        j = i;
+                        while(!this->isAlphaNumeric(s[i]))i++;
+                        if(s[i]>='a'&&s[i]<='z') s[i]-=32;
+                        if(i>j){
+                            s = s.substr(0, j) + s.substr(i, s.length()-i);
+                        }
+                        i=j;
+                    }
+                    i++;
+                }
+            }
             int ReadFileData(QTType* tree, std::vector<NodePosType> &_minPos, std::vector<NodePosType> &_maxPos, std::unordered_map<std::string, size_t>& mapMap, std::unordered_map<std::string, size_t>& pieMap);
             void readNodePosition(std::string fileName, std::unordered_map<ClusterIDType, float*> *positionMap);
             std::string WriteDataToFile(std::string fileName, std::string extention, std::string data, bool addTimeStemp);
@@ -157,6 +176,8 @@ namespace hyppox {
                             if(start) s+= ch;
                             else{
                                 col++;
+
+                                this->formatColumnName(s);
 
                                 for(int fc:hyppox::Config::COL_FILTER){
                                     if(fc==col){
@@ -540,8 +561,6 @@ namespace hyppox {
                 std::cout<<"\nError to read file"<<std::endl;
                 return -1;
             }
-
-            std::cout<<"clusters: "<<hyppox::Config::CLUSTER_NAMES.size()<<std::endl;
 
             return 0;
         }

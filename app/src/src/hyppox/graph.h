@@ -1052,6 +1052,7 @@ namespace hyppox {
             CustomHashSet<size_t> covSourceNodeIdSet;
             CustomHashSet<size_t> covIntSourceNodeIdSet;
             CustomHashSet<size_t> exploreSet;
+            CustomHashSet<size_t> visitedSet;
             CustomHashSet<std::string> terminalEdgeSet;
 
             unsigned int ccNumber;
@@ -1239,6 +1240,7 @@ namespace hyppox {
 
             auto _id = this->exploreSet.getElement();
             this->exploreSet.removeItem(_id);
+            this->visitedSet.addToSet(_id);
 
             auto fromNode = this->nodes.getValue(_id);
 
@@ -1283,7 +1285,12 @@ namespace hyppox {
             for(size_t i=0; i<fromNode->getTotalOutDegree(); i++){
                 auto toNode = fromNode->getNextNode(i);
 
-                this->exploreSet.addToSet(toNode->getID());
+                //this->exploreSet.addToSet(toNode->getID());
+                if(!this->visitedSet.hasItem(toNode->getID())){
+                    this->exploreSet.removeItem(toNode->getID());
+                    this->exploreSet.addToSet(toNode->getID());
+                    this->visitedSet.addToSet(toNode->getID());
+                }
             }
         }
 
@@ -1372,12 +1379,14 @@ namespace hyppox {
         void IsolatedSubGraph<PerfType,RNType,REType>::runBFS(){
             this->resetDepth();
             this->identifySourceNodes(true);
+            this->visitedSet.clearHashSet();
 
             auto sourceIds = this->sourceNodeIdSet.getSet();
 
             for(auto itr=sourceIds.begin(); itr!=sourceIds.end(); itr++){
                 auto fromId = *itr;
                 auto fromNode = this->nodes.getValue(fromId);
+                this->visitedSet.addToSet(fromId);
 
                 for(size_t i=0; i<fromNode->getTotalOutDegree(); i++){
                     auto toNode = fromNode->getNextNode(i);
@@ -1385,14 +1394,21 @@ namespace hyppox {
 
                     e->setDepth(1);
 
-                    this->exploreSet.removeItem(e->getToNode()->getID());
-                    this->exploreSet.addToSet(e->getToNode()->getID());
+                    if(!this->visitedSet.hasItem(e->getToNode()->getID())){
+                        this->exploreSet.removeItem(e->getToNode()->getID());
+                        this->exploreSet.addToSet(e->getToNode()->getID());
+                        this->visitedSet.addToSet(e->getToNode()->getID());
+                    }
+
                 }
             }
 
             while(this->exploreSet.getSize()>0){
+                //Test
+                //std::cout<<this->exploreSet.getSize()<<",";
                 this->exploreNode();
             }
+            //std::cout<<std::endl;
         }
 
         template<typename PerfType, typename RNType, typename REType>
@@ -1880,7 +1896,13 @@ namespace hyppox {
                         _coverage->addTerminalNode(sourceNode->getID());
                         if(tNode->getTotalOutDegree()>0 && !this->exploreSet.hasItem(tNode->getID())){
                             this->covIntSourceNodeIdSet.addToSet(tNode->getID());
-                            this->exploreSet.addToSet(tNode->getID());
+                            //this->exploreSet.addToSet(tNode->getID());
+
+                            if(!this->visitedSet.hasItem(tNode->getID())){
+                                this->exploreSet.removeItem(tNode->getID());
+                                this->exploreSet.addToSet(tNode->getID());
+                                this->visitedSet.addToSet(tNode->getID());
+                            }
                         }
                         return 1;
                     }
@@ -1898,7 +1920,13 @@ namespace hyppox {
                         _coverage->addTerminalNode(sourceNode->getID());
                         if(tNode->getTotalOutDegree()>0 && !this->exploreSet.hasItem(tNode->getID())){
                             this->covIntSourceNodeIdSet.addToSet(tNode->getID());
-                            this->exploreSet.addToSet(tNode->getID());
+                            //this->exploreSet.addToSet(tNode->getID());
+
+                            if(!this->visitedSet.hasItem(tNode->getID())){
+                                this->exploreSet.removeItem(tNode->getID());
+                                this->exploreSet.addToSet(tNode->getID());
+                                this->visitedSet.addToSet(tNode->getID());
+                            }
                         }
                         return 1;
                     }
@@ -1916,7 +1944,13 @@ namespace hyppox {
                         _coverage->addTerminalNode(sourceNode->getID());
                         if(tNode->getTotalOutDegree()>0 && !this->exploreSet.hasItem(tNode->getID())){
                             this->covIntSourceNodeIdSet.addToSet(tNode->getID());
-                            this->exploreSet.addToSet(tNode->getID());
+                            //this->exploreSet.addToSet(tNode->getID());
+
+                            if(!this->visitedSet.hasItem(tNode->getID())){
+                                this->exploreSet.removeItem(tNode->getID());
+                                this->exploreSet.addToSet(tNode->getID());
+                                this->visitedSet.addToSet(tNode->getID());
+                            }
                         }
                         return 1;
                     }
@@ -1926,7 +1960,13 @@ namespace hyppox {
                         _coverage->addTerminalNode(sourceNode->getID());
                         if(tNode->getTotalOutDegree()>0 && !this->exploreSet.hasItem(tNode->getID())){
                             this->covIntSourceNodeIdSet.addToSet(tNode->getID());
-                            this->exploreSet.addToSet(tNode->getID());
+                            //this->exploreSet.addToSet(tNode->getID());
+
+                            if(!this->visitedSet.hasItem(tNode->getID())){
+                                this->exploreSet.removeItem(tNode->getID());
+                                this->exploreSet.addToSet(tNode->getID());
+                                this->visitedSet.addToSet(tNode->getID());
+                            }
                         }
                         return 1;
                     }
@@ -1945,7 +1985,13 @@ namespace hyppox {
                         _coverage->addTerminalNode(sourceNode->getID());
                         if(tNode->getTotalOutDegree()>0 && !this->exploreSet.hasItem(tNode->getID())){
                             this->covIntSourceNodeIdSet.addToSet(tNode->getID());
-                            this->exploreSet.addToSet(tNode->getID());
+                            //this->exploreSet.addToSet(tNode->getID());
+
+                            if(!this->visitedSet.hasItem(tNode->getID())){
+                                this->exploreSet.removeItem(tNode->getID());
+                                this->exploreSet.addToSet(tNode->getID());
+                                this->visitedSet.addToSet(tNode->getID());
+                            }
                         }
                         return 1;
                     }
@@ -2586,15 +2632,7 @@ namespace hyppox {
                 std::string d3Data = "";
                 std::string d3Nodes = "\"nodes\": [\n\t";
                 std::vector<std::string> btn(hyppox::Config::CLUSTER_NAMES);
-
-                std::cout<<"Total clusters: "<<hyppox::Config::CLUSTER_NAMES.size()<<std::endl;
-                std::cout<<"Total filters: "<<hyppox::Config::FILTER_NAMES.size()<<std::endl;
-
                 btn.insert(btn.end(),hyppox::Config::FILTER_NAMES.begin(), hyppox::Config::FILTER_NAMES.end());
-
-                for(std::string sst:btn){
-                  std::cout<<sst<<std::endl;
-                }
 
                 // All individual colors based on pie chart
                 for(size_t i=0; i<this->pie_color.size(); i++){
