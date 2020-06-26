@@ -758,7 +758,7 @@ namespace hyppox {
 
     std::string Hyppox::visualization(){
         std::cout<<"Started constructing interesting paths...\n";
-        time_t t1=clock(), t2;
+        time_t st=clock(), t1=clock(), t2;
         this->graph.generateInterestingPaths();
         t2 = clock();
         std::vector<std::string> _time = getTime((float)(t2-t1)/CLOCKS_PER_SEC);
@@ -773,7 +773,13 @@ namespace hyppox {
             std::cout<<"Total time to construct all flares:"<<_time[0]<<_time[1]<<std::endl;
         }
 
-        return this->graph.printD3Graph();
+        std::string rs = this->graph.printD3Graph();
+
+        t2 = clock();
+        _time = getTime((float)(t2-st)/CLOCKS_PER_SEC);
+        std::cout<<"Overall Execution time:"<<_time[0]<<_time[1]<<std::endl;
+
+        return rs;
     }
 }
 
