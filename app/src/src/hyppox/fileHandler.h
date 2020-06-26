@@ -53,6 +53,7 @@ namespace hyppox {
             }
             void formatColumnName(std::string& s, char subs=':'){
                 size_t i=0, j=0;
+                std::cout<<"Old name:"<<s<<std::endl;
 
                 while(i<s.length()){
                     if(!this->isAlphaNumeric(s[i])){
@@ -66,6 +67,7 @@ namespace hyppox {
                     }
                     i++;
                 }
+                std::cout<<"New name:"<<s<<std::endl;
             }
             int ReadFileData(QTType* tree, std::vector<NodePosType> &_minPos, std::vector<NodePosType> &_maxPos, std::unordered_map<std::string, size_t>& mapMap, std::unordered_map<std::string, size_t>& pieMap);
             void readNodePosition(std::string fileName, std::unordered_map<ClusterIDType, float*> *positionMap);
@@ -204,6 +206,7 @@ namespace hyppox {
 
                     if(s.length()>0){
                         col++;
+                        this->formatColumnName(s);
 
                         for(int fc:hyppox::Config::COL_FILTER){
                             if(fc==col){

@@ -307,7 +307,7 @@ $(function () {
           console.log("Call initPage");
             this.fileName = gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex];
             this.zoom_handler(this.svg);
-            this.zoom_handler.scaleExtent([1 / 10, 10])
+            this.zoom_handler.scaleExtent([1 / 50, 50])
                     .on("zoom", gInstance.zoom_actions);
 
             $("#int-cc").css("display", "none");
