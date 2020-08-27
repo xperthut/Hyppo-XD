@@ -42,7 +42,7 @@
   "devDependencies": {
     "asar": "^2.1.0",
     "csv-parser": "^2.3.3",
-    "electron": "^6.1.12",
+    "electron": "^10.0.0",
     "electron-installer-debian": "^2.0.1",
     "electron-installer-dmg": "^3.0.0",
     "electron-installer-windows": "^2.0.0",
