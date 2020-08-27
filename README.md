@@ -68,6 +68,10 @@ Open terminal and redirect to the [git folder]/app prior running the following c
   # Install asar package
   npm install --save-dev asar
   
+  # Install csv-parser
+  npm install --save-dev csv-parser
+  npm install csv-parser -g
+  
   # Install logger
   npm install --save electron-log
   
