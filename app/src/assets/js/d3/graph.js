@@ -121,6 +121,7 @@ $(function () {
         this.autoLoadData = [];
         this.fnParam = null;
         this.devMode = false;
+        this.IndvPresence = null;
     }
 
     Graph.prototype = {
@@ -2494,22 +2495,23 @@ $(function () {
 
         writeDataToFile: function () {
           _logger.addLog("graph.js writeDataToFile");
-            var rIDs = [];
+          var idMap = new HashMap();
 
-            for (var i = 0; i < gInstance._analysis.length; i++) {
-                var tIDs = gInstance.getAllRowIdsOfANode(gInstance._analysis[i]);
-                for (var j = 0; j < tIDs.length; j++) {
-                    if (rIDs.indexOf(tIDs[j]) < 0) {
-                        rIDs.push(tIDs[j]);
-                    }
-                }
-            }
-
-            if (rIDs.length > 0) {
-                rIDs.sort(function (a, b) {
-                    return a - b;
-                });
-            }
+          for (var i = 0; i < gInstance._analysis.length; i++) {
+              var tIDs = gInstance.getAllRowIdsOfANode(gInstance._analysis[i]);
+              var rIDs = [];
+              for (var j = 0; j < tIDs.length; j++) {
+                  if (rIDs.indexOf(tIDs[j]) < 0) {
+                      rIDs.push(tIDs[j]);
+                  }
+              }
+              if (rIDs.length > 0) {
+                  rIDs.sort(function (a, b) {
+                      return a - b;
+                  });
+                  idMap.put(gInstance._analysis[i], rIDs);
+              }
+          }
 
             var cols = [];
             for (var i = 1; i <= gInstance._graph.HN.length; i++) {
@@ -2595,7 +2597,7 @@ $(function () {
           _logger.addLog("graph.js nodeRightClick");
             d3.event.preventDefault();
 
-            return false;
+            //return false;
 
             d3.select("#top-nav").style("display", "none");
 
@@ -3174,6 +3176,16 @@ $(function () {
             var kl = "";
             for (var i = 0; i < d.pie.length; i++) {
                 var index = d.pie[i][0] - 1;
+
+                var _key = this._graph.indv[index];
+                var _ct = this.IndvPresence.get(_key);
+
+                if(_ct===null){
+                  this.IndvPresence.put(_key, 1);
+                }else{
+                  this.IndvPresence.put(_key, _ct+1);
+                }
+
                 var percentage = d.pie[i][1];
 
                 if (kl.length > 0)
@@ -3323,6 +3335,9 @@ $(function () {
 
             /* Draw the respective pie chart for each node */
             gInstance.createPallete();
+            if(this.IndvPresence===null){
+              this.IndvPresence = new HashMap();
+            }
             this.node.each(function (d) {
                 var pieData = gInstance.getPieData(d);
 

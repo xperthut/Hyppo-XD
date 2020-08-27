@@ -58,7 +58,7 @@ namespace hyppox {
                 while(i<s.length()){
                     if(!this->isAlphaNumeric(s[i])){
                         j = i;
-                        while(!this->isAlphaNumeric(s[i]))i++;
+                        while(i<s.length() && !this->isAlphaNumeric(s[i]))i++;
                         if(s[i]>='a'&&s[i]<='z') s[i]-=32;
                         if(i>j){
                             s = s.substr(0, j) + s.substr(i, s.length()-i);
