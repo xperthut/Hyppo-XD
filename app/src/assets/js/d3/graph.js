@@ -127,8 +127,6 @@ $(function () {
     Graph.prototype = {
         constructor: Graph,
 
-
-
         // Get all JSON files
         getAllFiles: function(_folder){
           _logger.addLog("graph.js getAllFiles");
@@ -1102,6 +1100,9 @@ $(function () {
                 }
             });
             $("#int-cc").css("display", "block");
+            if(this._graph.param.fc.length===1){
+              $("#color_bar").css("display", "block");
+            }
           }else{
             console.log(_path + " not found.");
           }
@@ -1161,6 +1162,10 @@ $(function () {
 
             try{
               gInstance._fs.writeFileSync(_path, nPos);
+
+              if(gInstance._graph.param.fc.length===1){
+                $("#color_bar").css("display", "block");
+              }
             }catch(err){
               alert("Error in setCoordinates: " + err.message);
             }
@@ -1188,16 +1193,32 @@ $(function () {
 
             var pos = [];
             var posC = [];
+            var w = $(window).width(), //w=pos[pos.length - 1][0] - pos[0][0],
+                    h = 70;
 
             gInstance.node.each(function (d) {
-                pos.push([d.x, d.Id]);
+              var x = 0.0, y = 0.0, k = 1.0;
+              if (gInstance.__transform) {
+                  x = gInstance.__transform.x;
+                  y = gInstance.__transform.y;
+                  k = gInstance.__transform.k;
+              }
+
+              var nodePos = (x + (d.x * k) + 100);
+              if(nodePos>=0 && nodePos<=w){
+                pos.push([nodePos, d.Id]);
+              }
             });
 
             pos.sort(function (a, b) {
                 return a[0] - b[0];
             });
 
-            var _int = parseInt(pos.length / 5 > 10 ? pos.length / 10 : pos.length / 5);
+            var _int = parseInt(pos.length/10);//parseInt(pos.length / 5 > 10 ? pos.length / 10 : pos.length / 5);
+            var _tickValues=[];
+
+            if(pos.length<11) _int=pos.length;
+            else if(pos.length<21) _int=parseInt(pos.length/5);
 
             var _ic = 0;
             for (; _ic < pos.length; _ic += _int) {
@@ -1219,9 +1240,7 @@ $(function () {
                 }
             });
 
-            var w = $(window).width(), //pos[pos.length - 1][0] - pos[0][0],
-                    h = 70;
-
+            //w=pos[pos.length - 1][0] - pos[0][0];
             if (d3.selectAll("#legends")) {
                 d3.selectAll("#legends").remove();
                 d3.selectAll("linearGradient").remove();
@@ -1257,9 +1276,14 @@ $(function () {
                     .range([w, 0])
                     .domain([posC[posC.length - 1][2], posC[0][2]]);
 
+            for(var i=0; i<posC.length; i++){
+              _tickValues.push(posC[i][2]);
+            }
+
             var yAxis = d3.axisBottom()
                     .scale(y)
-                    .ticks(_int);
+                    .ticks(_int)
+                    .tickValues(_tickValues);
 
             _g.attr("class", "y axis")
                     .attr("transform", "translate(0," + ($(window).height() - 40) + ")")
@@ -1408,7 +1432,7 @@ $(function () {
             for (var l in label) {
                 s += "<button id='btn_" + label[l] + "' seq='" + l + "'>" + label[l].replace("_", " ") + "</button>&nbsp;";
             }
-            $("#attr-btn").html(s + "</div><div style='float:left'>" +
+            $("#attr-btn").html(s + "</div><div style='clear:left;float:left'>" +
                     "<input type='checkbox' class='gsn-select' id='grayScaleNode' /><label class='fa' for='grayScaleNode'>Show in gray scale</label>" +
                     "</div></fieldset>");
 
@@ -1427,8 +1451,8 @@ $(function () {
             // dev version
             s += "<button id='get_coord' title='Assign saved node position to the graph'>Restore nodes positions</button>&nbsp;" +
                     "<button id='set_coord' title='Save node positions'>Save nodes positions</button>&nbsp;" +
-                    "<button id='set_color' title='Save colors whatever you changed'>Save colors</button>&nbsp;";
-            if(this._graph.param.fc.length===1) s += "<button id='color_bar' title='Color bar'>Color bar</button>&nbsp;";
+                    "<button id='set_color' title='Save colors whatever you changed'>Save colors</button>&nbsp;" +
+                    "<button id='color_bar' title='Color bar'>Color bar</button>&nbsp;";
 
             s += "<button id='node_analysis' title='Explore nodes' style='display:none;'>Analysis</button>&nbsp;";
 
@@ -1604,7 +1628,7 @@ $(function () {
               fName += "-";
             }
             s += nesVal.overlap[i];
-            fName += parseFloat(nesVal.overlap[i]).toFixed(2);
+            fName += parseFloat(nesVal.overlap[i]).toFixed(4);
           }
           s += "]";
           fName += "_";
@@ -1621,7 +1645,7 @@ $(function () {
             s += nesVal.cluster_param[i];
 
             if(i==0 && nesVal.cluster_algo==="DBSCAN"){
-              fName += parseFloat(nesVal.cluster_param[i]).toFixed(2);
+              fName += parseFloat(nesVal.cluster_param[i]).toFixed(4);
             }else{
               fName += nesVal.cluster_param[i];
             }
@@ -2513,12 +2537,12 @@ $(function () {
               }
           }
 
-            var cols = [];
-            for (var i = 1; i <= gInstance._graph.HN.length; i++) {
-                if ($("#ancb_" + i).prop("checked") === true) {
-                    cols.push(i);
-                }
-            }
+          var cols = [];
+          for (var i = 1; i <= gInstance._graph.HN.length; i++) {
+              if ($("#ancb_" + i).prop("checked") === true) {
+                  cols.push(i);
+              }
+          }
 
             if (cols.length === 0) {
                 alert("Please select columns.");
@@ -2829,16 +2853,18 @@ $(function () {
             }
 
             gInstance.selectedNodeId = d.Id;
-            var x = 0.0, y = 0.0, k = 1.0;
+            var x = 0.0, y = 0.0, k = 1.0, offsetX=50, offsetY=-25;
             if (gInstance.__transform) {
                 x = gInstance.__transform.x;
                 y = gInstance.__transform.y;
                 k = gInstance.__transform.k;
             }
 
+            var newX = x + (d.x * k) + offsetX, newY = y + (d.y * k) - offsetY;
+
             d3.select("#tooltip").style("display", "none")
-                    .style("left", (x + (d.x * k) + 100) + "px")
-                    .style("top", (y + (d.y * k) - 28) + "px");
+                    .style("left", newX + "px")
+                    .style("top", newY + "px");
 
             var tt = "<p>";
             tt += "<span>Total points: " + d.NP + "</span><br />";
@@ -2871,6 +2897,26 @@ $(function () {
             tt += "</p>";
             d3.select("#tooltip").style("display", "block");
             gInstance.tooltipDiv.html(tt);
+
+            if(d3.select("#tooltip")){
+              var maxW = $(window).width()-100;
+              var maxH = $(window).height()-100;
+              var element = d3.select('#tooltip').node();
+              var tt_right = element.getBoundingClientRect().right;
+              var tt_left = element.getBoundingClientRect().left;
+              var tt_top = element.getBoundingClientRect().top;
+              var tt_bottom = element.getBoundingClientRect().bottom;
+              var tt_width = tt_right-tt_left;
+              var tt_height = tt_bottom-tt_top;
+
+              if(tt_right>=maxW){
+                d3.select("#tooltip").style("left", (newX-(2*offsetX)-tt_width) + "px");
+              }
+
+              if(tt_bottom>=maxH){
+                d3.select("#tooltip").style("top", (newY-(tt_bottom-maxH)) + "px");
+              }
+            }
         },
 
         nodeMouseOut: function () {
@@ -3450,7 +3496,7 @@ $(function () {
             s += "<tr><td><label>Density: </label></td>";
             s += "<td><input type='text' id='txtDensity' placeholder='" + this.fnParam.cls.param[1] + "' value='" + this.fnParam.cls.param[1] + "' onkeypress='return isFloatingNumberKey(event, this)' /></td></tr>";
             s += "<tr><td><label>Radius: </label></td>";
-            s += "<td><input type='text' id='txtRadius' placeholder='" + parseFloat(this.fnParam.cls.param[0]).toFixed(2) + "' value='" + parseFloat(this.fnParam.cls.param[0]).toFixed(2) + "' onkeypress='return isFloatingNumberKey(event, this)' /></td></tr>";
+            s += "<td><input type='text' id='txtRadius' placeholder='" + parseFloat(this.fnParam.cls.param[0]).toFixed(4) + "' value='" + parseFloat(this.fnParam.cls.param[0]).toFixed(4) + "' onkeypress='return isFloatingNumberKey(event, this)' /></td></tr>";
             s += "</table>";
             s += "</fieldset>";
             s += "<fieldset id='pieDiv'><legend>Pie chart features</legend>" + this.getPieAttributes(_header_names) + "</fieldset>";

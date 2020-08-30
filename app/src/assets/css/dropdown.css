@@ -3,7 +3,7 @@ To change this license header, choose License Headers in Project Properties.
 To change this template file, choose Tools | Templates
 and open the template in the editor.
 */
-/* 
+/*
     Created on : Feb 4, 2018, 3:10:43 PM
     Author     : methun
 */
@@ -37,10 +37,10 @@ and open the template in the editor.
     background-color: #f1f1f1;
     z-index: 1;
     position: absolute;*/
-    
+
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    
+
 }
 
 /* Links inside the dropdown */
@@ -73,7 +73,7 @@ and open the template in the editor.
 
 #top-nav ul{
   background-color: #f1f1f1;
-  list-style: none;  
+  list-style: none;
   padding-left: 0px;
   border-radius: 10px;
 }
@@ -108,19 +108,19 @@ ul.dropdown-menu li{
 .legend span, .pattern span { border: 1px solid #ccc; float: left; width: 20px; height: 20px; margin: 2px;}
 
 .flare_options,.flare_legend,
-.path_legend, .path_options, 
+.path_legend, .path_options,
 .cc_legend,.attr_legend,.node_attr_legend,.view_attr_legend,
 .feature_legend, path_analysis { list-style: none; height: 20px;}
 .flare_options li,.flare_legend li,.path_legend li, .path_options li, .cc_legend li,.attr_legend li,.node_attr_legend li,.view_attr_legend li,.feature_legend li { float: left; margin-right: 5px; }
 flare_options span,.flare_legend span,.path_legend span, .path_options span, .cc_legend span,.attr_legend span,.node_attr_legend span,.view_attr_legend span,.feature_legend span { border: 1px solid #ccc; float: left; width: 20px; height: 20px; margin: 2px;}
 
 .modal-init{
-    position: absolute; 
-    top: 50px; 
-    left: 50px; 
-    width: 90%; 
-    height: auto; 
-    z-index: 9999; 
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    width: 90%;
+    height: auto;
+    z-index: 9999;
     background-color: white;
 }
 
@@ -203,6 +203,8 @@ fieldset pattern{text-align: left;}
   text-align: left;
   min-width: 208px;
 }
+
+#color_bar{display: none;}
 
 #attrList ul{
     display: block;

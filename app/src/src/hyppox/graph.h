@@ -2828,10 +2828,10 @@ namespace hyppox {
                     // Filternames_windows_overlap_clusterParams
                     paramJS += "\"cls\":{\"name\":\"" + hyppox::Config::CLUSTER_METHOD + "\", \"param\":[";
                     if(hyppox::Config::CLUSTER_METHOD.compare("DBSCAN")==0){
-                        fName += "_" + hyppox::Config::CLUSTER_METHOD + fCascad + fixPrecision(hyppox::Config::CLUSTER_PARAM[0], 2)+
+                        fName += "_" + hyppox::Config::CLUSTER_METHOD + fCascad + fixPrecision(hyppox::Config::CLUSTER_PARAM[0], 4)+
                             fCascad + fixPrecision(hyppox::Config::CLUSTER_PARAM[1], 0);
 
-                        paramJS += fixPrecision(hyppox::Config::CLUSTER_PARAM[0], 2)+ "," + fixPrecision(hyppox::Config::CLUSTER_PARAM[1], 0);
+                        paramJS += fixPrecision(hyppox::Config::CLUSTER_PARAM[0], 4)+ "," + fixPrecision(hyppox::Config::CLUSTER_PARAM[1], 0);
                     }
                     paramJS += "]},";
 
