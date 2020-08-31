@@ -3,46 +3,65 @@
 
 $(function () {
     // Hash map class
+    // The idea has collected from: https://stackoverflow.com/questions/4246980/how-to-create-a-simple-map-using-javascript-jquery
     function HashMap() {
-        this._dict = [];
+      this.keys = new Array();
+      this.data = new Object();
     }
 
-    HashMap.prototype = {
-        _get: function (key) {
-            for (var i = 0, couplet; i < this._dict.length; i++) {
-                couplet = this._dict[i];
-                if (couplet[0] === key) {
-                    return couplet;
-                }
-            }
+    HashMap.prototype={
+      put: function (key, value) {
+          if (this.keys.indexOf(key)<0) {
+              this.keys.push(key);
+          }
 
-            return null;
-        },
-        put: function (key, value) {
-            var couplet = this._get(key);
-            if (couplet) {
-                couplet[1] = value;
-            } else {
-                this._dict.push([key, value]);
-            }
-            return this; // for chaining
-        },
-        get: function (key) {
-            var couplet = this._get(key);
-            if (couplet) {
-                return couplet[1];
-            }
-            return null;
-        },
-        getKeys: function () {
-            var keys = [];
-            for (var i = 0, couplet; i < this._dict.length; i++) {
-                couplet = this._dict[i];
-                keys.push(couplet[0]);
-            }
+          this.data[key] = value;
+      },
 
-            return keys;
-        }
+      get: function (key) {
+          if(this.keys.indexOf(key)<0) return null;
+          return this.data[key];
+      },
+
+      getKeys: function(){
+          return this.keys;
+      },
+
+      remove: function (key) {
+          this.keys.remove(key);
+          this.data[key] = null;
+      },
+
+      each: function (fn) {
+          if (typeof fn != 'function') {
+              return;
+          }
+          var len = this.keys.length;
+          for (var i = 0; i < len; i++) {
+              var k = this.keys[i];
+              fn(k, this.data[k], i);
+          }
+      },
+
+      entrys: function () {
+          var len = this.keys.length;
+          var entrys = new Array(len);
+          for (var i = 0; i < len; i++) {
+              entrys[i] = {
+                  key: this.keys[i],
+                  value: this.data[i]
+              };
+          }
+          return entrys;
+      },
+
+      isEmpty: function () {
+          return this.keys.length == 0;
+      },
+
+      size: function () {
+          return this.keys.length;
+      }
     };
 
 // Graph management class
@@ -2519,7 +2538,8 @@ $(function () {
 
         writeDataToFile: function () {
           _logger.addLog("graph.js writeDataToFile");
-          var idMap = new HashMap();
+          var rIDMap = new HashMap();
+          var gRowIDs=[];
 
           for (var i = 0; i < gInstance._analysis.length; i++) {
               var tIDs = gInstance.getAllRowIdsOfANode(gInstance._analysis[i]);
@@ -2528,19 +2548,38 @@ $(function () {
                   if (rIDs.indexOf(tIDs[j]) < 0) {
                       rIDs.push(tIDs[j]);
                   }
+                  if (gRowIDs.indexOf(tIDs[j]) < 0) {
+                      gRowIDs.push(tIDs[j]);
+                  }
               }
               if (rIDs.length > 0) {
                   rIDs.sort(function (a, b) {
                       return a - b;
                   });
-                  idMap.put(gInstance._analysis[i], rIDs);
+
+                  for(var j=0; j<rIDs.length; j++){
+                    var clsIds = rIDMap.get(rIDs[j]);
+                    if(clsIds!=null){
+                      clsIds.push(gInstance._analysis[i]);
+                    }else{
+                      clsIds = [gInstance._analysis[i]];
+                    }
+                    rIDMap.put(rIDs[j], clsIds);
+                  }
+                  //clsMap.put(gInstance._analysis[i], rIDs);
               }
           }
 
-          var cols = [];
-          for (var i = 1; i <= gInstance._graph.HN.length; i++) {
+          if(gRowIDs.length>0){
+            gRowIDs.sort(function(a,b){
+              return a-b;
+            });
+          }
+
+          var cols = [gInstance._graph.HN[0]];
+          for (var i = 2; i <= gInstance._graph.HN.length; i++) {
               if ($("#ancb_" + i).prop("checked") === true) {
-                  cols.push(i);
+                  cols.push(gInstance._graph.HN[i-1]);
               }
           }
 
@@ -2548,37 +2587,81 @@ $(function () {
                 alert("Please select columns.");
             } else {
                 //var compVal = LZW.compress(rIDs.toString());
-                d3.select("#type").attr("value", cols.toString());
-                d3.select("#data").attr("value", rIDs.toString());
-                d3.select("#folderName").attr("value", gInstance.fl[gInstance.fileIndex]);
-                d3.select("#fileName").attr("value", "");
-                var form = $("#frm");
+                const csv = require('csv-parser');
+                //const fs = require('fs') this._fs
+                const results = [];
+                var _path = _common.getPath([gInstance.workspace.wd, "Data", "csv", gInstance.fl[gInstance.fileIndex]]);
+                var rPos=1;
+                var cData = [];
 
-                $.ajax({
-                    type: "POST",
-                    url: "./datahandler/writedata?t=" + new Date().getTime(),
-                    data: form.serialize(),
-                    success: function (json, d) {
-                        if (json !== "404") {
-                            if (json.indexOf("PHP Error") >= 0) {
-                                alert("Error to write data in file. Check file permission.");
-                            } else {
-                                var _json = JSON.parse(json);
-                                if (_json[0].code === 200) {
-                                    alert("File saved at:" + _json[0].fn);
-                                } else if (_json[0].code === 404) {
-                                    alert("Error occured:\n" + _json[0].Error);
-                                }
-                            }
+                if(gInstance._fs.existsSync(_path)){
+                  gInstance._fs.createReadStream(_path)
+                    .pipe(csv())
+                    .on('data', (data) => {
+                      /* data would be something like :
+                          { '2': 'Why we use bottels?', '1 ': 'How do I change my password? ' }
+                      */
+                      cData = [];
+                      Object.entries(data)
+                        .forEach(([key, value]) => {
+                          // key would be the column number (1 or 2)
+                          // value would be the data of the row
+                          // we "abuse" the fact that the column happens to be a number between 1 and 2 and we use that as the array index
 
-                        } else {
-                            alert("Requested URL is missing. Possible cause could be server down or incorrect url.")
+                          if(gRowIDs.indexOf(rPos)>=0 && cols.indexOf(key)>=0){
+                            cData.push(value)
+                          }
+                        });
+
+                        rPos++;
+                        if(cData.length>0){
+                          var val = rIDMap.get(parseInt(cData[0]));
+                          for(var l=0; l<val.length; l++){
+                            var tcData = [];
+                            for(a in cData) tcData.push(cData[a]);
+                            tcData.push(val[l]);
+                            results.push(tcData);
+                          }
                         }
-                    },
-                    error: function (request, err, ex) {
-                        alert("Error to post data")
-                    }
-                });
+                    })
+                    .on('end', () => {
+                      // Add cluster ids to the results
+                      if(results.length>0){
+                        var csvData = "";
+                        for(var i=0; i<cols.length; i++){
+                          csvData += cols[i]+",";
+                        }
+                        csvData += "'ClusteID'\n";
+
+                        for(var i=0; i<results.length; i++){
+                          var s = "";
+                          for(var j=0; j<results[i].length; j++){
+                            if(s.length>0) s += ",";
+                            s += results[i][j];
+                          }
+                          csvData += s + "\n";
+                        }
+
+                        var _file = gInstance.fl[gInstance.fileIndex].split(".")[0] + "_" + (new Date).getTime()+".csv";
+                        _path = _common.getPath([gInstance.workspace.wd, "Data", "tmp",_file]);
+
+                        _logger.addLog("Path to save csv: "+_path);
+
+                        try{
+                          gInstance._fs.writeFileSync(_path, csvData);
+                          alert("The file has saved at: " + _path);
+                        }catch(err){
+                          _logger.addLog("Error to save csv: " + err.message);
+                        }
+                        _logger.addLog("Total results: "+results.length);
+
+                      }
+                    });
+                }else{
+                  _logger.addLog("File is missing: "+_path);
+                }
+
+                alert("The request is processing. Will notify the update soon.");
             }
         },
 
@@ -2867,6 +2950,7 @@ $(function () {
                     .style("top", newY + "px");
 
             var tt = "<p>";
+            tt += "<span>Cluster ID: " + d.Id + "</span><br />";
             tt += "<span>Total points: " + d.NP + "</span><br />";
             for(var i=0; i<this._graph.btn.length; i++){
               tt += "<span>Mean " + this._graph.btn[i] + ": " + d.Label[i] + "</span><br />";
