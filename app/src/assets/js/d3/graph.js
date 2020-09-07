@@ -1225,7 +1225,8 @@ $(function () {
 
               var nodePos = (x + (d.x * k) + 100);
               if(nodePos>=0 && nodePos<=w){
-                pos.push([nodePos, d.Id]);
+                pos.push([nodePos, d.Id, parseFloat(d.Label[1]), d.Color[1]]);
+                //pos.push([nodePos, d.Id]);
               }
             });
 
@@ -1233,23 +1234,22 @@ $(function () {
                 return a[0] - b[0];
             });
 
-            var _int = parseInt(pos.length/10);//parseInt(pos.length / 5 > 10 ? pos.length / 10 : pos.length / 5);
+            var _int = (pos.length<10)?pos.length:10;//parseInt(pos.length / 5 > 10 ? pos.length / 10 : pos.length / 5);
             var _tickValues=[];
 
-            if(pos.length<11) _int=pos.length;
-            else if(pos.length<21) _int=parseInt(pos.length/5);
-
-            var _ic = 0;
-            for (; _ic < pos.length; _ic += _int) {
-                posC.push([pos[_ic][1], "", 0.0]);
+            var _ic = 0, _step = Math.round(pos.length/_int);
+            for (; _ic < pos.length; _ic += 1) {
+                //posC.push([pos[_ic][1], "", 0.0]);
+                posC.push(pos[_ic]);
             }
 
-            if (_ic === pos.length && _ic - _int < pos.length - 1) {
-                posC.push([pos[pos.length - 1][1], "", 0.0]);
+            /*if (_ic === pos.length && _ic>_int && _ic - _int < pos.length - 1) {
+                //posC.push([pos[pos.length - 1][1], "", 0.0]);
+                posC.push(pos[pos.length - 1]);
                 _int++;
-            }
+            }*/
 
-            gInstance.node.each(function (d) {
+            /*gInstance.node.each(function (d) {
                 for (var _i = 0; _i < posC.length; _i++) {
                     if (posC[_i][0] === d.Id && posC[_i][1].length === 0) {
                         posC[_i][1] = d.Color[1];
@@ -1257,7 +1257,7 @@ $(function () {
                         break;
                     }
                 }
-            });
+            });*/
 
             //w=pos[pos.length - 1][0] - pos[0][0];
             if (d3.selectAll("#legends")) {
@@ -1282,7 +1282,7 @@ $(function () {
 
                 legend.append("stop")
                         .attr("offset", "" + _perc + "%")
-                        .attr("stop-color", posC[i][1])
+                        .attr("stop-color", posC[i][3])//posC[i][1])
                         .attr("stop-opacity", 1);
             }
 
@@ -1291,13 +1291,25 @@ $(function () {
                     .attr("height", h - 40)
                     .style("fill", "url(#gradient)");
 
-            var y = d3.scaleLinear()
-                    .range([w, 0])
-                    .domain([posC[posC.length - 1][2], posC[0][2]]);
-
-            for(var i=0; i<posC.length; i++){
+            for(var i=0; i<posC.length; i+=_step){
               _tickValues.push(posC[i][2]);
             }
+
+            var extent = d3.extent(_tickValues),
+            _dom=[posC[posC.length-1][2]+1],
+            _rng=[w];
+
+            for(var i=posC.length-1; i>=0; i-=_step){
+              _dom.push(posC[i][2]);
+              _rng.push(posC[i][0]);
+            }
+
+            _dom.push(posC[0][2]-1);
+            _rng.push(0);
+
+            var y = d3.scaleLinear().range(_rng).domain(_dom);
+                    //.range([w, 0]) // The values are going to map in the screen
+                    //.domain([posC[posC.length - 1][2], posC[0][2]]);// The values I want to show
 
             var yAxis = d3.axisBottom()
                     .scale(y)
@@ -2839,7 +2851,7 @@ $(function () {
         },
 
         dragstarted: function (d) {
-          _logger.addLog("graph.js dragstarted");
+        //  _logger.addLog("graph.js dragstarted");
             $("#top-nav").css("display", "none");
             if (!d3.event.active)
                 gInstance.simulation.alphaTarget(0.3).restart();
@@ -2855,7 +2867,7 @@ $(function () {
         },
 
         dragended: function (d) {
-          _logger.addLog("graph.js dragended");
+          //_logger.addLog("graph.js dragended");
             $("#top-nav").css("display", "none");
             if (!d3.event.active)
                 gInstance.simulation.alphaTarget(0);
@@ -2963,6 +2975,7 @@ $(function () {
                 tt += "<span> Total " + this._graph.HN[this._graph.param.pie[i]-1] + ": " + d.tooltip[i].total + "</span><br /><span>";
                 var f = false;
 
+                d.tooltip[i].names.sort();
                 for(var j=0; j<d.tooltip[i].names.length; j++){
                   if(f) tt += ",";
                   tt +=d.tooltip[i].names[j];
