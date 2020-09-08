@@ -2643,7 +2643,7 @@ $(function () {
                         for(var i=0; i<cols.length; i++){
                           csvData += cols[i]+",";
                         }
-                        csvData += "'ClusteID'\n";
+                        csvData += "ClusteID\n";
 
                         for(var i=0; i<results.length; i++){
                           var s = "";

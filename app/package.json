@@ -20,7 +20,8 @@
     "win": "npm run package-win && npm run installer-win",
     "install-all": "npm run builder && npm run mac && npm run linux && npm run win",
     "install": "npm run clean && npm run install-all",
-    "upgrade": "sudo npm install -g npm && sudo npm install -g node-gyp && npm install --save nan && npm install --save bindings && npm install -g bindings && npm install --save-dev rebuild && npm install --save-dev electron && npm install --save-dev electron-packager && npm install electron-packager -g && npm install --save electron-rebuild && npm install --save jquery && npm install --save-dev asar && npm install --save electron-log && npm install electron-installer-dmg --save-dev && npm install electron-installer-dmg -g && npm install --save-dev electron-installer-windows && npm install -g electron-installer-windows && npm install --save-dev  electron-installer-debian && npm install -g electron-installer-debian && npm install --save-dev csv-parser && npm install csv-parser -g"
+    "upgrade": "sudo npm install -g npm && sudo npm install -g node-gyp && npm install --save nan && npm install --save bindings && npm install -g bindings && npm install --save-dev rebuild && npm install --save-dev electron && npm install --save-dev electron-packager && npm install electron-packager -g && npm install --save electron-rebuild && npm install --save jquery && npm install --save-dev asar && npm install --save electron-log && npm install electron-installer-dmg --save-dev && npm install electron-installer-dmg -g && npm install --save-dev electron-installer-windows && npm install -g electron-installer-windows && npm install --save-dev  electron-installer-debian && npm install -g electron-installer-debian && npm install --save-dev csv-parser && npm install csv-parser -g",
+    "fix": "sudo npm audit fix"
   },
   "repository": {
     "type": "git",
@@ -46,7 +47,7 @@
     "electron-installer-debian": "^2.0.1",
     "electron-installer-dmg": "^3.0.0",
     "electron-installer-windows": "^2.0.0",
-    "electron-packager": "^14.2.1",
+    "electron-packager": "^15.1.0",
     "electron-rebuild": "^1.11.0",
     "rebuild": "^0.1.2"
   },
