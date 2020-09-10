@@ -59,13 +59,13 @@ namespace hyppox{
             SimplexList(std::vector<SLType> v){sv.push_back(v);}
             ~SimplexList() = default;
 
-            std::string GetAllData(){
+            std::string GetAllData(std::string delim="\t\t"){
                 std::string str = "";
 
                 for(auto sitr = slist.begin(); sitr != slist.end(); sitr++){
                     if(str.length() > 0) str += "\n";
 
-                    str += *sitr;
+                    str += delim + *sitr;
                 }
 
                 return str;
@@ -133,18 +133,59 @@ namespace hyppox{
 
         template<typename PerfType, typename ClusterIDType>
         std::string SimplicialComplex<PerfType,ClusterIDType>::PrintSimplex(){
-            std::string simplex = "";
+          std::string simplexSTR = "/**************************************************************************************************\nCopyright © 2016-2018 Md.Kamruzzaman. All rights reserved.\nThe generated code is released under following licenses:\nGNU GENERAL PUBLIC LICENSE, Version 3, 29 June 2007\n\n--------------------------------------------------------------------------------------------------\nFile name: Barcode.java\nObjective: Generate barcode image\nAdditional information: NA\n\n--------------------------------------------------------------------------------------------------\nContributors                   Date            Task details\n-------------------------    ----------      --------------------\nMd. Kamruzzaman              02/16/2017      Initial version\n**************************************************************************************************/\n\n// Run from terminal\n//javac -cp .:javaplex-4.3.4.jar Barcode.java -d . && java -cp .:javaplex-4.3.4.jar barcode.Barcode\n\npackage barcode;\n\nimport edu.stanford.math.plex4.homology.barcodes.BarcodeCollection;\nimport edu.stanford.math.plex4.homology.chain_basis.Simplex;\nimport edu.stanford.math.plex4.homology.interfaces.AbstractPersistenceAlgorithm;\nimport edu.stanford.math.plex4.streams.impl.ExplicitSimplexStream;\nimport java.io.IOException;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\npublic class Barcode{\n\tpublic void GetStreamForData(ExplicitSimplexStream stream) {\n\t\t/************ Start from here *************/\n";
 
-            for(auto sitr = this->simplexMap.begin(); sitr != this->simplexMap.end(); sitr++){
-                if(simplex.length()>0) simplex += "\n";
+          std::string simplex = "";
+          std::string fName = "", tmpFN="";
+          const std::string fCascad = "-";
 
-                simplex += sitr->second->GetAllData();
-            }
+          // Filternames
+          tmpFN="";
+          for(int i=0; i<hyppox::Config::FILTER; i++){
+              if(tmpFN.length()>0) tmpFN += fCascad;
+              tmpFN += hyppox::Config::FILTER_NAMES[i];
+          }
+          fName = tmpFN;
 
-            simplex += "\n";
+          // Filternames_windows
+          tmpFN="";
+          for(int i=0;i<hyppox::Config::FILTER;i++){
+              if(tmpFN.length()>0) tmpFN += fCascad;
+              tmpFN += std::to_string(hyppox::Config::WINDOWS[i]);
+          }
+          if(tmpFN.length()>0) fName += "_" + tmpFN;
+
+          // Filternames_windows_clusterParams
+          if(hyppox::Config::CLUSTER_METHOD.compare("DBSCAN")==0){
+              fName += "_" + fixPrecision(hyppox::Config::CLUSTER_PARAM[0], 4)+
+                  fCascad + fixPrecision(hyppox::Config::CLUSTER_PARAM[1], 0);
+          }
+
+          for(auto sitr = this->simplexMap.begin(); sitr != this->simplexMap.end(); sitr++){
+              if(simplex.length()>0) simplex += "\n";
+
+              simplex += sitr->second->GetAllData();
+          }
+
+          simplex += "\n";
+
+          simplexSTR += simplex + "\n\t\t/************ End here *************/\n\t}\n\n"+
+              "\tpublic static void main(String[] args) {\n"+
+                      "\t\tBarcode barcode_ = new Barcode();\n" +
+                      "\t\tint dimension = 4; // The maximum dimension\n\n" +
+                      "\t\tExplicitSimplexStream stream = edu.stanford.math.plex4.api.Plex4.createExplicitSimplexStream();\n\n" +
+                      "\t\tbarcode_.GetStreamForData(stream);\n" +
+                      "\t\tstream.finalizeStream();\n\n" +
+                      "\t\tint slices = stream.getSize();\n" +
+                      "\t\tSystem.out.println(\"Total simplices=\" + slices);\n\n" +
+                      "\t\tAbstractPersistenceAlgorithm<Simplex> persistent = edu.stanford.math.plex4.api.Plex4.getDefaultSimplicialAlgorithm(dimension);\n" +
+                      "\t\tBarcodeCollection<Double> intervals_index = persistent.computeIntervals(stream);\n\n" +
+                      "\t\ttry {\n" +
+                          "\t\t\tedu.stanford.math.plex4.api.Plex4.createBarcodePlot(intervals_index, \"Barcode-" + hyppox::Config::DATA_FILE_NAME.substr(0, hyppox::Config::DATA_FILE_NAME.length()-4) + "(" + fName + ")\", 50);\n" +
+          "\t\t} catch (IOException ex) {\n" + "\t\t\tLogger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);\n\t\t}\n\t}\n}";
 
 
-            return simplex;
+          return simplexSTR;
         }
 
     /*

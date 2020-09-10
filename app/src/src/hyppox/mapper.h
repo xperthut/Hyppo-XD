@@ -866,10 +866,10 @@ namespace hyppox {
 
             if(hyppox::Config::PH_JAVA_PLEX){
                 FHType* writeToFile = new FHType("");
-                r = writeToFile->WriteDataToFile(hyppox::Config::WRITE_DIR+"Simplex_for_Javaplex", ".txt", sc.PrintSimplex(), false);
+                r = writeToFile->WriteDataToFile(hyppox::Config::WRITE_DIR+"Barcode", ".java", sc.PrintSimplex(), false);
                 delete writeToFile;
 
-                std::cout<<"\nDump the code of file: \""<<r<<"\" to Java file to generate barcode.";
+                std::cout<<"\nDump the javaplex.jar file to: "<<hyppox::Config::WRITE_DIR<<" and run from terminal: //javac -cp .:javaplex-4.3.4.jar Barcode.java -d . && java -cp .:javaplex-4.3.4.jar barcode.Barcode";
             }/*else{
                 std::vector<float> v = sc.getPersistentOverlap();
                 r = "\n Persistent overlap: ";

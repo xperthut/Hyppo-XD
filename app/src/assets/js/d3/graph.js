@@ -1334,7 +1334,12 @@ $(function () {
             d3.selectAll("#legends text").style("fill", "#000")
                     .style("font-family", "Arial")
                     .style("font-weight", "bold")
-                    .style("font-size", "20px");
+                    .style("font-size", "14px")
+                    .style("text-anchor", "left")
+                    .attr("transform","rotate(60)")
+                    .attr("y", 0)
+                    .attr("dy",".71em")
+                    .attr("dx","1.1em");
         },
 
         getColumnNames: function(){
@@ -3725,6 +3730,18 @@ $(function () {
             $("#myDropdown").on("change", function () {
                 $("#map-details-details .jsonDetails table").css({"display":"none"});
                 //$("#myDropdown a").removeClass("seldw");
+
+                // Hide other panels
+                $("#jsonheader").css({"display":"none"});
+                $("#map-details").css({"display":"none"});
+                $("#pie-legend").css({"display":"none"});
+                $("#thumbnails").css({"display":"none"});
+                $("#attr-ctrl").css({"display":"none"});
+                $("#int-path").css({"display":"none"});
+                $("#int-flare").css({"display":"none"});
+                $("#int-cc").css({"display":"none"});
+                $("#int-nodes").css({"display":"none"});
+
                 var $opt = $(this).find('option:selected');
                 gInstance.fileIndex = $opt.attr('value');
                 //$(this).addClass("seldw");
