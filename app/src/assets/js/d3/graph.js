@@ -473,7 +473,7 @@ $(function () {
             image.onload = function () {
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 context.drawImage(image, 0, 0);
-                var canvasdata = canvas.toDataURL("image/png");
+                var canvasdata = canvas.toDataURL("image/png", 1.0);
 
                 d3.select("canvasdata_save").remove();
                 var a = document.createElement("a");
@@ -1210,10 +1210,11 @@ $(function () {
           _logger.addLog("graph.js createColorBar");
             gInstance.selectButton("other-btn", $(this));
 
-            var pos = [];
+            var tpos = [], pos=[];
             var posC = [];
             var w = $(window).width(), //w=pos[pos.length - 1][0] - pos[0][0],
                     h = 70;
+            var lastVal = Number.NEGATIVE_INFINITY, lastPos=Number.NEGATIVE_INFINITY;
 
             gInstance.node.each(function (d) {
               var x = 0.0, y = 0.0, k = 1.0;
@@ -1224,15 +1225,23 @@ $(function () {
               }
 
               var nodePos = (x + (d.x * k) + 100);
+
               if(nodePos>=0 && nodePos<=w){
-                pos.push([nodePos, d.Id, parseFloat(d.Label[1]), d.Color[1]]);
-                //pos.push([nodePos, d.Id]);
+                tpos.push([nodePos, d.Id, parseFloat(d.Label[1]), d.Color[1]]);
               }
             });
 
-            pos.sort(function (a, b) {
+            tpos.sort(function (a, b) {
                 return a[0] - b[0];
             });
+
+            for(var i=0; i<tpos.length; i++){
+              if(tpos[i][2] > lastVal && (lastPos===Number.NEGATIVE_INFINITY || tpos[i][0]-lastPos>2)){
+                lastVal = parseFloat(tpos[i][2]);
+                lastPos = tpos[i][0]
+                pos.push(tpos[i]);
+              }
+            }
 
             var _int = (pos.length<10)?pos.length:10;//parseInt(pos.length / 5 > 10 ? pos.length / 10 : pos.length / 5);
             var _tickValues=[];
@@ -1300,8 +1309,8 @@ $(function () {
             _rng=[w];
 
             for(var i=posC.length-1; i>=0; i-=_step){
-              _dom.push(posC[i][2]);
-              _rng.push(posC[i][0]);
+              _dom.push(posC[i][2]); // Node value
+              _rng.push(posC[i][0]-100.0); //Node position
             }
 
             _dom.push(posC[0][2]-1);
@@ -1740,6 +1749,9 @@ $(function () {
             param.push(s);
           }
 
+          param.push("-NSR");
+          param.push("[60.0, 90.0]");
+
           fName += nesVal.ref_perf;
 
           if(nesVal.mem_attr.length > 0){
@@ -1757,6 +1769,8 @@ $(function () {
             s += "]";
             param.push(s);
           }
+
+
 
           fName += ".json";
 

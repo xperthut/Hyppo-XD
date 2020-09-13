@@ -508,6 +508,9 @@ $(function () {
         param.push(s);
       }
 
+      param.push("-NSR");
+      param.push("[60.0, 90.0]");
+
       fName += ".json";
 
       var chkFN = _common.getPath([this.workspace.wd,"Data", "json", this.fileName.split(".")[0], fName]);
