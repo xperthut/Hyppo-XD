@@ -427,10 +427,26 @@ $(function () {
             $("#cc-details").html("<fieldset><legend>Connected subgraphs&nbsp;</legend><ul class='cc_legend'></ul></fieldset>");
 
             var sg = [];
+            var brNodes = new HashMap();
             for (var li = 0; li < this._linkData.length; li++) {
                 if (sg.indexOf(this._linkData[li].CC) === -1) {
                     sg.push(this._linkData[li].CC);
                 }
+
+                var d = this._linkData[li];
+                var s = (d.source.Id) ? d.source.Id : d.source;
+                var t = (d.target.Id) ? d.target.Id : d.target;
+                var k = brNodes.get(s);
+
+                if(k===null){
+                  k = [t];
+                }else{
+                  if(k.indexOf(t)<0){
+                    k.push(t);
+                  }
+                }
+
+                brNodes.put(s, k);
             }
 
             sg.sort(function (a, b) {
@@ -448,6 +464,25 @@ $(function () {
             for (var i = 0; i < sg.length; i++) {
                 d3.select("#cc_" + sg[i]).on("change", gInstance.showHideSubGraph);
             }
+
+            var bc = 0;
+            var keys = brNodes.getKeys();
+            for(var i=0; i<keys.length; i++){
+              if(brNodes.get(keys[i]).length>1) bc++;
+            }
+
+            var ts = "<table id='tdaDiv'>" +
+                     "<tr><td>Total nodes</td><td>"+this._nodeData.length+"</td></tr>" +
+                     "<tr><td>Total edges</td><td>"+this._linkData.length+"</td></tr>" +
+                     "<tr><td>Total branching nodes</td><td>"+bc+"</td></tr>" +
+                     "<tr><td>Branching nodes ratio</td><td>"+(bc/this._nodeData.length)+"</td></tr>" +
+                     "<tr><td>Total subgraphs</td><td>"+sg.length+"</td></tr>";
+
+            $("#tda-details-details .jsonDetails").html(ts);
+            $("#tda-details-details .jsonDetails table").css({"display":"block","width":"100%", "color":"white", "margin":"1%"});
+            $("#tda-details-details .jsonDetails table tr").css({"width":"100%"});
+            $("#tda-details-details .jsonDetails table td").css({"width":"33%", "border":"1px solid black", "text-align":"center", "padding":"2%"});
+
         },
 
         selectButton: function (holder, e) {
@@ -2505,6 +2540,7 @@ $(function () {
         createAttributes: function () {
           _logger.addLog("graph.js createAttributes");
             $("#map-details").css("display", "block");
+            $("#tda-details").css("display", "block");
 
             $("#attr-ctrl").css("display", "block");
             $("#attr-details").html("");
@@ -2662,7 +2698,7 @@ $(function () {
                         for(var i=0; i<cols.length; i++){
                           csvData += cols[i]+",";
                         }
-                        csvData += "ClusteID\n";
+                        csvData += "ClusterID\n";
 
                         for(var i=0; i<results.length; i++){
                           var s = "";
@@ -3579,6 +3615,43 @@ $(function () {
             });
         },
 
+        getTDADetails: function(tcc){
+          _logger.addLog("graph.js getTDADetails");
+
+          var brNodes = new HashMap();
+
+          this.link.each(function(d){
+            var s = (d.source.Id) ? d.source.Id : d.source;
+            var t = (d.target.Id) ? d.target.Id : d.target;
+            var k = brNodes.get(s);
+
+            if(k===null){
+              k = [t];
+            }else{
+              if(k.indexOf(t)<0){
+                k.push(t);
+              }
+            }
+
+            brNodes.put(s, k);
+          });
+
+          var bc = 0;
+          var keys = brNodes.getKeys();
+          for(var i=0; i<keys.length; i++){
+            if(brNodes.get(keys[i]).length>0) bc++;
+          }
+
+          var s = "<table id='tdaDiv'>" +
+                   "<tr><td>Total nodes</td><td>"+this.node.length+"</td></tr>" +
+                   "<tr><td>Total edges</td><td>"+this.link.length+"</td></tr>" +
+                   "<tr><td>Total branching nodes</td><td>"+bc+"</td></tr>" +
+                   "<tr><td>Branching nodes ratio</td><td>"+(bc/this.node.length)+"</td></tr>" +
+                   "<tr><td>Total subgraphs</td><td>"+tcc+"</td></tr>";
+
+          return s;
+        },
+
         getJSONFileDetails: function(){
           _logger.addLog("graph.js getJSONFileDetails");
           //{"fc":[2],"wx":[30],"gx":[25.00],"cls":{"name":"DBSCAN", "param":[0.60,2]},"cla":[7],"sig":[],"rp":["GrowthRate"]}
@@ -3743,11 +3816,13 @@ $(function () {
 
             $("#myDropdown").on("change", function () {
                 $("#map-details-details .jsonDetails table").css({"display":"none"});
+                $("#tda-details-details .jsonDetails table").css({"display":"none"});
                 //$("#myDropdown a").removeClass("seldw");
 
                 // Hide other panels
                 $("#jsonheader").css({"display":"none"});
                 $("#map-details").css({"display":"none"});
+                $("#tda-details").css({"display":"none"});
                 $("#pie-legend").css({"display":"none"});
                 $("#thumbnails").css({"display":"none"});
                 $("#attr-ctrl").css({"display":"none"});
@@ -3828,6 +3903,21 @@ $(function () {
             } else {
                 $("#fa-map-details-title").removeClass('fa-angle-double-up');
                 $("#fa-map-details-title").addClass('fa-angle-double-down');
+            }
+
+        });
+    });
+
+    $(".tda-details-show").click(function (e) {
+        e.preventDefault();
+        $("#tda-details .row").not("#tda-details .row1").slideUp();
+        $("#tda-details .row1").slideToggle("slow", function () {
+            if ($(this).css("display") === "none") {
+                $("#fa-tda-details-title").removeClass('fa-angle-double-down');
+                $("#fa-tda-details-title").addClass('fa-angle-double-up');
+            } else {
+                $("#fa-tda-details-title").removeClass('fa-angle-double-up');
+                $("#fa-tda-details-title").addClass('fa-angle-double-down');
             }
 
         });

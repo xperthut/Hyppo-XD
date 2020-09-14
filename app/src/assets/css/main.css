@@ -118,7 +118,7 @@ html {
     font-size: 16pt;
 }
 
-.cc-show,.path-show,.flare-show,.node-show, .map-details-show{
+.cc-show,.path-show,.flare-show,.node-show, .map-details-show, .tda-details-show{
     cursor: pointer;
 }
 
@@ -983,7 +983,8 @@ body.is-loading-1 #main {
 #int-path,
 #int-flare,
 #int-nodes,
-#map-details{
+#map-details,
+#tda-details{
     padding: 0.1em 1em 1.75em 1em ;
 
     /* border: 1px solid red; */
@@ -1007,7 +1008,8 @@ fieldset{
 #flare-details,
 #path-details,
 #attr-details,
-#map-details-details{
+#map-details-details,
+#tda-details-details{
     margin: 0 auto;
     text-align: center;
 }
