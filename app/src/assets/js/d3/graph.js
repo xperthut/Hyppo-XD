@@ -133,6 +133,7 @@ $(function () {
         this.tooltipDiv = d3.select("#tooltip").append("div").style("color", "black");
         this.selectedNodeId = -1;
         this.showToolTip = false;
+        this.showNodeValues=true;
         this.svgBGColor = "#000";
         this.piePattern = false;
         this.grayNode = false;
@@ -308,6 +309,7 @@ $(function () {
             this.tooltipDiv = d3.select("#tooltip").append("div").style("color", "black");
             this.selectedNodeId = -1;
             this.showToolTip = false;
+            this.showNodeValues=true;
             this.piePattern = false;
             this.grayNode = false;
             this.fileName = "";
@@ -1115,7 +1117,7 @@ $(function () {
             });
 
             this.labelText.text(function (d) {
-                return d.Label[index];
+                return ((gInstance.showNodeValues)?d.Label[index]:"");
             })
                     .style("fill", function (d) {
                         return gInstance.getFontColor(d, index);
@@ -2537,6 +2539,15 @@ $(function () {
             }
         },
 
+        showHideNodeValues: function(){
+          _logger.addLog("graph.js showHideNodeValues");
+          gInstance.showNodeValues = false;
+
+          if ($(this).prop("checked") === true) {
+            gInstance.showNodeValues = true;
+          }
+        },
+
         createAttributes: function () {
           _logger.addLog("graph.js createAttributes");
             $("#map-details").css("display", "block");
@@ -2549,7 +2560,7 @@ $(function () {
                     "<fieldset><legend>Edge attributes&nbsp;</legend><ul class='attr_legend'></ul></fieldset>" +
                     "<fieldset><legend>Features&nbsp;</legend><ul class='feature_legend'></ul></fieldset>");
 
-            $(".view_attr_legend").html("<li><input type='text' class='color_pick' id='viewBC' value='" + this.svgBGColor + "'/>&nbsp;Background color</li>");
+            $(".view_attr_legend").html("<li><input type='text' class='color_pick' id='viewBC' value='" + this.svgBGColor + "'/>&nbsp;Background color</li><li><input type='checkbox' name='snv' id='snv' checked /><label class='fa' for='snv'>Show node values</label></li>");
 
             $("#viewBC").spectrum({color: this.svgBGColor});
             $("#viewBC").spectrum({
@@ -2563,6 +2574,7 @@ $(function () {
             $(".node_attr_legend").html("<li><input type='checkbox' name='shTT' id='shTT' /><label class='fa' for='shTT'>Show tooltip</label></li>");
 
             d3.select("#shTT").on("change", gInstance.showHideToolTip);
+            d3.select("#snv").on("change", gInstance.showHideNodeValues);
 
             var s = "<li><input type='text' class='color_pick' id='edgeDC' value='" + this.defaultEdgeColor + "'/>&nbsp;Edge color</li>" +
                     "<li><input type='checkbox' name='eArrow' id='eArrow' checked /><label class='fa' for='eArrow'>Show edge direction</label></li>";
@@ -3245,7 +3257,7 @@ $(function () {
                     .enter()
                     .append("text")
                     .text(function (d) {
-                        return d.Label[index];
+                        return ((gInstance.showNodeValues)?d.Label[index]:"");
                     })
                     .attr("r", function (d) {
                         return d.Size;
