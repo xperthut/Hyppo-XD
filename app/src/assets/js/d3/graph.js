@@ -1,70 +1,72 @@
 
 /* global d3, NodePieBuilder */
 
+const { isArray } = require('util');
+
 $(function () {
     // Hash map class
     // The idea has collected from: https://stackoverflow.com/questions/4246980/how-to-create-a-simple-map-using-javascript-jquery
     function HashMap() {
-      this.keys = new Array();
-      this.data = new Object();
+        this.keys = new Array();
+        this.data = new Object();
     }
 
-    HashMap.prototype={
-      put: function (key, value) {
-          if (this.keys.indexOf(key)<0) {
-              this.keys.push(key);
-          }
+    HashMap.prototype = {
+        put: function (key, value) {
+            if (this.keys.indexOf(key) < 0) {
+                this.keys.push(key);
+            }
 
-          this.data[key] = value;
-      },
+            this.data[key] = value;
+        },
 
-      get: function (key) {
-          if(this.keys.indexOf(key)<0) return null;
-          return this.data[key];
-      },
+        get: function (key) {
+            if (this.keys.indexOf(key) < 0) return null;
+            return this.data[key];
+        },
 
-      getKeys: function(){
-          return this.keys;
-      },
+        getKeys: function () {
+            return this.keys;
+        },
 
-      remove: function (key) {
-          this.keys.remove(key);
-          this.data[key] = null;
-      },
+        remove: function (key) {
+            this.keys.remove(key);
+            this.data[key] = null;
+        },
 
-      each: function (fn) {
-          if (typeof fn != 'function') {
-              return;
-          }
-          var len = this.keys.length;
-          for (var i = 0; i < len; i++) {
-              var k = this.keys[i];
-              fn(k, this.data[k], i);
-          }
-      },
+        each: function (fn) {
+            if (typeof fn != 'function') {
+                return;
+            }
+            var len = this.keys.length;
+            for (var i = 0; i < len; i++) {
+                var k = this.keys[i];
+                fn(k, this.data[k], i);
+            }
+        },
 
-      entrys: function () {
-          var len = this.keys.length;
-          var entrys = new Array(len);
-          for (var i = 0; i < len; i++) {
-              entrys[i] = {
-                  key: this.keys[i],
-                  value: this.data[i]
-              };
-          }
-          return entrys;
-      },
+        entrys: function () {
+            var len = this.keys.length;
+            var entrys = new Array(len);
+            for (var i = 0; i < len; i++) {
+                entrys[i] = {
+                    key: this.keys[i],
+                    value: this.data[i]
+                };
+            }
+            return entrys;
+        },
 
-      isEmpty: function () {
-          return this.keys.length == 0;
-      },
+        isEmpty: function () {
+            return this.keys.length == 0;
+        },
 
-      size: function () {
-          return this.keys.length;
-      }
+        size: function () {
+            return this.keys.length;
+        }
     };
 
-// Graph management class
+    // Graph management class
     function Graph() {
         this._electron = require('electron');
         this._fs = require('fs');
@@ -133,7 +135,7 @@ $(function () {
         this.tooltipDiv = d3.select("#tooltip").append("div").style("color", "black");
         this.selectedNodeId = -1;
         this.showToolTip = false;
-        this.showNodeValues=true;
+        this.showNodeValues = true;
         this.svgBGColor = "#000";
         this.piePattern = false;
         this.grayNode = false;
@@ -148,112 +150,112 @@ $(function () {
         constructor: Graph,
 
         // Get all JSON files
-        getAllFiles: function(_folder){
-          _logger.addLog("graph.js getAllFiles");
-          try {
-            var files = this._fs.readdirSync(_folder);
-            return files;
-          }
-          catch(err) {alert(err); return [];}
+        getAllFiles: function (_folder) {
+            _logger.addLog("graph.js getAllFiles");
+            try {
+                var files = this._fs.readdirSync(_folder);
+                return files;
+            }
+            catch (err) { alert(err); return []; }
         },
 
         // Function to get all file names in a directory
-        getAllCsvFiles: function(){
-          _logger.addLog("graph.js getAllCsvFiles");
-          var flist = [];
-          _logger.addLog(this.workspace);
+        getAllCsvFiles: function () {
+            _logger.addLog("graph.js getAllCsvFiles");
+            var flist = [];
+            _logger.addLog(this.workspace);
 
-          if(this.workspace && this._fs.existsSync(this.workspace.wd)){
-            var _dir = _common.getPath([this.workspace.wd, "Data", "csv"]);
-            var files = this.getAllFiles(_dir);
-            for(var i=0; i<files.length; i++){
-              if(files[i].indexOf('.csv')>=0 || files[i].indexOf('.CSV')>=0){
-                  flist.push(files[i]);
+            if (this.workspace && this._fs.existsSync(this.workspace.wd)) {
+                var _dir = _common.getPath([this.workspace.wd, "Data", "csv"]);
+                var files = this.getAllFiles(_dir);
+                for (var i = 0; i < files.length; i++) {
+                    if (files[i].indexOf('.csv') >= 0 || files[i].indexOf('.CSV') >= 0) {
+                        flist.push(files[i]);
 
-                  var ff = false;
-                  for(var j=0; j<this.workspace.files.length; j++){
-                    if(this.workspace.files[j].csv === files[i]){
-                      ff = true;
-                      break;
+                        var ff = false;
+                        for (var j = 0; j < this.workspace.files.length; j++) {
+                            if (this.workspace.files[j].csv === files[i]) {
+                                ff = true;
+                                break;
+                            }
+                        }
+
+                        if (!ff) {
+                            this.workspace.files.push({ csv: files[i], col: { index: true, header: [], dt: new Date().toString() }, json: [] });
+                        }
                     }
-                  }
-
-                  if(!ff){
-                    this.workspace.files.push({csv:files[i], col:{index:true, header:[], dt:new Date().toString()}, json:[]});
-                  }
-              }
+                }
             }
-          }
 
-          return flist;
+            return flist;
         },
 
         // Get all JSON files
-        getAllJsonFiles: function(){
-          _logger.addLog("graph.js getAllJsonFiles");
-          var _fList = [];
+        getAllJsonFiles: function () {
+            _logger.addLog("graph.js getAllJsonFiles");
+            var _fList = [];
 
-          if(this.workspace && this._fs.existsSync(this.workspace.wd)){
-            var _dir = _common.getPath([this.workspace.wd, "Data", "json"]);
-            var _folderList = this.getAllFiles(_dir);
+            if (this.workspace && this._fs.existsSync(this.workspace.wd)) {
+                var _dir = _common.getPath([this.workspace.wd, "Data", "json"]);
+                var _folderList = this.getAllFiles(_dir);
 
-            // Get all folders under /json folder
-            for(var i=0; i<_folderList.length; i++){
-              if(_folderList[i].indexOf(".")===-1){
-                var _f={name:"", files:[]};
-                _f.name = _folderList[i];
-                _f.files = [];
+                // Get all folders under /json folder
+                for (var i = 0; i < _folderList.length; i++) {
+                    if (_folderList[i].indexOf(".") === -1) {
+                        var _f = { name: "", files: [] };
+                        _f.name = _folderList[i];
+                        _f.files = [];
 
-                var _jList = this.getAllFiles(_common.getPath([_dir,_folderList[i]]));
+                        var _jList = this.getAllFiles(_common.getPath([_dir, _folderList[i]]));
 
-                if(_jList.length>0) _jList.sort(function(a,b){
-                  var x = a.toLowerCase();
-                  var y = b.toLowerCase();
-                  return x < y ? -1 : x > y ? 1 : 0;
-                });
+                        if (_jList.length > 0) _jList.sort(function (a, b) {
+                            var x = a.toLowerCase();
+                            var y = b.toLowerCase();
+                            return x < y ? -1 : x > y ? 1 : 0;
+                        });
 
-                var csvIndex = -1;
-                for(var j=0; j<this.workspace.files.length; j++){
-                  if(this.workspace.files[j].csv === (_f.name + ".csv") || this.workspace.files[j].csv === (_f.name + ".CSV")){
-                    csvIndex = j;
-                    break;
-                  }
-                }
-
-                for(var j=0; j<_jList.length; j++){
-                  if(_jList[j].substring(0, 6)!="coord_" && (_jList[j].indexOf('.json')>=0 || _jList[j].indexOf('.JSON')>=0)){
-                      if(csvIndex>-1 && this.workspace.files[csvIndex].json.indexOf(_jList[j])===-1){
-                        this.workspace.files[csvIndex].json.push(_jList[j]);
-                      }
-
-                      _f.files.push(_jList[j]);
-
-                      /*var fjson = _jList[j].split("__")[0];
-                      if(_f.files.length === 0) _f.files.push(_jList[j]);
-                      else {
-                        var m=false;
-                        for(var k=0; k<_f.files.length; k++){
-                          if(_f.files.sj === fjson){
-                            _f.files.lj.push(_jList[j]);
-                            m = true;
-                            break;
-                          }
+                        var csvIndex = -1;
+                        for (var j = 0; j < this.workspace.files.length; j++) {
+                            if (this.workspace.files[j].csv === (_f.name + ".csv") || this.workspace.files[j].csv === (_f.name + ".CSV")) {
+                                csvIndex = j;
+                                break;
+                            }
                         }
 
-                        if(!m){
-                          _f.files.push({sj:fjson, lj:[_jList[j]]});
+                        for (var j = 0; j < _jList.length; j++) {
+                            if (_jList[j].substring(0, 6) != "coord_" && (_jList[j].indexOf('.json') >= 0 || _jList[j].indexOf('.JSON') >= 0)) {
+                                if (csvIndex > -1 && this.workspace.files[csvIndex].json.indexOf(_jList[j]) === -1) {
+                                    this.workspace.files[csvIndex].json.push(_jList[j]);
+                                }
+
+                                _f.files.push(_jList[j]);
+
+                                /*var fjson = _jList[j].split("__")[0];
+                                if(_f.files.length === 0) _f.files.push(_jList[j]);
+                                else {
+                                  var m=false;
+                                  for(var k=0; k<_f.files.length; k++){
+                                    if(_f.files.sj === fjson){
+                                      _f.files.lj.push(_jList[j]);
+                                      m = true;
+                                      break;
+                                    }
+                                  }
+          
+                                  if(!m){
+                                    _f.files.push({sj:fjson, lj:[_jList[j]]});
+                                  }
+                                }*/
+                            }
                         }
-                      }*/
-                  }
+
+                        _fList.push(_f);
+
+                    }
                 }
-
-                _fList.push(_f);
-
-              }
             }
-          }
 
-          return _fList;
+            return _fList;
         },
 
         zoom_actions: function () {
@@ -309,7 +311,7 @@ $(function () {
             this.tooltipDiv = d3.select("#tooltip").append("div").style("color", "black");
             this.selectedNodeId = -1;
             this.showToolTip = false;
-            this.showNodeValues=true;
+            this.showNodeValues = true;
             this.piePattern = false;
             this.grayNode = false;
             this.fileName = "";
@@ -323,12 +325,12 @@ $(function () {
         },
 
         initPage: function (gData) {
-          _logger.addLog("graph.js initPage");
-          console.log("Call initPage");
+            _logger.addLog("graph.js initPage");
+            console.log("Call initPage");
             this.fileName = gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex];
             this.zoom_handler(this.svg);
             this.zoom_handler.scaleExtent([1 / 50, 50])
-                    .on("zoom", gInstance.zoom_actions);
+                .on("zoom", gInstance.zoom_actions);
 
             $("#int-cc").css("display", "none");
             $("#int-path").css("display", "none");
@@ -370,10 +372,10 @@ $(function () {
         },
 
         showHideSubGraph: function () {
-          _logger.addLog("graph.js showHideSubGraph");
+            _logger.addLog("graph.js showHideSubGraph");
             var _nid = [],
-                    _show = $(this).prop("checked"),
-                    c = parseInt($(this).attr("r"));
+                _show = $(this).prop("checked"),
+                c = parseInt($(this).attr("r"));
 
             gInstance._nodeData = [];
 
@@ -424,7 +426,7 @@ $(function () {
         },
 
         createSubGraphLegends: function () {
-          _logger.addLog("graph.js createSubGraphLegends");
+            _logger.addLog("graph.js createSubGraphLegends");
             $("#cc-details").html("");
             $("#cc-details").html("<fieldset><legend>Connected subgraphs&nbsp;</legend><ul class='cc_legend'></ul></fieldset>");
 
@@ -440,12 +442,12 @@ $(function () {
                 var t = (d.target.Id) ? d.target.Id : d.target;
                 var k = brNodes.get(s);
 
-                if(k===null){
-                  k = [t];
-                }else{
-                  if(k.indexOf(t)<0){
-                    k.push(t);
-                  }
+                if (k === null) {
+                    k = [t];
+                } else {
+                    if (k.indexOf(t) < 0) {
+                        k.push(t);
+                    }
                 }
 
                 brNodes.put(s, k);
@@ -458,7 +460,7 @@ $(function () {
             var s = "";
             for (var i = 0; i < sg.length; i++) {
                 s += "<li><input type='checkbox' r='" + sg[i] + "' name='cc' id='cc_" + sg[i] +
-                        "' checked /><label class='fa' for='cc_" + sg[i] + "'>Subgraph-" + sg[i] + "</label></li>";
+                    "' checked /><label class='fa' for='cc_" + sg[i] + "'>Subgraph-" + sg[i] + "</label></li>";
             }
 
             $(".cc_legend").html(s);
@@ -469,42 +471,42 @@ $(function () {
 
             var bc = 0;
             var keys = brNodes.getKeys();
-            for(var i=0; i<keys.length; i++){
-              if(brNodes.get(keys[i]).length>1) bc++;
+            for (var i = 0; i < keys.length; i++) {
+                if (brNodes.get(keys[i]).length > 1) bc++;
             }
 
             var ts = "<table id='tdaDiv'>" +
-                     "<tr><td>Total nodes</td><td>"+this._nodeData.length+"</td></tr>" +
-                     "<tr><td>Total edges</td><td>"+this._linkData.length+"</td></tr>" +
-                     "<tr><td>Total branching nodes</td><td>"+bc+"</td></tr>" +
-                     "<tr><td>Branching nodes ratio</td><td>"+(bc/this._nodeData.length)+"</td></tr>" +
-                     "<tr><td>Total subgraphs</td><td>"+sg.length+"</td></tr>";
+                "<tr><td>Total nodes</td><td>" + this._nodeData.length + "</td></tr>" +
+                "<tr><td>Total edges</td><td>" + this._linkData.length + "</td></tr>" +
+                "<tr><td>Total branching nodes</td><td>" + bc + "</td></tr>" +
+                "<tr><td>Branching nodes ratio</td><td>" + (bc / this._nodeData.length) + "</td></tr>" +
+                "<tr><td>Total subgraphs</td><td>" + sg.length + "</td></tr>";
 
             $("#tda-details-details .jsonDetails").html(ts);
-            $("#tda-details-details .jsonDetails table").css({"display":"block","width":"100%", "color":"white", "margin":"1%"});
-            $("#tda-details-details .jsonDetails table tr").css({"width":"100%"});
-            $("#tda-details-details .jsonDetails table td").css({"width":"33%", "border":"1px solid black", "text-align":"center", "padding":"2%"});
+            $("#tda-details-details .jsonDetails table").css({ "display": "block", "width": "100%", "color": "white", "margin": "1%" });
+            $("#tda-details-details .jsonDetails table tr").css({ "width": "100%" });
+            $("#tda-details-details .jsonDetails table td").css({ "width": "33%", "border": "1px solid black", "text-align": "center", "padding": "2%" });
 
         },
 
         selectButton: function (holder, e) {
-          _logger.addLog("graph.js selectButton");
+            _logger.addLog("graph.js selectButton");
             $("#" + holder + " button").removeClass("button_bc");
             $("#" + e.attr("id")).addClass("button_bc");
         },
 
         saveImage: function () {
-          _logger.addLog("graph.js saveImage");
+            _logger.addLog("graph.js saveImage");
             gInstance.selectButton("other-btn", $(this));
 
             var html = d3.select("svg")
-                    .attr("version", 1.1)
-                    .attr("xmlns", "http://www.w3.org/2000/svg")
-                    .node().parentNode.innerHTML;
+                .attr("version", 1.1)
+                .attr("xmlns", "http://www.w3.org/2000/svg")
+                .node().parentNode.innerHTML;
             var imgsrc = 'data:image/svg+xml;base64,' + btoa(html);
 
             var canvas = document.querySelector("canvas"),
-                    context = canvas.getContext("2d");
+                context = canvas.getContext("2d");
 
             var image = new Image;
             image.onload = function () {
@@ -525,7 +527,7 @@ $(function () {
         },
 
         changeIndvcolor: function (e, col) {
-          _logger.addLog("graph.js changeIndvcolor");
+            _logger.addLog("graph.js changeIndvcolor");
             var c = parseInt($(e).attr("r"));
 
             gInstance._graph.color[c - 1] = col;
@@ -534,7 +536,7 @@ $(function () {
         },
 
         changeFlarecolor: function (e, col) {
-          _logger.addLog("graph.js changeFlarecolor");
+            _logger.addLog("graph.js changeFlarecolor");
             var c = parseInt($(e).attr("r"));
 
             gInstance._graph.IFC[c - 1] = col;
@@ -559,7 +561,7 @@ $(function () {
 
         // Show only flare edges
         showIFs: function () {
-          _logger.addLog("graph.js showIFs");
+            _logger.addLog("graph.js showIFs");
             if ($(this).prop("checked") === true) {
                 var activeFlares = 0;
                 gInstance.hideIFRank = [];
@@ -684,7 +686,7 @@ $(function () {
         },
 
         showAllFlares: function () {
-          _logger.addLog("graph.js showAllFlares");
+            _logger.addLog("graph.js showAllFlares");
             var _allIntFlares = $("#saf").prop("checked");
 
             gInstance.selectedFeature[0] = gInstance.selectedFeature[1] = false;
@@ -742,11 +744,11 @@ $(function () {
         },
 
         showHideIntFlare: function () {
-          _logger.addLog("graph.js showHideIntFlare");
+            _logger.addLog("graph.js showHideIntFlare");
             var _nid = [],
-                    _show = $(this).prop("checked"),
-                    c = parseInt($(this).attr("r")),
-                    _intFlare = $("#ifs").prop("checked"); // Show only interesting flares, no other edges; Also delete nodes which has normal edges only
+                _show = $(this).prop("checked"),
+                c = parseInt($(this).attr("r")),
+                _intFlare = $("#ifs").prop("checked"); // Show only interesting flares, no other edges; Also delete nodes which has normal edges only
             //_allFlares = $("#saf").prop("checked");
 
             if (_intFlare || _show) {
@@ -898,14 +900,14 @@ $(function () {
         },
 
         createFlareLegends: function () {
-          _logger.addLog("graph.js createFlareLegends");
+            _logger.addLog("graph.js createFlareLegends");
             $("#int-flare").css("display", "block");
 
             $("#flare-details").html("");
             $("#flare-details").html("<ul class='flare_options'></ul><fieldset><legend>Flare color&nbsp;</legend><ul class='flare_legend'></ul></fieldset>");
 
             var map = new HashMap(),
-                    pc_map = new HashMap();
+                pc_map = new HashMap();
 
             this._linkData = $.extend(true, [], this.graph.links);
             this._nodeData = $.extend(true, [], this.graph.nodes);
@@ -938,11 +940,11 @@ $(function () {
 
             var s = "<li><label id='idl'>Flare width:</label>&nbsp<input type='range' min='1' max='100' value='50' id='fw' />&nbsp;<label id='fwl'>50%</label></li>";
 
-            if(this.devMode){
-              s += "<li><input type='checkbox' id='ifs' /><label class='fa' for='ifs'>Show only interesting flares</label></li>";
+            if (this.devMode) {
+                s += "<li><input type='checkbox' id='ifs' /><label class='fa' for='ifs'>Show only interesting flares</label></li>";
             }
             else {
-              s += "<li style='display:none'><input type='checkbox' id='ifs' /><label class='fa' for='ifs'>Show only interesting flares</label></li>";
+                s += "<li style='display:none'><input type='checkbox' id='ifs' /><label class='fa' for='ifs'>Show only interesting flares</label></li>";
             }
             s += "<li><input type='checkbox' id='saf'" + sack + " /><label class='fa' for='saf'>Select all</label></li>";
 
@@ -951,13 +953,13 @@ $(function () {
             s = "";
             for (var i = 0; i < this.intFlareRank.length; i++) {
                 s += "<li><input type='checkbox' r='" + this.intFlareRank[i] + "' name='pc' id='if_" + this.intFlareRank[i] +
-                        "' checked /><label class='fa' for='if_" + this.intFlareRank[i] + "'>" + map.get(this.intFlareRank[i]) + "</label></li>";
+                    "' checked /><label class='fa' for='if_" + this.intFlareRank[i] + "'>" + map.get(this.intFlareRank[i]) + "</label></li>";
             }
 
             $(".flare_legend").html(s);
 
             for (var i = 0; i < this.intFlareRank.length; i++) {
-                $("#f_color_" + this.intFlareRank[i]).spectrum({color: pc_map.get(this.intFlareRank[i])});
+                $("#f_color_" + this.intFlareRank[i]).spectrum({ color: pc_map.get(this.intFlareRank[i]) });
                 $("#f_color_" + this.intFlareRank[i]).spectrum({
                     change: function (c) {
                         gInstance.changeFlarecolor(this, c.toHexString());
@@ -980,7 +982,7 @@ $(function () {
         },
 
         changeIFWidth: function () {
-          _logger.addLog("graph.js changeIFWidth");
+            _logger.addLog("graph.js changeIFWidth");
             var val = $("#fw").val();
             $("#fwl").html(val + "%");
 
@@ -994,7 +996,7 @@ $(function () {
         },
 
         showHidePattern: function () {
-          _logger.addLog("graph.js showHidePattern");
+            _logger.addLog("graph.js showHidePattern");
             gInstance.piePattern = false;
             if ($(this).prop("checked") === true) {
                 gInstance.piePattern = true;
@@ -1008,7 +1010,7 @@ $(function () {
         },
 
         createPieColorLegend: function () {
-          _logger.addLog("graph.js createPieColorLegend");
+            _logger.addLog("graph.js createPieColorLegend");
             gInstance.selectButton("attr-btn", $(this));
 
             //$("#int-path").css("display", "none");
@@ -1033,7 +1035,7 @@ $(function () {
             $(".pattern").html("<li><input type='checkbox' name='pattern' id='pattern' /><label class='fa' for='pattern'>Show as a pattern</label></li>");
 
             for (var i = 0; i < gInstance._graph.indv.length; i++) {
-                $("#fcolor_" + (i + 1)).spectrum({color: gInstance._graph.color[i]});
+                $("#fcolor_" + (i + 1)).spectrum({ color: gInstance._graph.color[i] });
                 $("#fcolor_" + (i + 1)).spectrum({
                     change: function (c) {
                         gInstance.changeIndvcolor(this, c.toHexString());
@@ -1049,7 +1051,7 @@ $(function () {
         },
 
         getFontColor: function (d, i) {
-          //_logger.addLog("graph.js getFontColor");
+            //_logger.addLog("graph.js getFontColor");
             var c = d.Color[i];
 
             if (gInstance.grayNode) {
@@ -1073,20 +1075,20 @@ $(function () {
         },
 
         resetFontSize: function () {
-          _logger.addLog("graph.js resetFontSize");
+            _logger.addLog("graph.js resetFontSize");
             var t = $(".labels").find("*");
             t.each(function (i) {
                 var _a = $(t[i]),
-                        r = parseFloat(_a.attr("r")),
-                        a = this.getComputedTextLength(),
-                        b = (2 * r - 8) / a * 24,
-                        s = Math.min(r, b) + "px";
+                    r = parseFloat(_a.attr("r")),
+                    a = this.getComputedTextLength(),
+                    b = (2 * r - 8) / a * 24,
+                    s = Math.min(r, b) + "px";
                 _a.css("font-size", s);
             });
         },
 
         grayScaleNode: function () {
-          _logger.addLog("graph.js grayScaleNode");
+            _logger.addLog("graph.js grayScaleNode");
             gInstance.grayNode = false;
 
             if ($(this).prop("checked") === true)
@@ -1095,7 +1097,7 @@ $(function () {
         },
 
         changeNodeColor: function (index, e) {
-          _logger.addLog("graph.js changeNodeColor");
+            _logger.addLog("graph.js changeNodeColor");
             gInstance.selectButton("attr-btn", e);
 
             gInstance.lIndex = parseInt(index);
@@ -1117,51 +1119,51 @@ $(function () {
             });
 
             this.labelText.text(function (d) {
-                return ((gInstance.showNodeValues)?d.Label[index]:"");
+                return ((gInstance.showNodeValues) ? d.Label[index] : "");
             })
-                    .style("fill", function (d) {
-                        return gInstance.getFontColor(d, index);
-                    })
-                    .style("font-size", "1px")
-                    .attr("dy", ".35em")
-                    .each(function (d) {
-                        var r = Number(d.Size),
-                                a = this.getComputedTextLength(),
-                                c=0.35,
-                                b = 2*Math.sqrt(r*r-c*c),
-                                s = Math.min(r, b/a);
-                        d.fs = s;
-                    })
-                    .style("font-size", function (d) {
-                        return d.fs + "px";
-                    });
+                .style("fill", function (d) {
+                    return gInstance.getFontColor(d, index);
+                })
+                .style("font-size", "1px")
+                .attr("dy", ".35em")
+                .each(function (d) {
+                    var r = Number(d.Size),
+                        a = this.getComputedTextLength(),
+                        c = 0.35,
+                        b = 2 * Math.sqrt(r * r - c * c),
+                        s = Math.min(r, b / a);
+                    d.fs = s;
+                })
+                .style("font-size", function (d) {
+                    return d.fs + "px";
+                });
             //if (!dr)
             //  gInstance.resetFontSize();
         },
 
         getNodeCoordinate: function () {
-          _logger.addLog("graph.js getNodeCoordinate");
-          var _path = _common.getPath([this.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].split("__")[0] + ".json")]);
+            _logger.addLog("graph.js getNodeCoordinate");
+            var _path = _common.getPath([this.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].split("__")[0] + ".json")]);
 
-          if(this._fs.existsSync(_path)){
-            var data = this._fs.readFileSync(_path, 'utf-8');
-            //alert(data);
-            gInstance.coordData = JSON.parse(data);
+            if (this._fs.existsSync(_path)) {
+                var data = this._fs.readFileSync(_path, 'utf-8');
+                //alert(data);
+                gInstance.coordData = JSON.parse(data);
 
-            gInstance.node.each(function (d) {
-                var __coord = gInstance.coordData["nid_" + d.Id];
-                if (__coord) {
-                    d.fx = __coord[0];
-                    d.fy = __coord[1];
+                gInstance.node.each(function (d) {
+                    var __coord = gInstance.coordData["nid_" + d.Id];
+                    if (__coord) {
+                        d.fx = __coord[0];
+                        d.fy = __coord[1];
+                    }
+                });
+                $("#int-cc").css("display", "block");
+                if (this._graph.param.fc.length === 1) {
+                    $("#color_bar").css("display", "block");
                 }
-            });
-            $("#int-cc").css("display", "block");
-            if(this._graph.param.fc.length===1){
-              $("#color_bar").css("display", "block");
+            } else {
+                console.log(_path + " not found.");
             }
-          }else{
-            console.log(_path + " not found.");
-          }
             //(err, data) => {
             /*if (err){
               //alert("Error to load coord data: \n" + err.name + ': ' + err.message);
@@ -1181,7 +1183,7 @@ $(function () {
         },
 
         getCoordinates: function () {
-          _logger.addLog("graph.js getCoordinates");
+            _logger.addLog("graph.js getCoordinates");
             if (gInstance.coordData) {
                 gInstance.node.each(function (d) {
                     var __coord = gInstance.coordData["nid_" + d.Id];
@@ -1197,7 +1199,7 @@ $(function () {
         },
 
         clickGetCoordinates: function () {
-          _logger.addLog("graph.js clickGetCoordinates");
+            _logger.addLog("graph.js clickGetCoordinates");
             gInstance.selectButton("other-btn", $(this));
             gInstance.getCoordinates();
         },
@@ -1216,74 +1218,74 @@ $(function () {
 
             var _path = _common.getPath([gInstance.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], ("coord_" + gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex].split("__")[0] + ".json")]);
 
-            try{
-              gInstance._fs.writeFileSync(_path, nPos);
+            try {
+                gInstance._fs.writeFileSync(_path, nPos);
 
-              if(gInstance._graph.param.fc.length===1){
-                $("#color_bar").css("display", "block");
-              }
-            }catch(err){
-              alert("Error in setCoordinates: " + err.message);
+                if (gInstance._graph.param.fc.length === 1) {
+                    $("#color_bar").css("display", "block");
+                }
+            } catch (err) {
+                alert("Error in setCoordinates: " + err.message);
             }
 
         },
 
         saveColors: function () {
-          _logger.addLog("graph.js saveColors");
+            _logger.addLog("graph.js saveColors");
             gInstance.selectButton("other-btn", $(this));
 
             var s = JSON.stringify(gInstance._graph);
 
             var _path = _common.getPath([gInstance.workspace.wd, "Data", "json", gInstance.fl[gInstance.fileIndex].split(".")[0], gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex]]);
 
-            try{
-              gInstance._fs.writeFileSync(_path, s);
-            }catch(err){
-              alert("Error to saveColors: " + err.message);
+            try {
+                gInstance._fs.writeFileSync(_path, s);
+            } catch (err) {
+                alert("Error to saveColors: " + err.message);
             }
         },
 
         createColorBar: function () {
-          _logger.addLog("graph.js createColorBar");
+            _logger.addLog("graph.js createColorBar");
             gInstance.selectButton("other-btn", $(this));
 
-            var tpos = [], pos=[];
+            var tpos = [], pos = [];
             var posC = [];
             var w = $(window).width(), //w=pos[pos.length - 1][0] - pos[0][0],
-                    h = 70;
-            var lastVal = Number.NEGATIVE_INFINITY, lastPos=Number.NEGATIVE_INFINITY;
+                h = 70;
+            var lastVal = Number.NEGATIVE_INFINITY, lastPos = Number.NEGATIVE_INFINITY;
 
             gInstance.node.each(function (d) {
-              var x = 0.0, y = 0.0, k = 1.0;
-              if (gInstance.__transform) {
-                  x = gInstance.__transform.x;
-                  y = gInstance.__transform.y;
-                  k = gInstance.__transform.k;
-              }
+                var x = 0.0, y = 0.0, k = 1.0;
+                if (gInstance.__transform) {
+                    x = gInstance.__transform.x;
+                    y = gInstance.__transform.y;
+                    k = gInstance.__transform.k;
+                }
 
-              var nodePos = (x + (d.x * k) + 100);
+                var nodePos = (x + (d.x * k) + 100);
 
-              if(nodePos>=0 && nodePos<=w){
-                tpos.push([nodePos, d.Id, parseFloat(d.Label[1]), d.Color[1]]);
-              }
+                if (nodePos >= 0 && nodePos <= w) {
+                    tpos.push([nodePos, d.Id, parseFloat(d.Label[1]), d.Color[1]]);
+                }
             });
 
             tpos.sort(function (a, b) {
                 return a[0] - b[0];
             });
 
-            for(var i=0; i<tpos.length; i++){
-              if(tpos[i][2] > lastVal && (lastPos===Number.NEGATIVE_INFINITY || tpos[i][0]-lastPos>2)){
-                lastVal = parseFloat(tpos[i][2]);
-                lastPos = tpos[i][0]
-                pos.push(tpos[i]);
-              }
+            for (var i = 0; i < tpos.length; i++) {
+                if (tpos[i][2] > lastVal && (lastPos === Number.NEGATIVE_INFINITY || tpos[i][0] - lastPos > 2)) {
+                    lastVal = parseFloat(tpos[i][2]);
+                    lastPos = tpos[i][0]
+                    pos.push(tpos[i]);
+                }
             }
 
-            var _int = (pos.length<10)?pos.length:10;//parseInt(pos.length / 5 > 10 ? pos.length / 10 : pos.length / 5);
-            var _tickValues=[];
+            var _int = (pos.length < 10) ? pos.length : 10;//parseInt(pos.length / 5 > 10 ? pos.length / 10 : pos.length / 5);
+            var _tickValues = [];
 
-            var _ic = 0, _step = Math.round(pos.length/_int);
+            var _ic = 0, _step = Math.round(pos.length / _int);
             for (; _ic < pos.length; _ic += 1) {
                 //posC.push([pos[_ic][1], "", 0.0]);
                 posC.push(pos[_ic]);
@@ -1313,174 +1315,175 @@ $(function () {
             var _g = gInstance.svg.append("g").attr("id", "legends");
 
             var legend = gInstance.marker
-                    .append("svg:linearGradient")
-                    .attr("id", "gradient")
-                    .attr("x1", "0%")
-                    .attr("y1", "100%")
-                    .attr("x2", "100%")
-                    .attr("y2", "100%")
-                    .attr("spreadMethod", "pad")
-                    .attr('fill', 'none')
-                    .style('stroke', '#000');
+                .append("svg:linearGradient")
+                .attr("id", "gradient")
+                .attr("x1", "0%")
+                .attr("y1", "100%")
+                .attr("x2", "100%")
+                .attr("y2", "100%")
+                .attr("spreadMethod", "pad")
+                .attr('fill', 'none')
+                .style('stroke', '#000');
 
             for (var i = 0; i < posC.length; i++) {
                 var _perc = i * 100 / (posC.length - 1);
 
                 legend.append("stop")
-                        .attr("offset", "" + _perc + "%")
-                        .attr("stop-color", posC[i][3])//posC[i][1])
-                        .attr("stop-opacity", 1);
+                    .attr("offset", "" + _perc + "%")
+                    .attr("stop-color", posC[i][3])//posC[i][1])
+                    .attr("stop-opacity", 1);
             }
 
             _g.append("rect")
-                    .attr("width", w)
-                    .attr("height", h - 40)
-                    .style("fill", "url(#gradient)");
+                .attr("width", w)
+                .attr("height", h - 0)//40
+                .style("fill", "url(#gradient)");
 
-            for(var i=0; i<posC.length; i+=_step){
-              _tickValues.push(posC[i][2]);
+            for (var i = 0; i < posC.length; i += _step) {
+                _tickValues.push(posC[i][2]);
             }
 
-            var extent = d3.extent(_tickValues),
-            _dom=[posC[posC.length-1][2]+1],
-            _rng=[w];
+            //var extent = d3.extent(_tickValues),
+            _dom = [posC[posC.length - 1][2] + 1],
+                _rng = [w];
 
-            for(var i=posC.length-1; i>=0; i-=_step){
-              _dom.push(posC[i][2]); // Node value
-              _rng.push(posC[i][0]-100.0); //Node position
+            for (var i = posC.length - 1; i >= 0; i -= _step) {
+                _dom.push(posC[i][2]); // Node value
+                _rng.push(posC[i][0] - 100.0); //Node position
             }
 
-            _dom.push(posC[0][2]-1);
+            _dom.push(posC[0][2] - 1);
             _rng.push(0);
 
             var y = d3.scaleLinear().range(_rng).domain(_dom);
-                    //.range([w, 0]) // The values are going to map in the screen
-                    //.domain([posC[posC.length - 1][2], posC[0][2]]);// The values I want to show
+            //.range([w, 0]) // The values are going to map in the screen
+            //.domain([posC[posC.length - 1][2], posC[0][2]]);// The values I want to show
 
             var yAxis = d3.axisBottom()
-                    .scale(y)
-                    .ticks(_int)
-                    .tickValues(_tickValues);
+                .scale(y)
+                .ticks(_int)
+                .tickValues(_tickValues)
+                .tickFormat(d3.format(",.0f"));
 
             _g.attr("class", "y axis")
-                    .attr("transform", "translate(0," + ($(window).height() - 40) + ")")
-                    .call(yAxis)
-                    .append("text")
-                    .attr("transform", "rotate(-90)")
-                    .attr("y", 0)
-                    .attr("dy", ".71em")
-                    .style("text-anchor", "end")
-                    .text("")
-                    .style("text-anchor", "middle")
-                    .style("fill", "#ff9189")
-                    .style("font-family", "Arial")
-                    .style("font-weight", "bold")
-                    .style("font-size", "20px");
+                .attr("transform", "translate(0," + ($(window).height() - 60) + ")")//40
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("")
+                .style("text-anchor", "middle")
+                .style("fill", "#ff9189")
+                .style("font-family", "Arial")
+                .style("font-weight", "bold")
+                .style("font-size", "20px"); //20px
 
             d3.selectAll("#legends text").style("fill", "#000")
-                    .style("font-family", "Arial")
-                    .style("font-weight", "bold")
-                    .style("font-size", "14px")
-                    .style("text-anchor", "left")
-                    .attr("transform","rotate(60)")
-                    .attr("y", 0)
-                    .attr("dy",".71em")
-                    .attr("dx","1.1em");
+                .style("font-family", "Arial")
+                .style("font-weight", "bold")
+                .style("font-size", "24px")//14px
+                .style("text-anchor", "left")
+                .attr("transform", "rotate(60)")
+                .attr("y", 0)
+                .attr("dy", ".71em")
+                .attr("dx", "1.5em");
         },
 
-        getColumnNames: function(){
-          _logger.addLog("graph.js getColumnNames");
-          var selectedCSVFile = this.fl[this.fileIndex];
-          for(var i=0; i<this.workspace.files.length; i++){
-            if(this.workspace.files[i].csv === selectedCSVFile){
-              if(this.workspace.files[i].col.header.length===0){
-                var addon = require('bindings')('hyppo-xd');
-                var srt = JSON.parse(addon.invoke("RCSVH", _common.getPath([this.workspace.wd, "Data","csv",selectedCSVFile])));
+        getColumnNames: function () {
+            _logger.addLog("graph.js getColumnNames");
+            var selectedCSVFile = this.fl[this.fileIndex];
+            for (var i = 0; i < this.workspace.files.length; i++) {
+                if (this.workspace.files[i].csv === selectedCSVFile) {
+                    if (this.workspace.files[i].col.header.length === 0) {
+                        var addon = require('bindings')('hyppo-xd');
+                        var srt = JSON.parse(addon.invoke("RCSVH", _common.getPath([this.workspace.wd, "Data", "csv", selectedCSVFile])));
 
-                for(var h=0; h<srt.header.length; h++){
-                  this.workspace.files[i].col.header.push(srt.header[h]);
+                        for (var h = 0; h < srt.header.length; h++) {
+                            this.workspace.files[i].col.header.push(srt.header[h]);
+                        }
+
+                        _common.saveWorkSpace(this.workspace);
+                    }
+                    return this.workspace.files[i].col.header;
                 }
-
-                _common.saveWorkSpace(this.workspace);
-              }
-              return this.workspace.files[i].col.header;
             }
-          }
 
-          return [];
+            return [];
         },
 
-        getPieAttributes: function(header){
-          _logger.addLog("graph.js getPieAttributes");
-          //var header = this.getColumnNames();
-          if(header.length===0) return "";
+        getPieAttributes: function (header) {
+            _logger.addLog("graph.js getPieAttributes");
+            //var header = this.getColumnNames();
+            if (header.length === 0) return "";
 
-          var colNames = [], colIndex=[];
+            var colNames = [], colIndex = [];
 
-          // Discard first column which is a index column
-          for(var i=1; i<header.length; i++){
-            colNames.push(header[i].name);
-            colIndex.push(header[i].index);
-          }
-
-          var s = "<select id='pie-select-state' multiple name='state[]' class='demo-default' style='width:100%'>";
-                  console.log("total cols: " + colNames.length);
-          for(var i=0; i<colNames.length; i++){
-            if(this.fnParam.pie.length>0 && this.fnParam.pie.indexOf(parseInt(colIndex[i]))>-1){
-              s += "<option value='" + colIndex[i] + "' selected>" + colNames[i] + "</option>";
-            }else{
-              s += "<option value='" + colIndex[i] + "'>" + colNames[i] + "</option>";
+            // Discard first column which is a index column
+            for (var i = 1; i < header.length; i++) {
+                colNames.push(header[i].name);
+                colIndex.push(header[i].index);
             }
-          }
 
-          s += "</select>" +
+            var s = "<select id='pie-select-state' multiple name='state[]' class='demo-default' style='width:100%'>";
+            console.log("total cols: " + colNames.length);
+            for (var i = 0; i < colNames.length; i++) {
+                if (this.fnParam.pie.length > 0 && this.fnParam.pie.indexOf(parseInt(colIndex[i])) > -1) {
+                    s += "<option value='" + colIndex[i] + "' selected>" + colNames[i] + "</option>";
+                } else {
+                    s += "<option value='" + colIndex[i] + "'>" + colNames[i] + "</option>";
+                }
+            }
+
+            s += "</select>" +
                 "<script>" +
-          				"var $select = $('#pie-select-state').selectize({" +
-          					"plugins: ['remove_button']," +
-          					"create          : true," +
-                    "placeholder     : 'Select pie chart features'," +
-          				"});" +
-          				"</script></div>";
+                "var $select = $('#pie-select-state').selectize({" +
+                "plugins: ['remove_button']," +
+                "create          : true," +
+                "placeholder     : 'Select pie chart features'," +
+                "});" +
+                "</script></div>";
 
-          return s;
+            return s;
         },
 
-        getFlareMemAttributes:function(header){
-          _logger.addLog("graph.js getFlareMemAttributes");
-          if(header.length===0) return "";
+        getFlareMemAttributes: function (header) {
+            _logger.addLog("graph.js getFlareMemAttributes");
+            if (header.length === 0) return "";
 
-          var colNames = [], colIndex=[];
+            var colNames = [], colIndex = [];
 
-          // Discard first column which is a index column
-          for(var i=1; i<header.length; i++){
-            colNames.push(header[i].name);
-            colIndex.push(header[i].index);
-          }
-
-          var s = "<select id='mem-select-state' multiple name='state[]' class='demo-default' style='width:100%'>";
-                  console.log("total cols: " + colNames.length);
-          for(var i=0; i<colNames.length; i++){
-            if(this.fnParam.mem.length>0 && this.fnParam.mem.indexOf(parseInt(colIndex[i]))>-1){
-              s += "<option value='" + colIndex[i] + "' selected>" + colNames[i] + "</option>";
-            }else{
-              s += "<option value='" + colIndex[i] + "'>" + colNames[i] + "</option>";
+            // Discard first column which is a index column
+            for (var i = 1; i < header.length; i++) {
+                colNames.push(header[i].name);
+                colIndex.push(header[i].index);
             }
-          }
 
-          s += "</select>" +
+            var s = "<select id='mem-select-state' multiple name='state[]' class='demo-default' style='width:100%'>";
+            console.log("total cols: " + colNames.length);
+            for (var i = 0; i < colNames.length; i++) {
+                if (this.fnParam.mem.length > 0 && this.fnParam.mem.indexOf(parseInt(colIndex[i])) > -1) {
+                    s += "<option value='" + colIndex[i] + "' selected>" + colNames[i] + "</option>";
+                } else {
+                    s += "<option value='" + colIndex[i] + "'>" + colNames[i] + "</option>";
+                }
+            }
+
+            s += "</select>" +
                 "<script>" +
-          				"var $select = $('#mem-select-state').selectize({" +
-          					"plugins: ['remove_button']," +
-          					"create          : true," +
-                    "placeholder     : 'Select flare membership features'," +
-          				"});" +
-          				"</script></div>";
+                "var $select = $('#mem-select-state').selectize({" +
+                "plugins: ['remove_button']," +
+                "create          : true," +
+                "placeholder     : 'Select flare membership features'," +
+                "});" +
+                "</script></div>";
 
-          return s;
+            return s;
         },
 
         createButtons: function () {
-          _logger.addLog("graph.js createButtons");
+            _logger.addLog("graph.js createButtons");
             $("#thumbnails").css("display", "block");
 
             var label = [];
@@ -1508,15 +1511,16 @@ $(function () {
                 this.hasPieChart = true;
             }
 
-            this.hasMemberShip = (this._graph.param.mem.length>0);
+            this.hasMemberShip = (this._graph.param.mem.length > 0);
 
 
             for (var l in label) {
                 s += "<button id='btn_" + label[l] + "' seq='" + l + "'>" + label[l].replace("_", " ") + "</button>&nbsp;";
             }
             $("#attr-btn").html(s + "</div><div style='clear:left;float:left'>" +
-                    "<input type='checkbox' class='gsn-select' id='grayScaleNode' /><label class='fa' for='grayScaleNode'>Show in gray scale</label>" +
-                    "</div></fieldset>");
+                "<input type='checkbox' class='gsn-select' id='grayScaleNode' /><label class='fa' for='grayScaleNode'>Show in gray scale</label>" +
+                "</div><div style='clear:left;float:left'><input type='checkbox' name='snv' id='snv' checked /><label class='fa' for='snv'>Show node values</label>" +
+                "</div></fieldset>");
 
             /*$(".gsn-select").on("click", function () {
              if ($("grayScaleNode").prop("checked") === true)
@@ -1527,14 +1531,15 @@ $(function () {
              gInstance.grayScaleNode();
              });*/
             d3.select("#grayScaleNode").on("change", gInstance.grayScaleNode);
+            d3.select("#snv").on("change", gInstance.showHideNodeValues);
 
             s = "<fieldset><legend>Actions&nbsp;</legend><button id='save_image'>Save image</button>&nbsp;";
 
             // dev version
             s += "<button id='get_coord' title='Assign saved node position to the graph'>Restore nodes positions</button>&nbsp;" +
-                    "<button id='set_coord' title='Save node positions'>Save nodes positions</button>&nbsp;" +
-                    "<button id='set_color' title='Save colors whatever you changed'>Save colors</button>&nbsp;" +
-                    "<button id='color_bar' title='Color bar'>Color bar</button>&nbsp;";
+                "<button id='set_coord' title='Save node positions'>Save nodes positions</button>&nbsp;" +
+                "<button id='set_color' title='Save colors whatever you changed'>Save colors</button>&nbsp;" +
+                "<button id='color_bar' title='Color bar'>Color bar</button>&nbsp;";
 
             s += "<button id='node_analysis' title='Explore nodes' style='display:none;'>Analysis</button>&nbsp;";
 
@@ -1558,14 +1563,14 @@ $(function () {
             d3.select("#get_coord").style("color", "wheat").on("click", gInstance.clickGetCoordinates);
             d3.select("#set_coord").style("color", "wheat").on("click", gInstance.setCoordinates);
             d3.select("#set_color").style("color", "wheat").on("click", gInstance.saveColors);
-            if(d3.select("#color_bar")) d3.select("#color_bar").style("color", "wheat").on("click", gInstance.createColorBar);
+            if (d3.select("#color_bar")) d3.select("#color_bar").style("color", "wheat").on("click", gInstance.createColorBar);
             d3.select("#node_analysis").style("color", "wheat").on("click", gInstance.analyzeNodes);
             d3.select("#wdtf-btn").style("color", "wheat").on("click", gInstance.writeDataToFile);
             d3.select("#clearNIDs").style("color", "wheat").on("click", gInstance.removeSelection);
 
             //
             s = "";
-            for (var i = 0; i < this._graph.HN.length; i++) {
+            for (var i = 1; i < this._graph.HN.length; i++) {
                 //s += "<a href='javascript:void(0)' class='file-select' seq='" + i + "'>" + this.fl[i] + "</a>";
                 if (this._graph.HN[i].length > 0)
                     s += "<li><input type='checkbox' class='attr-select' id='ancb_" + (i + 1) + "' seq='" + (i + 1) + "' /><label class='fa' for='ancb_" + (i + 1) + "'>" + this._graph.HN[i] + "</label></li>";
@@ -1584,319 +1589,319 @@ $(function () {
             });
 
             $("#map-details-details .jsonDetails").html(this.getJSONFileDetails());
-            $("#map-details-details .jsonDetails table").css({"display":"block","width":"100%", "color":"white", "margin":"1%"});
-            $("#map-details-details .jsonDetails table tr").css({"width":"100%"});
-            $("#map-details-details .jsonDetails table td").css({"width":"33%", "border":"1px solid black", "text-align":"center", "padding":"2%"});
+            $("#map-details-details .jsonDetails table").css({ "display": "block", "width": "100%", "color": "white", "margin": "1%" });
+            $("#map-details-details .jsonDetails table tr").css({ "width": "100%" });
+            $("#map-details-details .jsonDetails table td").css({ "width": "33%", "border": "1px solid black", "text-align": "center", "padding": "2%" });
 
             d3.select("#generate_mapper").style("display", "block").style("color", "wheat").style("float", "right").on("click", gInstance.generateMapper);
 
         },
 
-        getHeaderName: function(index, header){
-          _logger.addLog("graph.js getHeaderName");
-          index = parseInt(index);
-          for(var i=1; i<=header.length; i++){
-            if(parseInt(header[i-1].index) === index){
-              return header[i-1].name;
+        getHeaderName: function (index, header) {
+            _logger.addLog("graph.js getHeaderName");
+            index = parseInt(index);
+            for (var i = 1; i <= header.length; i++) {
+                if (parseInt(header[i - 1].index) === index) {
+                    return header[i - 1].name;
+                }
             }
-          }
 
-          return "";
+            return "";
         },
 
-        createMapper: function(nesVal){
-          _logger.addLog("graph.js createMapper");
-          _logger.addLog(nesVal);
-          var param = [];
+        createMapper: function (nesVal) {
+            _logger.addLog("graph.js createMapper");
+            _logger.addLog(nesVal);
+            var param = [];
 
-          param.push("-RD");
-          param.push(_common.getPath([this.workspace.wd, "Data" , "csv"]));
-          param.push("-WD");
-          param.push(_common.getPath([this.workspace.wd, "Data" , "json"]));
-          param.push("-FN");
-          param.push(this.fl[this.fileIndex]);
+            param.push("-RD");
+            param.push(_common.getPath([this.workspace.wd, "Data", "csv"]));
+            param.push("-WD");
+            param.push(_common.getPath([this.workspace.wd, "Data", "json"]));
+            param.push("-FN");
+            param.push(this.fl[this.fileIndex]);
 
-          if(nesVal.gen.length > 0){
-            param.push("-GC");
-            param.push(nesVal.gen);
-          }
-
-          if(nesVal.loc.length > 0){
-            param.push("-LC");
-            var s = "[";
-            for(var i=0; i<nesVal.loc.length; i++){
-              if(i>0) s += ",";
-              s += nesVal.loc[i];
+            if (nesVal.gen.length > 0) {
+                param.push("-GC");
+                param.push(nesVal.gen);
             }
-            s += "]";
-            param.push(s);
-          }
 
-          if(nesVal.dt.length > 0){
-            param.push("-DTC");
-            var s = "[";
-            for(var i=0; i<nesVal.dt.length; i++){
-              if(i>0) s += ",";
-              s += nesVal.dt[i];
+            if (nesVal.loc.length > 0) {
+                param.push("-LC");
+                var s = "[";
+                for (var i = 0; i < nesVal.loc.length; i++) {
+                    if (i > 0) s += ",";
+                    s += nesVal.loc[i];
+                }
+                s += "]";
+                param.push(s);
             }
-            s += "]";
-            param.push(s);
-          }
 
-
-          /*
-          {
-            "filter" : param.fc,
-            "filter_gen":[],
-            "window" : param.wx,
-            "overlap" : param.gx,
-            "cluster_algo": param.cls.name,
-            "cluster_attr": param.cla,
-            "cluster_param": param.cls.param,
-            "pie_attr": $('#pieDiv div.item').map((i, el) => el.getAttribute('data-value')).get(),
-            "mem_attr":[],
-            "edge_sig":param.sig,
-            "ref_perf":param.rp,
-            "gen": param.gc,
-            "loc": param.loc,
-            "dt": param.dtc
-          }
-          */
-
-          // Get the header list  and create file name using that List
-          // If file alread exists then pull it otherwise run mapper
-          _header_names = [];
-          for(var i=0; i<this.workspace.files.length; i++){
-            if(this.workspace.files[i].csv===this.fl[this.fileIndex]){
-              _header_names = this.workspace.files[i].col.header;
-              break;
+            if (nesVal.dt.length > 0) {
+                param.push("-DTC");
+                var s = "[";
+                for (var i = 0; i < nesVal.dt.length; i++) {
+                    if (i > 0) s += ",";
+                    s += nesVal.dt[i];
+                }
+                s += "]";
+                param.push(s);
             }
-          }
-
-          var fName = "";
-          param.push("-FC");
-          var s = "[";
-          for(var i=0; i<nesVal.filter.length; i++){
-            if(i>0){
-              s += ",";
-              fName += "-";
-            }
-            s += nesVal.filter[i];
-            fName += this.getHeaderName(nesVal.filter[i], _header_names);
-          }
-          s += "]";
-          fName += "_";
-          param.push(s);
-
-          param.push("-WX");
-          s = "[";
-          for(var i=0; i<nesVal.window.length; i++){
-            if(i>0){
-              s += ",";
-              fName += "-";
-            }
-            s += nesVal.window[i];
-            fName += nesVal.window[i];
-          }
-          s += "]";
-          fName += "_";
-          param.push(s);
-
-          param.push("-GX");
-          s = "[";
-          for(var i=0; i<nesVal.overlap.length; i++){
-            if(i>0){
-              s += ",";
-              fName += "-";
-            }
-            s += nesVal.overlap[i];
-            fName += parseFloat(nesVal.overlap[i]).toFixed(4);
-          }
-          s += "]";
-          fName += "_";
-          param.push(s);
-
-          param.push("-CP");
-          s = "[";
-          fName += nesVal.cluster_algo + "-";
-          for(var i=0; i<nesVal.cluster_param.length; i++){
-            if(i>0){
-              s += ",";
-              fName += "-";
-            }
-            s += nesVal.cluster_param[i];
-
-            if(i==0 && nesVal.cluster_algo==="DBSCAN"){
-              fName += parseFloat(nesVal.cluster_param[i]).toFixed(4);
-            }else{
-              fName += nesVal.cluster_param[i];
-            }
-          }
-          s += "]";
-          fName += "_";
-          param.push(s);
-
-          param.push("-CC");
-          s = "[";
-          for(var i=0; i<nesVal.cluster_attr.length; i++){
-            if(i>0){
-              s += ",";
-              fName += "-";
-            }
-            s += nesVal.cluster_attr[i];
-            fName += this.getHeaderName(nesVal.cluster_attr[i], _header_names);
-          }
-          s += "]";
-          fName += "_";
-          param.push(s);
-
-          if(nesVal.filter_gen.length>0){
-            param.push("-FG");
-
-            s = "[";
-            for(var i=0; i<nesVal.filter_gen.length; i++){
-              if(i>0){
-                s += ",";
-                fName += "-";
-              }
-              s += nesVal.filter_gen[i];
-              fName += nesVal.filter_gen[i];
-            }
-            s += "]";
-            fName += "_";
-            param.push(s);
-          }
-
-          fName += "_";
-
-          if(nesVal.pie_attr.length > 0){
-            param.push("-PIEC");
-            s = "[";
-
-            for(var i=0; i<nesVal.pie_attr.length; i++){
-              if(i>0){
-                s += ",";
-                fName += "-";
-              }
-              s += nesVal.pie_attr[i];
-              fName += nesVal.pie_attr[i];
-            }
-            s += "]";
-            fName += "_";
-            param.push(s);
-          }
-
-          param.push("-NSR");
-          param.push("[60.0, 90.0]");
-
-          fName += nesVal.ref_perf;
-
-          if(nesVal.mem_attr.length > 0){
-            param.push("-MEMC");
-            s = "[";
-            fName += "_";
-            for(var i=0; i<nesVal.mem_attr.length; i++){
-              if(i>0){
-                s += ",";
-                fName += "-";
-              }
-              s += nesVal.mem_attr[i];
-              fName += nesVal.mem_attr[i];
-            }
-            s += "]";
-            param.push(s);
-          }
 
 
-
-          fName += ".json";
-
-          var chkFN = _common.getPath([this.workspace.wd,"Data", "json", this.fileName.split(".")[0], fName]);
-          console.log(chkFN);
-          _logger.addLog(param);
-
-          if(this._fs.existsSync(chkFN)){
-            this.storeData(chkFN);
-          }else{
-            var addon = require('bindings')('hyppo-xd');
-            var srt = addon.invoke("CRTMAPR", param);
-
-            this.storeData(srt);
-          }
-
-          return true;
-        },
-
-        storeData: function(ofn){
-          _logger.addLog("graph.js storeData");
-          try{
-            this._fs.writeFileSync(_common.getPath([__dirname, "tmp.sp"]), JSON.stringify([{'csv':this.fl[this.fileIndex], 'json':this._path.basename(ofn)}]));
-          }catch(err){
-            console.log("Error to write data at storeData: " + err.message);
-          }
-        },
-
-        generateMapper: function(){
-          _logger.addLog("graph.js generateMapper");
-          var param = (gInstance._graph.param)?gInstance._graph.param:null;
-          _logger.addLog(param);
-
-          if(param){
-            var nesVal = {
+            /*
+            {
               "filter" : param.fc,
-              "filter_gen":param.fg,
+              "filter_gen":[],
               "window" : param.wx,
               "overlap" : param.gx,
               "cluster_algo": param.cls.name,
               "cluster_attr": param.cla,
               "cluster_param": param.cls.param,
               "pie_attr": $('#pieDiv div.item').map((i, el) => el.getAttribute('data-value')).get(),
-              "mem_attr":$('#memDiv div.item').map((i, el) => el.getAttribute('data-value')).get(),
+              "mem_attr":[],
               "edge_sig":param.sig,
               "ref_perf":param.rp,
               "gen": param.gc,
-              "loc": param.lc,
+              "loc": param.loc,
               "dt": param.dtc
-            };
+            }
+            */
 
-            for(var i=1; i<=param.fc.length; i++){
-              if(parseInt($("#txtWin_"+i).val()) > 0 && parseInt($("#txtWin_"+i).val())!==nesVal.window[i-1]){
-                nesVal.window[i-1] = parseInt($("#txtWin_"+i).val());
-              }
-
-              if(parseFloat($("#myRangeOv_"+i).val())!==nesVal.overlap[i-1]){
-                nesVal.overlap[i-1] = parseFloat($("#myRangeOv_"+i).val());
-              }
+            // Get the header list  and create file name using that List
+            // If file alread exists then pull it otherwise run mapper
+            _header_names = [];
+            for (var i = 0; i < this.workspace.files.length; i++) {
+                if (this.workspace.files[i].csv === this.fl[this.fileIndex]) {
+                    _header_names = this.workspace.files[i].col.header;
+                    break;
+                }
             }
 
-            if($("#selCluster option:selected").val() !== nesVal.cluster_algo){
-              nesVal.cluster_algo = $("#selCluster option:selected").val();
+            var fName = "";
+            param.push("-FC");
+            var s = "[";
+            for (var i = 0; i < nesVal.filter.length; i++) {
+                if (i > 0) {
+                    s += ",";
+                    fName += "-";
+                }
+                s += nesVal.filter[i];
+                fName += this.getHeaderName(nesVal.filter[i], _header_names);
+            }
+            s += "]";
+            fName += "_";
+            param.push(s);
+
+            param.push("-WX");
+            s = "[";
+            for (var i = 0; i < nesVal.window.length; i++) {
+                if (i > 0) {
+                    s += ",";
+                    fName += "-";
+                }
+                s += nesVal.window[i];
+                fName += nesVal.window[i];
+            }
+            s += "]";
+            fName += "_";
+            param.push(s);
+
+            param.push("-GX");
+            s = "[";
+            for (var i = 0; i < nesVal.overlap.length; i++) {
+                if (i > 0) {
+                    s += ",";
+                    fName += "-";
+                }
+                s += nesVal.overlap[i];
+                fName += parseFloat(nesVal.overlap[i]).toFixed(4);
+            }
+            s += "]";
+            fName += "_";
+            param.push(s);
+
+            param.push("-CP");
+            s = "[";
+            fName += nesVal.cluster_algo + "-";
+            for (var i = 0; i < nesVal.cluster_param.length; i++) {
+                if (i > 0) {
+                    s += ",";
+                    fName += "-";
+                }
+                s += nesVal.cluster_param[i];
+
+                if (i == 0 && nesVal.cluster_algo === "DBSCAN") {
+                    fName += parseFloat(nesVal.cluster_param[i]).toFixed(4);
+                } else {
+                    fName += nesVal.cluster_param[i];
+                }
+            }
+            s += "]";
+            fName += "_";
+            param.push(s);
+
+            param.push("-CC");
+            s = "[";
+            for (var i = 0; i < nesVal.cluster_attr.length; i++) {
+                if (i > 0) {
+                    s += ",";
+                    fName += "-";
+                }
+                s += nesVal.cluster_attr[i];
+                fName += this.getHeaderName(nesVal.cluster_attr[i], _header_names);
+            }
+            s += "]";
+            fName += "_";
+            param.push(s);
+
+            if (nesVal.filter_gen.length > 0) {
+                param.push("-FG");
+
+                s = "[";
+                for (var i = 0; i < nesVal.filter_gen.length; i++) {
+                    if (i > 0) {
+                        s += ",";
+                        fName += "-";
+                    }
+                    s += nesVal.filter_gen[i];
+                    fName += nesVal.filter_gen[i];
+                }
+                s += "]";
+                fName += "_";
+                param.push(s);
             }
 
-            if(parseFloat($("#txtRadius").val()) > 0 && nesVal.cluster_param[0]!==parseFloat($("#txtRadius").val())){
-              nesVal.cluster_param[0] = parseFloat($("#txtRadius").val());
+            fName += "_";
+
+            if (nesVal.pie_attr.length > 0) {
+                param.push("-PIEC");
+                s = "[";
+
+                for (var i = 0; i < nesVal.pie_attr.length; i++) {
+                    if (i > 0) {
+                        s += ",";
+                        fName += "-";
+                    }
+                    s += nesVal.pie_attr[i];
+                    fName += nesVal.pie_attr[i];
+                }
+                s += "]";
+                fName += "_";
+                param.push(s);
             }
 
-            if(parseInt($("#txtDensity").val()) > 0 && nesVal.cluster_param[1] !== parseInt($("#txtDensity").val())){
-              nesVal.cluster_param[1] = parseInt($("#txtDensity").val());
+            param.push("-NSR");
+            param.push("[60.0, 90.0]");
+
+            fName += nesVal.ref_perf;
+
+            if (nesVal.mem_attr.length > 0) {
+                param.push("-MEMC");
+                s = "[";
+                fName += "_";
+                for (var i = 0; i < nesVal.mem_attr.length; i++) {
+                    if (i > 0) {
+                        s += ",";
+                        fName += "-";
+                    }
+                    s += nesVal.mem_attr[i];
+                    fName += nesVal.mem_attr[i];
+                }
+                s += "]";
+                param.push(s);
             }
 
-            gInstance.createMapper(nesVal);
-            gInstance.reload();
 
-          }
+
+            fName += ".json";
+
+            var chkFN = _common.getPath([this.workspace.wd, "Data", "json", this.fileName.split(".")[0], fName]);
+            console.log(chkFN);
+            _logger.addLog(param);
+
+            if (this._fs.existsSync(chkFN)) {
+                this.storeData(chkFN);
+            } else {
+                var addon = require('bindings')('hyppo-xd');
+                var srt = addon.invoke("CRTMAPR", param);
+
+                this.storeData(srt);
+            }
+
+            return true;
         },
 
-        reload: function(){
-          _logger.addLog("graph.js reload");
-          this.workspace = _common.getWorkSpace();
-          this.fl = this.getAllCsvFiles();
-          this.jfl = this.getAllJsonFiles();
-          this.loadFiles(false);
+        storeData: function (ofn) {
+            _logger.addLog("graph.js storeData");
+            try {
+                this._fs.writeFileSync(_common.getPath([__dirname, "tmp.sp"]), JSON.stringify([{ 'csv': this.fl[this.fileIndex], 'json': this._path.basename(ofn) }]));
+            } catch (err) {
+                console.log("Error to write data at storeData: " + err.message);
+            }
+        },
+
+        generateMapper: function () {
+            _logger.addLog("graph.js generateMapper");
+            var param = (gInstance._graph.param) ? gInstance._graph.param : null;
+            _logger.addLog(param);
+
+            if (param) {
+                var nesVal = {
+                    "filter": param.fc,
+                    "filter_gen": param.fg,
+                    "window": param.wx,
+                    "overlap": param.gx,
+                    "cluster_algo": param.cls.name,
+                    "cluster_attr": param.cla,
+                    "cluster_param": param.cls.param,
+                    "pie_attr": $('#pieDiv div.item').map((i, el) => el.getAttribute('data-value')).get(),
+                    "mem_attr": $('#memDiv div.item').map((i, el) => el.getAttribute('data-value')).get(),
+                    "edge_sig": param.sig,
+                    "ref_perf": param.rp,
+                    "gen": param.gc,
+                    "loc": param.lc,
+                    "dt": param.dtc
+                };
+
+                for (var i = 1; i <= param.fc.length; i++) {
+                    if (parseInt($("#txtWin_" + i).val()) > 0 && parseInt($("#txtWin_" + i).val()) !== nesVal.window[i - 1]) {
+                        nesVal.window[i - 1] = parseInt($("#txtWin_" + i).val());
+                    }
+
+                    if (parseFloat($("#myRangeOv_" + i).val()) !== nesVal.overlap[i - 1]) {
+                        nesVal.overlap[i - 1] = parseFloat($("#myRangeOv_" + i).val());
+                    }
+                }
+
+                if ($("#selCluster option:selected").val() !== nesVal.cluster_algo) {
+                    nesVal.cluster_algo = $("#selCluster option:selected").val();
+                }
+
+                if (parseFloat($("#txtRadius").val()) > 0 && nesVal.cluster_param[0] !== parseFloat($("#txtRadius").val())) {
+                    nesVal.cluster_param[0] = parseFloat($("#txtRadius").val());
+                }
+
+                if (parseInt($("#txtDensity").val()) > 0 && nesVal.cluster_param[1] !== parseInt($("#txtDensity").val())) {
+                    nesVal.cluster_param[1] = parseInt($("#txtDensity").val());
+                }
+
+                gInstance.createMapper(nesVal);
+                gInstance.reload();
+
+            }
+        },
+
+        reload: function () {
+            _logger.addLog("graph.js reload");
+            this.workspace = _common.getWorkSpace();
+            this.fl = this.getAllCsvFiles();
+            this.jfl = this.getAllJsonFiles();
+            this.loadFiles(false);
         },
 
         changeEdgeColor: function (col) {
-          _logger.addLog("graph.js changeEdgeColor");
+            _logger.addLog("graph.js changeEdgeColor");
             for (var i = 0; i < gInstance._linkData.length; i++) {
                 if (gInstance._linkData[i].W === 2) {
                     gInstance._linkData[i].C = col;
@@ -1920,7 +1925,7 @@ $(function () {
         },
 
         showEdgeArrow: function () {
-          _logger.addLog("graph.js showEdgeArrow");
+            _logger.addLog("graph.js showEdgeArrow");
             gInstance.shEdgeArrow = false;
             if ($(this).prop("checked") === true) {
                 gInstance.shEdgeArrow = true;
@@ -1934,7 +1939,7 @@ $(function () {
         },
 
         showEdgeRank: function () {
-          _logger.addLog("graph.js showEdgeRank");
+            _logger.addLog("graph.js showEdgeRank");
             gInstance.shEdgeRank = false;
             gInstance.shEdgeSig = false;
             if ($(this).prop("checked") === true) {
@@ -1950,7 +1955,7 @@ $(function () {
         },
 
         showEdgeSig: function () {
-          _logger.addLog("graph.js showEdgeSig");
+            _logger.addLog("graph.js showEdgeSig");
             gInstance.shEdgeSig = false;
             gInstance.shEdgeRank = false;
             if ($(this).prop("checked") === true) {
@@ -1966,23 +1971,23 @@ $(function () {
         },
 
         changePathcolor: function (e, col) {
-          _logger.addLog("graph.js changePathcolor");
+            _logger.addLog("graph.js changePathcolor");
             var c = parseInt($(e).attr("r"));
 
-            if(col.length>3){
-              this.IPColors[c - 1] = col;
+            if (col.length > 3) {
+                this.IPColors[c - 1] = col;
 
-              for (var i = 0; i < this._linkData.length; i++) {
-                  if (this._linkData[i].R[0] === c) {
-                      this._linkData[i].C = this.IPColors[c - 1];
-                  }
-              }
+                for (var i = 0; i < this._linkData.length; i++) {
+                    if (this._linkData[i].R[0] === c) {
+                        this._linkData[i].C = this.IPColors[c - 1];
+                    }
+                }
 
-              for (var i = 0; i < this._graph.links.length; i++) {
-                  if (this._graph.links[i].R[0] === c) {
-                      this._graph.links[i].C = this.IPColors[c - 1];
-                  }
-              }
+                for (var i = 0; i < this._graph.links.length; i++) {
+                    if (this._graph.links[i].R[0] === c) {
+                        this._graph.links[i].C = this.IPColors[c - 1];
+                    }
+                }
             }
 
             if (this.dpie) {
@@ -1994,7 +1999,7 @@ $(function () {
         },
 
         showAllEdges: function () {
-          _logger.addLog("graph.js showAllEdges");
+            _logger.addLog("graph.js showAllEdges");
             if ($(this).prop("checked") === true) {
                 $("#ips").prop("checked", false);
             }
@@ -2010,7 +2015,7 @@ $(function () {
         },
 
         showIPs: function () {
-          _logger.addLog("graph.js showIPs");
+            _logger.addLog("graph.js showIPs");
             if ($(this).prop("checked") === true) {
                 $("#sa").prop("checked", false);
             }
@@ -2058,7 +2063,7 @@ $(function () {
         },
 
         showAllIPs: function () {
-          _logger.addLog("graph.js showAllIPs");
+            _logger.addLog("graph.js showAllIPs");
             var _allIntPaths = $("#sap").prop("checked");
 
             gInstance.selectedFeature[0] = gInstance.selectedFeature[1] = false;
@@ -2103,12 +2108,12 @@ $(function () {
         },
 
         showHideIntPath: function () {
-          _logger.addLog("graph.js showHideIntPath");
+            _logger.addLog("graph.js showHideIntPath");
             var _nid = [],
-                    _show = $(this).prop("checked"),
-                    c = parseInt($(this).attr("r")),
-                    _allPaths = $("#sa").prop("checked"),
-                    _intPaths = $("#ips").prop("checked");
+                _show = $(this).prop("checked"),
+                c = parseInt($(this).attr("r")),
+                _allPaths = $("#sa").prop("checked"),
+                _intPaths = $("#ips").prop("checked");
             //_allIntPaths = $("#sap").prop("checked");
 
             if (_intPaths || _show) {
@@ -2205,7 +2210,7 @@ $(function () {
         },
 
         changeIPWidth: function () {
-          _logger.addLog("graph.js changeIPWidth");
+            _logger.addLog("graph.js changeIPWidth");
             var val = $("#pw").val();
             $("#pwl").html((val - 100) + "%");
 
@@ -2219,7 +2224,7 @@ $(function () {
         },
 
         getAllRowIdsOfANode: function (nodeID) {
-          _logger.addLog("graph.js getAllRowIdsOfANode");
+            _logger.addLog("graph.js getAllRowIdsOfANode");
             var rIDs = [];
             gInstance.node.each(function (d) {
                 if (d.Id === nodeID) {
@@ -2236,7 +2241,7 @@ $(function () {
         },
 
         getAllRowIdsOfAPath: function (pathRank) {
-          _logger.addLog("graph.js getAllRowIdsOfAPath");
+            _logger.addLog("graph.js getAllRowIdsOfAPath");
             var rIDs = [];
             var nc = [];
             gInstance.link.each(function (d) {
@@ -2272,7 +2277,7 @@ $(function () {
         },
 
         pickData: function (rawIDs) {
-          _logger.addLog("graph.js pickData");
+            _logger.addLog("graph.js pickData");
             rawIDs.sort();
             var _data = [];
             var _file = "Data/csv/" + gInstance.fl[gInstance.fileIndex] + "?t=" + (new Date).getTime();
@@ -2308,8 +2313,8 @@ $(function () {
             return _data;
         },
 
-        nodeAnalysis:function(){
-          _logger.addLog("graph.js nodeAnalysis");
+        nodeAnalysis: function () {
+            _logger.addLog("graph.js nodeAnalysis");
             var _l = $("#txtPA").val();
             if (_l.toUpperCase() === 'ALL') {
                 _l = "";
@@ -2324,29 +2329,29 @@ $(function () {
                 return false;
 
             var nIDs = [];
-            for(var i=0; i<gInstance._linkData.length; i++){
+            for (var i = 0; i < gInstance._linkData.length; i++) {
                 var ipr = gInstance._linkData[i].R[0];
-                if(IP_ids.indexOf(ipr)>=0){
-                    if(nIDs.indexOf(gInstance._linkData[i].source.Id)===-1){
+                if (IP_ids.indexOf(ipr) >= 0) {
+                    if (nIDs.indexOf(gInstance._linkData[i].source.Id) === -1) {
                         nIDs.push(gInstance._linkData[i].source.Id);
                     }
-                    if(nIDs.indexOf(gInstance._linkData[i].target.Id)===-1){
+                    if (nIDs.indexOf(gInstance._linkData[i].target.Id) === -1) {
                         nIDs.push(gInstance._linkData[i].target.Id);
                     }
                 }
             }
 
-            var x = "", y="";
+            var x = "", y = "";
             var tmpIDs = [];
-            for(var i=0; i<gInstance._nodeData.length; i++){
+            for (var i = 0; i < gInstance._nodeData.length; i++) {
                 tmpIDs.push(gInstance._nodeData[i].Id);
             }
 
-            for(var i=0; i<nIDs.length; i++){
+            for (var i = 0; i < nIDs.length; i++) {
                 var ni = tmpIDs.indexOf(nIDs[i]);
 
-                if(x.length>0) x += ",";
-                if(y.length>0) y += ",";
+                if (x.length > 0) x += ",";
+                if (y.length > 0) y += ",";
 
                 x += gInstance._nodeData[ni].Label[1];
                 y += gInstance._nodeData[ni].Label[2];
@@ -2357,7 +2362,7 @@ $(function () {
         },
 
         pathAnalysis: function () {
-          _logger.addLog("graph.js pathAnalysis");
+            _logger.addLog("graph.js pathAnalysis");
             var _l = $("#txtPA").val();
             if (_l.toUpperCase() === 'ALL') {
                 _l = "";
@@ -2394,17 +2399,17 @@ $(function () {
         },
 
         createPathLegends: function () {
-          _logger.addLog("graph.js createPathLegends");
+            _logger.addLog("graph.js createPathLegends");
             $("#int-path").css("display", "block");
 
             $("#path-details").html("");
             $("#path-details").html("<ul class='path_options'></ul><fieldset><legend>Path color&nbsp;</legend><ul class='path_legend'></ul></fieldset>" +
-                    "<fieldset style='display:none;'><legend>Path analysis&nbsp;</legend><input type='text' id='txtPA' value='' style='color:wheat' />" +
-                    "<input type='button' id='na-btn' value='Nodes' style='color:wheat' />" +
-                    "<input type='button' id='pa-btn' value='Analysis' style='color:wheat' /><label id='pa-result'></label></fieldset>");
+                "<fieldset style='display:none;'><legend>Path analysis&nbsp;</legend><input type='text' id='txtPA' value='' style='color:wheat' />" +
+                "<input type='button' id='na-btn' value='Nodes' style='color:wheat' />" +
+                "<input type='button' id='pa-btn' value='Analysis' style='color:wheat' /><label id='pa-result'></label></fieldset>");
 
             var map = new HashMap(),
-                    pc_map = new HashMap();
+                pc_map = new HashMap();
 
             this._linkData = $.extend(true, [], this.graph.links);
             this._nodeData = $.extend(true, [], this.graph.nodes);
@@ -2437,11 +2442,11 @@ $(function () {
 
             var s = "<li><label id='idl'>Path width:</label>&nbsp<input type='range' min='101' max='200' value='150' id='pw' />&nbsp;<label id='pwl'>50%</label></li>";
 
-            if(this.devMode){
-              s += "<li><input type='radio' id='sa' name='esr' checked /><label class='fa' for='sa'>Show all edges</label></li>" +
-                   "<li><input type='radio' id='ips' name='esr' /><label class='fa' for='ips'>Show only interesting paths</label></li>";
-            }else{
-               s += "<li style='display:none'><input type='radio' id='sa' name='esr' checked /><label class='fa' for='sa'>Show all edges</label></li>" +
+            if (this.devMode) {
+                s += "<li><input type='radio' id='sa' name='esr' checked /><label class='fa' for='sa'>Show all edges</label></li>" +
+                    "<li><input type='radio' id='ips' name='esr' /><label class='fa' for='ips'>Show only interesting paths</label></li>";
+            } else {
+                s += "<li style='display:none'><input type='radio' id='sa' name='esr' checked /><label class='fa' for='sa'>Show all edges</label></li>" +
                     "<li style='display:none'><input type='radio' id='ips' name='esr' /><label class='fa' for='ips'>Show only interesting paths</label></li>";
             }
 
@@ -2452,13 +2457,13 @@ $(function () {
             s = "";
             for (var i = 0; i < this.intPathRank.length; i++) {
                 s += "<li><input type='checkbox' r='" + this.intPathRank[i] + "' name='pc' id='ip_" + this.intPathRank[i] +
-                        "' checked /><label class='fa' for='ip_" + this.intPathRank[i] + "'>" + map.get(this.intPathRank[i]) + "</label></li>";
+                    "' checked /><label class='fa' for='ip_" + this.intPathRank[i] + "'>" + map.get(this.intPathRank[i]) + "</label></li>";
             }
 
             $(".path_legend").html(s);
 
             for (var i = 0; i < this.intPathRank.length; i++) {
-                $("#color_" + this.intPathRank[i]).spectrum({color: pc_map.get(this.intPathRank[i])});
+                $("#color_" + this.intPathRank[i]).spectrum({ color: pc_map.get(this.intPathRank[i]) });
                 $("#color_" + this.intPathRank[i]).spectrum({
                     change: function (c) {
                         gInstance.changePathcolor(this, c.toHexString());
@@ -2486,7 +2491,7 @@ $(function () {
         },
 
         disableFeatures: function () {
-          _logger.addLog("graph.js disableFeatures");
+            _logger.addLog("graph.js disableFeatures");
             $("#int-path").css("display", "none");
             //$("#pie-legend").css("display", "none");
             $("#int-flare").css("display", "none");
@@ -2502,7 +2507,7 @@ $(function () {
         },
 
         showInterestingPaths: function () {
-          _logger.addLog("graph.js showInterestingPaths");
+            _logger.addLog("graph.js showInterestingPaths");
             $("#int-path").css("display", "block");
             //$("#pie-legend").css("display", "none");
             $("#int-flare").css("display", "none");
@@ -2516,7 +2521,7 @@ $(function () {
         },
 
         showInterestingFlares: function () {
-          _logger.addLog("graph.js showInterestingFlares");
+            _logger.addLog("graph.js showInterestingFlares");
             $("#int-path").css("display", "none");
             //$("#pie-legend").css("display", "block");
             $("#int-flare").css("display", "block");
@@ -2530,7 +2535,7 @@ $(function () {
         },
 
         showHideToolTip: function () {
-          _logger.addLog("graph.js showHideToolTip");
+            _logger.addLog("graph.js showHideToolTip");
             gInstance.showToolTip = false;
             d3.select("#tooltip").style("display", "none");
 
@@ -2539,30 +2544,30 @@ $(function () {
             }
         },
 
-        showHideNodeValues: function(){
-          _logger.addLog("graph.js showHideNodeValues");
-          gInstance.showNodeValues = false;
+        showHideNodeValues: function () {
+            _logger.addLog("graph.js showHideNodeValues");
+            gInstance.showNodeValues = false;
 
-          if ($(this).prop("checked") === true) {
-            gInstance.showNodeValues = true;
-          }
+            if ($(this).prop("checked") === true) {
+                gInstance.showNodeValues = true;
+            }
         },
 
         createAttributes: function () {
-          _logger.addLog("graph.js createAttributes");
+            _logger.addLog("graph.js createAttributes");
             $("#map-details").css("display", "block");
             $("#tda-details").css("display", "block");
 
             $("#attr-ctrl").css("display", "block");
             $("#attr-details").html("");
             $("#attr-details").html("<fieldset><legend>View attributes&nbsp;</legend><ul class='view_attr_legend'></ul></fieldset>" +
-                    "<fieldset><legend>Tooltip&nbsp;</legend><ul class='node_attr_legend'></ul></fieldset>" +
-                    "<fieldset><legend>Edge attributes&nbsp;</legend><ul class='attr_legend'></ul></fieldset>" +
-                    "<fieldset><legend>Features&nbsp;</legend><ul class='feature_legend'></ul></fieldset>");
+                "<fieldset><legend>Tooltip&nbsp;</legend><ul class='node_attr_legend'></ul></fieldset>" +
+                "<fieldset><legend>Edge attributes&nbsp;</legend><ul class='attr_legend'></ul></fieldset>" +
+                "<fieldset><legend>Features&nbsp;</legend><ul class='feature_legend'></ul></fieldset>");
 
-            $(".view_attr_legend").html("<li><input type='text' class='color_pick' id='viewBC' value='" + this.svgBGColor + "'/>&nbsp;Background color</li><li><input type='checkbox' name='snv' id='snv' checked /><label class='fa' for='snv'>Show node values</label></li>");
+            $(".view_attr_legend").html("<li><input type='text' class='color_pick' id='viewBC' value='" + this.svgBGColor + "'/>&nbsp;Background color</li>");
 
-            $("#viewBC").spectrum({color: this.svgBGColor});
+            $("#viewBC").spectrum({ color: this.svgBGColor });
             $("#viewBC").spectrum({
                 change: function (c) {
                     d3.select("#svg-container").style("background-color", c.toHexString());
@@ -2574,22 +2579,21 @@ $(function () {
             $(".node_attr_legend").html("<li><input type='checkbox' name='shTT' id='shTT' /><label class='fa' for='shTT'>Show tooltip</label></li>");
 
             d3.select("#shTT").on("change", gInstance.showHideToolTip);
-            d3.select("#snv").on("change", gInstance.showHideNodeValues);
 
             var s = "<li><input type='text' class='color_pick' id='edgeDC' value='" + this.defaultEdgeColor + "'/>&nbsp;Edge color</li>" +
-                    "<li><input type='checkbox' name='eArrow' id='eArrow' checked /><label class='fa' for='eArrow'>Show edge direction</label></li>";
+                "<li><input type='checkbox' name='eArrow' id='eArrow' checked /><label class='fa' for='eArrow'>Show edge direction</label></li>";
 
-            if(this.devMode){
-              s += "<li><input type='checkbox' name='eRank' id='eRank' /><label class='fa' for='eRank'>Show edge rank</label></li>" +
+            if (this.devMode) {
+                s += "<li><input type='checkbox' name='eRank' id='eRank' /><label class='fa' for='eRank'>Show edge rank</label></li>" +
                     "<li><input type='checkbox' name='eSig' id='eSig' /><label class='fa' for='eSig'>Show edge signature</label></li>";
-            }else{
-               s += "<li style='display:none'><input type='checkbox' name='eRank' id='eRank' /><label class='fa' for='eRank'>Show edge rank</label></li>" +
-                     "<li style='display:none'><input type='checkbox' name='eSig' id='eSig' /><label class='fa' for='eSig'>Show edge signature</label></li>";
+            } else {
+                s += "<li style='display:none'><input type='checkbox' name='eRank' id='eRank' /><label class='fa' for='eRank'>Show edge rank</label></li>" +
+                    "<li style='display:none'><input type='checkbox' name='eSig' id='eSig' /><label class='fa' for='eSig'>Show edge signature</label></li>";
             }
 
             $(".attr_legend").html(s);
 
-            $("#edgeDC").spectrum({color: this.defaultEdgeColor});
+            $("#edgeDC").spectrum({ color: this.defaultEdgeColor });
             $("#edgeDC").spectrum({
                 change: function (c) {
                     gInstance.changeEdgeColor(c.toHexString());
@@ -2601,7 +2605,7 @@ $(function () {
             d3.select("#eSig").on("change", gInstance.showEdgeSig);
 
             s = "<li><input type='radio' name='feature' id='no-feature' value='no-feature' checked  /><label class='fa' for='no-feature'>Show graph (without feature) </label></li>" +
-                    "<li><input type='radio' name='feature' id='fpath' value='fpath'  /><label class='fa' for='fpath'>Show interesting paths</label></li>";
+                "<li><input type='radio' name='feature' id='fpath' value='fpath'  /><label class='fa' for='fpath'>Show interesting paths</label></li>";
             if (this.hasMemberShip) {
                 s += "<li><input type='radio' name='feature' id='fflare' value='fflare' /><label class='fa' for='fflare'>Show interesting flares</label></li>";
             }
@@ -2616,51 +2620,46 @@ $(function () {
         },
 
         writeDataToFile: function () {
-          _logger.addLog("graph.js writeDataToFile");
-          var rIDMap = new HashMap();
-          var gRowIDs=[];
+            _logger.addLog("graph.js writeDataToFile");
+            var rIDMap = new HashMap();
+            var gRowIDs = [];
 
-          for (var i = 0; i < gInstance._analysis.length; i++) {
-              var tIDs = gInstance.getAllRowIdsOfANode(gInstance._analysis[i]);
-              var rIDs = [];
-              for (var j = 0; j < tIDs.length; j++) {
-                  if (rIDs.indexOf(tIDs[j]) < 0) {
-                      rIDs.push(tIDs[j]);
-                  }
-                  if (gRowIDs.indexOf(tIDs[j]) < 0) {
-                      gRowIDs.push(tIDs[j]);
-                  }
-              }
-              if (rIDs.length > 0) {
-                  rIDs.sort(function (a, b) {
-                      return a - b;
-                  });
-
-                  for(var j=0; j<rIDs.length; j++){
-                    var clsIds = rIDMap.get(rIDs[j]);
-                    if(clsIds!=null){
-                      clsIds.push(gInstance._analysis[i]);
-                    }else{
-                      clsIds = [gInstance._analysis[i]];
+            for (var i = 0; i < gInstance._analysis.length; i++) {
+                var tIDs = gInstance.getAllRowIdsOfANode(gInstance._analysis[i]);
+                var rIDs = [];
+                for (var j = 0; j < tIDs.length; j++) {
+                    if (rIDs.indexOf(tIDs[j]) < 0) {
+                        rIDs.push(tIDs[j]);
                     }
-                    rIDMap.put(rIDs[j], clsIds);
-                  }
-                  //clsMap.put(gInstance._analysis[i], rIDs);
-              }
-          }
+                    if (gRowIDs.indexOf(tIDs[j]) < 0) {
+                        gRowIDs.push(tIDs[j]);
+                    }
+                }
+                if (rIDs.length > 0) {
+                    rIDs.sort(function (a, b) {
+                        return a - b;
+                    });
 
-          if(gRowIDs.length>0){
-            gRowIDs.sort(function(a,b){
-              return a-b;
-            });
-          }
+                    for (var j = 0; j < rIDs.length; j++) {
+                        var clsIds = rIDMap.get(rIDs[j]);
+                        if (clsIds != null) {
+                            clsIds.push(gInstance._analysis[i]);
+                        } else {
+                            clsIds = [gInstance._analysis[i]];
+                        }
+                        rIDMap.put(rIDs[j], clsIds);
+                    }
+                    //clsMap.put(gInstance._analysis[i], rIDs);
+                }
+            }
 
-          var cols = [gInstance._graph.HN[0]];
-          for (var i = 2; i <= gInstance._graph.HN.length; i++) {
-              if ($("#ancb_" + i).prop("checked") === true) {
-                  cols.push(gInstance._graph.HN[i-1]);
-              }
-          }
+            if (gRowIDs.length > 0) {
+                gRowIDs.sort(function (a, b) {
+                    return a - b;
+                });
+            }
+
+            var cols = [gInstance._graph.HN[0]];
 
             if (cols.length === 0) {
                 alert("Please select columns.");
@@ -2670,74 +2669,85 @@ $(function () {
                 //const fs = require('fs') this._fs
                 const results = [];
                 var _path = _common.getPath([gInstance.workspace.wd, "Data", "csv", gInstance.fl[gInstance.fileIndex]]);
-                var rPos=1;
+                var rPos = 1;
                 var cData = [];
 
-                if(gInstance._fs.existsSync(_path)){
-                  gInstance._fs.createReadStream(_path)
-                    .pipe(csv())
-                    .on('data', (data) => {
-                      /* data would be something like :
-                          { '2': 'Why we use bottels?', '1 ': 'How do I change my password? ' }
-                      */
-                      cData = [];
-                      Object.entries(data)
-                        .forEach(([key, value]) => {
-                          // key would be the column number (1 or 2)
-                          // value would be the data of the row
-                          // we "abuse" the fact that the column happens to be a number between 1 and 2 and we use that as the array index
+                if (gInstance._fs.existsSync(_path)) {
+                    gInstance._fs.createReadStream(_path)
+                        .pipe(csv())
+                        .on('headers', (headers) => {
+                            console.log(`First header: ${headers[0]}`)
+                            for (var i = 2; i <= headers.length; i++) {
+                                if ($("#ancb_" + i).prop("checked") === true) {
+                                    cols.push(headers[i - 1]);
+                                }
+                            }
+                        })
+                        .on('data', (data) => {
+                            /* data is a row like :
+                                { 'column 1': 'value 1', 'column 2': 'value 2' }
+                            */
+                            cData = [];
+                            if (gRowIDs.indexOf(rPos) >= 0) {
+                                Object.entries(data)
+                                    .forEach(([key, value]) => {
+                                        // key would be the column name
+                                        // value would be the data of the row for that column
+                                        
+                                        if (cols.indexOf(key) >= 0) {
+                                            cData.push(value)
+                                        }
+                                    });
+                            }
 
-                          if(gRowIDs.indexOf(rPos)>=0 && cols.indexOf(key)>=0){
-                            cData.push(value)
-                          }
+                            rPos++;
+                            if (cData.length > 0) {
+                                var val = rIDMap.get(parseInt(cData[0]));
+                                if (Array.isArray(val)) {
+                                    for (var l = 0; l < val.length; l++) {
+                                        var tcData = [];
+                                        for (a in cData) tcData.push(cData[a]);
+                                        tcData.push(val[l]);
+                                        results.push(tcData);
+                                    }
+                                }
+                            }
+                        })
+                        .on('end', () => {
+                            // Add cluster ids to the results
+                            if (results.length > 0) {
+                                var csvData = "";
+                                for (var i = 0; i < cols.length; i++) {
+                                    csvData += cols[i] + ",";
+                                }
+                                csvData += "ClusterID\n";
+
+                                for (var i = 0; i < results.length; i++) {
+                                    var s = "";
+                                    for (var j = 0; j < results[i].length; j++) {
+                                        if (s.length > 0) s += ",";
+                                        s += results[i][j];
+                                    }
+                                    csvData += s + "\n";
+                                }
+
+                                var _file = gInstance.fl[gInstance.fileIndex].split(".")[0] + "_" + (new Date).getTime() + ".csv";
+                                _path = _common.getPath([gInstance.workspace.wd, "Data", "tmp", _file]);
+
+                                _logger.addLog("Path to save csv: " + _path);
+
+                                try {
+                                    gInstance._fs.writeFileSync(_path, csvData);
+                                    alert("The file has saved at: " + _path);
+                                } catch (err) {
+                                    _logger.addLog("Error to save csv: " + err.message);
+                                }
+                                _logger.addLog("Total results: " + results.length);
+
+                            }
                         });
-
-                        rPos++;
-                        if(cData.length>0){
-                          var val = rIDMap.get(parseInt(cData[0]));
-                          for(var l=0; l<val.length; l++){
-                            var tcData = [];
-                            for(a in cData) tcData.push(cData[a]);
-                            tcData.push(val[l]);
-                            results.push(tcData);
-                          }
-                        }
-                    })
-                    .on('end', () => {
-                      // Add cluster ids to the results
-                      if(results.length>0){
-                        var csvData = "";
-                        for(var i=0; i<cols.length; i++){
-                          csvData += cols[i]+",";
-                        }
-                        csvData += "ClusterID\n";
-
-                        for(var i=0; i<results.length; i++){
-                          var s = "";
-                          for(var j=0; j<results[i].length; j++){
-                            if(s.length>0) s += ",";
-                            s += results[i][j];
-                          }
-                          csvData += s + "\n";
-                        }
-
-                        var _file = gInstance.fl[gInstance.fileIndex].split(".")[0] + "_" + (new Date).getTime()+".csv";
-                        _path = _common.getPath([gInstance.workspace.wd, "Data", "tmp",_file]);
-
-                        _logger.addLog("Path to save csv: "+_path);
-
-                        try{
-                          gInstance._fs.writeFileSync(_path, csvData);
-                          alert("The file has saved at: " + _path);
-                        }catch(err){
-                          _logger.addLog("Error to save csv: " + err.message);
-                        }
-                        _logger.addLog("Total results: "+results.length);
-
-                      }
-                    });
-                }else{
-                  _logger.addLog("File is missing: "+_path);
+                } else {
+                    _logger.addLog("File is missing: " + _path);
                 }
 
                 alert("The request is processing. Will notify the update soon.");
@@ -2745,7 +2755,7 @@ $(function () {
         },
 
         adjustSelectedAttr: function () {
-          _logger.addLog("graph.js adjustSelectedAttr");
+            _logger.addLog("graph.js adjustSelectedAttr");
             var s = "";
             for (var i = 1; i <= gInstance._graph.HN.length; i++) {
                 if ($("#ancb_" + i).prop("checked") === true) {
@@ -2763,7 +2773,7 @@ $(function () {
         },
 
         adjustSelectedNodes: function () {
-          _logger.addLog("graph.js adjustSelectedNodes");
+            _logger.addLog("graph.js adjustSelectedNodes");
             var s = "";
             for (var i = 0; i < gInstance._analysis.length; i++) {
                 if (s.length > 0)
@@ -2780,7 +2790,7 @@ $(function () {
         },
 
         nodeRightClick: function (d) {
-          _logger.addLog("graph.js nodeRightClick");
+            _logger.addLog("graph.js nodeRightClick");
             d3.event.preventDefault();
 
             //return false;
@@ -2789,13 +2799,13 @@ $(function () {
 
             d3.selectAll("#top-nav ul li").remove();
             d3.select("#top-nav ul").append("li").append("a")
-                    .attr("href", "javascript:void(0)")
-                    .attr("id", "add-node")
-                    .text("Add node for analysis");
+                .attr("href", "javascript:void(0)")
+                .attr("id", "add-node")
+                .text("Add node for analysis");
             d3.select("#top-nav ul").append("li").append("a")
-                    .attr("href", "javascript:void(0)")
-                    .attr("id", "remove-node")
-                    .text("Remove node for analysis");
+                .attr("href", "javascript:void(0)")
+                .attr("id", "remove-node")
+                .text("Remove node for analysis");
 
             var x = 0.0, y = 0.0, k = 1.0;
             if (gInstance.__transform) {
@@ -2805,61 +2815,61 @@ $(function () {
             }
 
             d3.select("#top-nav").style("display", "block")
-                    .style("position", "absolute")
-                    .style("top", y + (d.y * k) + "px")
-                    .style("left", x + (d.x * k) + "px");
+                .style("position", "absolute")
+                .style("top", y + (d.y * k) + "px")
+                .style("left", x + (d.x * k) + "px");
 
             d3.select("#add-node").attr("d", d.Id)
-                    .on("click", function () {
-                        var _id = parseInt($(this).attr("d"));
-                        if (gInstance._analysis.indexOf(_id) < 0) {
-                            gInstance._analysis.push(_id);
+                .on("click", function () {
+                    var _id = parseInt($(this).attr("d"));
+                    if (gInstance._analysis.indexOf(_id) < 0) {
+                        gInstance._analysis.push(_id);
 
-                            var _cid = "#node_" + _id;
+                        var _cid = "#node_" + _id;
 
-                            d3.select(_cid).style("stroke", "#ff0000")
-                                    .style("stroke-width", "2px");
+                        d3.select(_cid).style("stroke", "#ff0000")
+                            .style("stroke-width", "2px");
 
-                            d3.select("#int-nodes").style('display', 'block');
-                            gInstance.adjustSelectedNodes();
-                        }
+                        d3.select("#int-nodes").style('display', 'block');
+                        gInstance.adjustSelectedNodes();
+                    }
 
-                        d3.select("#top-nav").style("display", "none");
+                    d3.select("#top-nav").style("display", "none");
 
-                        //displayAnalysis();
-                    });
+                    //displayAnalysis();
+                });
 
             d3.select("#remove-node").attr("d", d.Id)
-                    .on("click", function () {
-                        var _id = parseInt($(this).attr("d"));
-                        if (gInstance._analysis.indexOf(_id) >= 0) {
-                            gInstance._analysis.splice(gInstance._analysis.indexOf(_id), 1);
+                .on("click", function () {
+                    var _id = parseInt($(this).attr("d"));
+                    if (gInstance._analysis.indexOf(_id) >= 0) {
+                        gInstance._analysis.splice(gInstance._analysis.indexOf(_id), 1);
 
-                            var _cid = "#node_" + _id;
-                            d3.select(_cid).style("stroke", "")
-                                    .style("stroke-width", "0px");
+                        var _cid = "#node_" + _id;
+                        d3.select(_cid).style("stroke", "")
+                            .style("stroke-width", "0px");
 
-                            if (gInstance._analysis.length === 0) {
-                                d3.select("#int-nodes").style('display', 'none');
-                            }
-
-                            gInstance.adjustSelectedNodes();
+                        if (gInstance._analysis.length === 0) {
+                            d3.select("#int-nodes").style('display', 'none');
                         }
 
-                        d3.select("#top-nav").style("display", "none");
+                        gInstance.adjustSelectedNodes();
+                    }
 
-                        //displayAnalysis();
-                    });
+                    d3.select("#top-nav").style("display", "none");
+
+                    //displayAnalysis();
+                });
 
             $("#top-nav").css("zIndex", "9999");
         },
 
         removeSelection: function () {
-          _logger.addLog("graph.js removeSelection");
+            _logger.addLog("graph.js removeSelection");
             for (var i = 0; i < gInstance._analysis.length; i++) {
                 var _cid = "#node_" + gInstance._analysis[i];
                 d3.select(_cid).style("stroke", "")
-                        .style("stroke-width", "0px");
+                    .style("stroke-width", "0px");
             }
 
             gInstance._analysis = [];
@@ -2868,35 +2878,35 @@ $(function () {
         },
 
         ticked: function () {
-          //_logger.addLog("graph.js ticked");
+            //_logger.addLog("graph.js ticked");
             gInstance.link
-                    .attr("x1", function (d) {
-                        var a = d.source;
-                        return d.source.x;
-                    })
-                    .attr("y1", function (d) {
-                        return d.source.y;
-                    })
-                    .attr("x2", function (d) {
-                        return d.target.x;
-                    })
-                    .attr("y2", function (d) {
-                        return d.target.y;
-                    });
+                .attr("x1", function (d) {
+                    var a = d.source;
+                    return d.source.x;
+                })
+                .attr("y1", function (d) {
+                    return d.source.y;
+                })
+                .attr("x2", function (d) {
+                    return d.target.x;
+                })
+                .attr("y2", function (d) {
+                    return d.target.y;
+                });
             d3.selectAll("circle")
-                    .attr("cx", function (d) {
-                        return d.x;
-                    })
-                    .attr("cy", function (d) {
-                        return d.y;
-                    });
+                .attr("cx", function (d) {
+                    return d.x;
+                })
+                .attr("cy", function (d) {
+                    return d.y;
+                });
             d3.selectAll(".labels text")
-                    .attr("x", function (d) {
-                        return d.x;
-                    })
-                    .attr("y", function (d) {
-                        return d.y;
-                    });
+                .attr("x", function (d) {
+                    return d.x;
+                })
+                .attr("y", function (d) {
+                    return d.y;
+                });
 
             if (gInstance.shEdgeRank || gInstance.shEdgeSig) {
                 gInstance.edgepaths.attr('d', function (d) {
@@ -2906,8 +2916,8 @@ $(function () {
                 gInstance.edgelabels.attr('transform', function (d) {
                     if (d.target.x < d.source.x) {
                         var bbox = this.getBBox(),
-                                rx = bbox.x + bbox.width / 2,
-                                ry = bbox.y + bbox.height / 2;
+                            rx = bbox.x + bbox.width / 2,
+                            ry = bbox.y + bbox.height / 2;
                         return 'rotate(180 ' + rx + ' ' + ry + ')';
                     } else {
                         return 'rotate(0)';
@@ -2918,7 +2928,7 @@ $(function () {
         },
 
         dragstarted: function (d) {
-        //  _logger.addLog("graph.js dragstarted");
+            //  _logger.addLog("graph.js dragstarted");
             $("#top-nav").css("display", "none");
             if (!d3.event.active)
                 gInstance.simulation.alphaTarget(0.3).restart();
@@ -2927,14 +2937,14 @@ $(function () {
         },
 
         dragged: function (d) {
-          //_logger.addLog("graph.js dragged");
+            //_logger.addLog("graph.js dragged");
             $("#top-nav").css("display", "none");
             d.fx = d3.event.x;
             d.fy = d3.event.y;
         },
 
         dragended: function (d) {
-          //_logger.addLog("graph.js dragended");
+            //_logger.addLog("graph.js dragended");
             $("#top-nav").css("display", "none");
             if (!d3.event.active)
                 gInstance.simulation.alphaTarget(0);
@@ -2946,7 +2956,7 @@ $(function () {
         },
 
         createPallete: function () {
-          _logger.addLog("graph.js createPallete");
+            _logger.addLog("graph.js createPallete");
             var _piCol = gInstance._graph.color;
             var _patternPath = [
                 'M 0 0 L 10 10 M 9 -1 L 11 1 M -1 9 L 1 11',
@@ -2967,20 +2977,20 @@ $(function () {
 
             for (var i = 0; i < _piCol.length; i++) {
                 gInstance.pallete.append("pattern")
-                        .attr("id", "pattern_" + (i + 1))
-                        .attr("patternUnits", "userSpaceOnUse")
-                        .attr("width", 10)
-                        .attr("height", 10)
-                        .append("svg:path")
-                        .attr("d", _patternPath[i % _patternPath.length])
-                        .attr('fill', "transparent")
-                        .style('stroke', _piCol[i])
-                        .style('stroke-width', _sw[i]);
+                    .attr("id", "pattern_" + (i + 1))
+                    .attr("patternUnits", "userSpaceOnUse")
+                    .attr("width", 10)
+                    .attr("height", 10)
+                    .append("svg:path")
+                    .attr("d", _patternPath[i % _patternPath.length])
+                    .attr('fill', "transparent")
+                    .style('stroke', _piCol[i])
+                    .style('stroke-width', _sw[i]);
             }
         },
 
         createLinkArrow: function () {
-          _logger.addLog("graph.js createLinkArrow");
+            _logger.addLog("graph.js createLinkArrow");
             d3.selectAll("marker").remove();
             var i = 1;
             gInstance.link.each(function (d) {
@@ -2989,19 +2999,19 @@ $(function () {
                 var w = gInstance.getFeatureWidth(d);
                 var co = gInstance.getFeatureColor(d);
                 gInstance.marker.append("marker")
-                        .attr("id", "arrowhead_" + i)
-                        .attr("viewBox", "-0 -5 10 10")
-                        .attr("refX", (w < 3) ? (r / 2) + 10 : (Math.abs((r / 2) - 5) > 15 ? Math.abs((r / 2) - 5) : Math.abs((r / 2) + 5)) - 2)
-                        .attr("refY", 0)
-                        .attr("markerUnits", "userSpaceOnUse")
-                        .attr("markerWidth", (w < 3) ? 20 : 50)
-                        .attr("markerHeight", (w < 3) ? 20 : 50)
-                        .attr("orient", "auto")
-                        .attr("xoverflow", "visible")
-                        .append("svg:path")
-                        .attr("d", "M0,-5L10,0L0,5")
-                        .attr('fill', co)
-                        .style('stroke', 'none');
+                    .attr("id", "arrowhead_" + i)
+                    .attr("viewBox", "-0 -5 10 10")
+                    .attr("refX", (w < 3) ? (r / 2) + 10 : (Math.abs((r / 2) - 5) > 15 ? Math.abs((r / 2) - 5) : Math.abs((r / 2) + 5)) - 2)
+                    .attr("refY", 0)
+                    .attr("markerUnits", "userSpaceOnUse")
+                    .attr("markerWidth", (w < 3) ? 20 : 50)
+                    .attr("markerHeight", (w < 3) ? 20 : 50)
+                    .attr("orient", "auto")
+                    .attr("xoverflow", "visible")
+                    .append("svg:path")
+                    .attr("d", "M0,-5L10,0L0,5")
+                    .attr('fill', co)
+                    .style('stroke', 'none');
 
                 d3.select(this).attr("marker-end", "url(#arrowhead_" + i + ")");
                 i++;
@@ -3009,13 +3019,13 @@ $(function () {
         },
 
         nodeMouseOver: function (d) {
-          //_logger.addLog("graph.js nodeMouseOver");
+            //_logger.addLog("graph.js nodeMouseOver");
             if (!gInstance.showToolTip) {
                 return false;
             }
 
             gInstance.selectedNodeId = d.Id;
-            var x = 0.0, y = 0.0, k = 1.0, offsetX=50, offsetY=-25;
+            var x = 0.0, y = 0.0, k = 1.0, offsetX = 50, offsetY = -25;
             if (gInstance.__transform) {
                 x = gInstance.__transform.x;
                 y = gInstance.__transform.y;
@@ -3025,79 +3035,79 @@ $(function () {
             var newX = x + (d.x * k) + offsetX, newY = y + (d.y * k) - offsetY;
 
             d3.select("#tooltip").style("display", "none")
-                    .style("left", newX + "px")
-                    .style("top", newY + "px");
+                .style("left", newX + "px")
+                .style("top", newY + "px");
 
             var tt = "<p>";
             tt += "<span>Cluster ID: " + d.Id + "</span><br />";
             tt += "<span>Total points: " + d.NP + "</span><br />";
-            for(var i=0; i<this._graph.btn.length; i++){
-              tt += "<span>Mean " + this._graph.btn[i] + ": " + d.Label[i] + "</span><br />";
+            for (var i = 0; i < this._graph.btn.length; i++) {
+                tt += "<span>Mean " + this._graph.btn[i] + ": " + d.Label[i] + "</span><br />";
             }
 
-            if(d.tooltip.length>0){
-              tt += "<hr /><strong>Pie chart legends</strong><br />"
+            if (d.tooltip.length > 0) {
+                tt += "<hr /><strong>Pie chart legends</strong><br />"
 
-              for(var i=0; i<d.tooltip.length; i++){
-                tt += "<span> Total " + this._graph.HN[this._graph.param.pie[i]-1] + ": " + d.tooltip[i].total + "</span><br /><span>";
-                var f = false;
+                for (var i = 0; i < d.tooltip.length; i++) {
+                    tt += "<span> Total " + this._graph.HN[this._graph.param.pie[i] - 1] + ": " + d.tooltip[i].total + "</span><br /><span>";
+                    var f = false;
 
-                d.tooltip[i].names.sort();
-                for(var j=0; j<d.tooltip[i].names.length; j++){
-                  if(f) tt += ",";
-                  tt +=d.tooltip[i].names[j];
+                    d.tooltip[i].names.sort();
+                    for (var j = 0; j < d.tooltip[i].names.length; j++) {
+                        if (f) tt += ",";
+                        tt += d.tooltip[i].names[j];
 
-                  if(j>5){
-                    tt += ",...";
-                    break;
-                  }
-                  f=true;
+                        if (j > 5) {
+                            tt += ",...";
+                            break;
+                        }
+                        f = true;
+                    }
+
+                    tt += "</span><br />"
                 }
-
-                tt += "</span><br />"
-              }
             }
 
             tt += "</p>";
             d3.select("#tooltip").style("display", "block");
             gInstance.tooltipDiv.html(tt);
 
-            if(d3.select("#tooltip")){
-              var maxW = $(window).width()-100;
-              var maxH = $(window).height()-100;
-              var element = d3.select('#tooltip').node();
-              var tt_right = element.getBoundingClientRect().right;
-              var tt_left = element.getBoundingClientRect().left;
-              var tt_top = element.getBoundingClientRect().top;
-              var tt_bottom = element.getBoundingClientRect().bottom;
-              var tt_width = tt_right-tt_left;
-              var tt_height = tt_bottom-tt_top;
+            if (d3.select("#tooltip")) {
+                var maxW = $(window).width() - 100;
+                var maxH = $(window).height() - 100;
+                var element = d3.select('#tooltip').node();
+                var tt_right = element.getBoundingClientRect().right;
+                var tt_left = element.getBoundingClientRect().left;
+                var tt_top = element.getBoundingClientRect().top;
+                var tt_bottom = element.getBoundingClientRect().bottom;
+                var tt_width = tt_right - tt_left;
+                var tt_height = tt_bottom - tt_top;
 
-              if(tt_right>=maxW){
-                d3.select("#tooltip").style("left", (newX-(2*offsetX)-tt_width) + "px");
-              }
+                if (tt_right >= maxW) {
+                    d3.select("#tooltip").style("left", (newX - (2 * offsetX) - tt_width) + "px");
+                }
 
-              if(tt_bottom>=maxH){
-                d3.select("#tooltip").style("top", (newY-(tt_bottom-maxH)) + "px");
-              }
+                if (tt_bottom >= maxH) {
+                    d3.select("#tooltip").style("top", (newY - (tt_bottom - maxH)) + "px");
+                }
             }
         },
 
         nodeMouseOut: function () {
-          //_logger.addLog("graph.js nodeMouseOut");
+            //_logger.addLog("graph.js nodeMouseOut");
             if (!gInstance.showToolTip) {
                 return false;
             }
 
             d3.select("#tooltip").style("display", "none");
             gInstance.tooltipDiv.transition()
-                    .duration(500);
+                .duration(500);
             gInstance.tooltipDiv.html("");
             //gInstance.selectedNodeId = -1;
         },
 
         getFeatureWidth: function (d) {
-          //_logger.addLog("graph.js getFeatureWidth");
+            //_logger.addLog("graph.js getFeatureWidth");
             if (gInstance.selectedFeature[0]) {
                 if (d.W > 2)
                     return (2 + ((d.W - 2) * gInstance.IPEdgeWeight));
@@ -3112,7 +3122,7 @@ $(function () {
         },
 
         getFeatureColor: function (d) {
-          //_logger.addLog("graph.js getFeatureColor");
+            //_logger.addLog("graph.js getFeatureColor");
             if (gInstance.selectedFeature[0]) {
                 if (d.W > 2)
                     return d.C;
@@ -3125,7 +3135,7 @@ $(function () {
         },
 
         convertHexToDec: function (hex_val) {
-          _logger.addLog("graph.js convertHexToDec");
+            _logger.addLog("graph.js convertHexToDec");
             if (hex_val.length === 0)
                 return 0;
             if (hex_val.slice(0, 2) !== "0x") {
@@ -3136,7 +3146,7 @@ $(function () {
         },
 
         convertHexToRGB: function (hex_col) {
-          _logger.addLog("graph.js convertHexToRGB");
+            _logger.addLog("graph.js convertHexToRGB");
             if (hex_col[0] === '#')
                 hex_col = hex_col.slice(1, hex_col.length);
 
@@ -3155,7 +3165,7 @@ $(function () {
         },
 
         convertDecToHex: function (dec_val) {
-          _logger.addLog("graph.js convertDecToHex");
+            _logger.addLog("graph.js convertDecToHex");
             var a = dec_val.toString(16);
             if (a.length < 2)
                 return "0" + a;
@@ -3163,7 +3173,7 @@ $(function () {
         },
 
         convertToGrayScale: function (aColor) {
-          _logger.addLog("graph.js convertToGrayScale");
+            _logger.addLog("graph.js convertToGrayScale");
             if (typeof aColor === "string") {
                 aColor = this.convertHexToRGB(aColor);
             }
@@ -3177,7 +3187,7 @@ $(function () {
         },
 
         draw: function (index) {
-          _logger.addLog("graph.js draw");
+            _logger.addLog("graph.js draw");
             this.lIndex = index;
             this.dpie = false;
             this.labelIndex = index;
@@ -3205,45 +3215,45 @@ $(function () {
             }
 
             this.link = this.g.append("g")
-                    .attr("class", "links")
-                    .selectAll("line")
-                    .data(gInstance._linkData)
-                    .enter().append("line")
-                    .attr("stroke-width", function (d) {
-                        return gInstance.getFeatureWidth(d);
-                    })
-                    .style("stroke", function (d) {
-                        return gInstance.getFeatureColor(d);
-                    });
+                .attr("class", "links")
+                .selectAll("line")
+                .data(gInstance._linkData)
+                .enter().append("line")
+                .attr("stroke-width", function (d) {
+                    return gInstance.getFeatureWidth(d);
+                })
+                .style("stroke", function (d) {
+                    return gInstance.getFeatureColor(d);
+                });
 
             this.node = this.g.append("g")
-                    .attr("class", "nodes")
-                    .selectAll("circle")
-                    .data(gInstance._nodeData)
-                    .enter().append("circle")
-                    .attr("r", function (d) {
-                        return d.Size;
-                    })
-                    .attr("fill", function (d) {
-                        return (gInstance.grayNode) ? gInstance.convertToGrayScale(d.Color[index]) : d.Color[index];
-                    })
-                    .attr("id", function (d) {
-                        return "node_" + d.Id;
-                    })
-                    .style("cursor", "pointer")
-                    .on('contextmenu', function (d) {
-                        gInstance.nodeRightClick(d);
-                    })
-                    .on("mouseover", function (d) {
-                        gInstance.nodeMouseOver(d);
-                    })
-                    .on("mouseout", function (d) {
-                        gInstance.nodeMouseOut();
-                    })
-                    .call(d3.drag()
-                            .on("start", gInstance.dragstarted)
-                            .on("drag", gInstance.dragged)
-                            .on("end", gInstance.dragended));
+                .attr("class", "nodes")
+                .selectAll("circle")
+                .data(gInstance._nodeData)
+                .enter().append("circle")
+                .attr("r", function (d) {
+                    return d.Size;
+                })
+                .attr("fill", function (d) {
+                    return (gInstance.grayNode) ? gInstance.convertToGrayScale(d.Color[index]) : d.Color[index];
+                })
+                .attr("id", function (d) {
+                    return "node_" + d.Id;
+                })
+                .style("cursor", "pointer")
+                .on('contextmenu', function (d) {
+                    gInstance.nodeRightClick(d);
+                })
+                .on("mouseover", function (d) {
+                    gInstance.nodeMouseOver(d);
+                })
+                .on("mouseout", function (d) {
+                    gInstance.nodeMouseOut();
+                })
+                .call(d3.drag()
+                    .on("start", gInstance.dragstarted)
+                    .on("drag", gInstance.dragged)
+                    .on("end", gInstance.dragended));
 
             /*this.node.append("title")
              .text(function (d) {
@@ -3251,93 +3261,93 @@ $(function () {
              });*/
 
             this.labelText = this.g.append("g")
-                    .attr("class", "labels")
-                    .selectAll(".mytext")
-                    .data(gInstance._nodeData)
-                    .enter()
-                    .append("text")
-                    .text(function (d) {
-                        return ((gInstance.showNodeValues)?d.Label[index]:"");
-                    })
-                    .attr("r", function (d) {
-                        return d.Size;
-                    })
-                    .style("text-anchor", "middle")
-                    .style("fill", function (d) {
-                        return gInstance.getFontColor(d, index);
-                    })
-                    .style("font-family", "Arial")
-                    .style("font-weight", "bold")
-                    .style("cursor", "pointer")
-                    .style("font-size", "1px")
-                    .attr("dy", ".35em")
-                    .each(function (d) {
-                        var r = Number(d.Size),
-                                a = this.getComputedTextLength(),
-                                c=0.35,
-                                b = 2*Math.sqrt(r*r-c*c),
-                                s = Math.min(r, b/a);
-                        d.fs = s;
-                    })
-                    .style("font-size", function (d) {
-                        return d.fs + "px";
-                    })
-                    .on("mouseover", function (d) {
-                        gInstance.nodeMouseOver(d);
-                    })
-                    .on("mouseout", function (d) {
-                        gInstance.nodeMouseOut();
-                    })
-                    .on('contextmenu', function (d) {
-                        gInstance.nodeRightClick(d);
-                    })
-                    .call(d3.drag()
-                            .on("start", gInstance.dragstarted)
-                            .on("drag", gInstance.dragged)
-                            .on("end", gInstance.dragended));
+                .attr("class", "labels")
+                .selectAll(".mytext")
+                .data(gInstance._nodeData)
+                .enter()
+                .append("text")
+                .text(function (d) {
+                    return ((gInstance.showNodeValues) ? d.Label[index] : "");
+                })
+                .attr("r", function (d) {
+                    return d.Size;
+                })
+                .style("text-anchor", "middle")
+                .style("fill", function (d) {
+                    return gInstance.getFontColor(d, index);
+                })
+                .style("font-family", "Arial")
+                .style("font-weight", "bold")
+                .style("cursor", "pointer")
+                .style("font-size", "1px")
+                .attr("dy", ".35em")
+                .each(function (d) {
+                    var r = Number(d.Size),
+                        a = this.getComputedTextLength(),
+                        c = 0.35,
+                        b = 2 * Math.sqrt(r * r - c * c),
+                        s = Math.min(r, b / a);
+                    d.fs = s;
+                })
+                .style("font-size", function (d) {
+                    return d.fs + "px";
+                })
+                .on("mouseover", function (d) {
+                    gInstance.nodeMouseOver(d);
+                })
+                .on("mouseout", function (d) {
+                    gInstance.nodeMouseOut();
+                })
+                .on('contextmenu', function (d) {
+                    gInstance.nodeRightClick(d);
+                })
+                .call(d3.drag()
+                    .on("start", gInstance.dragstarted)
+                    .on("drag", gInstance.dragged)
+                    .on("end", gInstance.dragended));
 
             // Enable below code to see edge label
             if (this.shEdgeRank || this.shEdgeSig) {
                 this.edgepaths = this.g.append("g")
-                        .attr("class", "edgepath").selectAll(".edgepath")
-                        .data(gInstance._linkData)
-                        .enter()
-                        .append('path')
-                        .attrs({
-                            'class': 'edgepath',
-                            'fill-opacity': 0,
-                            'stroke-opacity': 0,
-                            'id': function (d, i) {
-                                return 'edgepath' + i;
-                            }
-                        })
-                        .style("pointer-events", "none");
+                    .attr("class", "edgepath").selectAll(".edgepath")
+                    .data(gInstance._linkData)
+                    .enter()
+                    .append('path')
+                    .attrs({
+                        'class': 'edgepath',
+                        'fill-opacity': 0,
+                        'stroke-opacity': 0,
+                        'id': function (d, i) {
+                            return 'edgepath' + i;
+                        }
+                    })
+                    .style("pointer-events", "none");
 
                 this.edgelabels = this.g.append("g")
-                        .attr("class", "edgelabel").selectAll(".edgelabel")
-                        .data(gInstance._linkData)
-                        .enter()
-                        .append('text')
-                        .style("pointer-events", "none")
-                        .attrs({
-                            'class': 'edgelabel',
-                            'id': function (d, i) {
-                                return 'edgelabel' + i;
-                            },
-                            'font-size': 18,
-                            'fill': '#fff'
-                        });
+                    .attr("class", "edgelabel").selectAll(".edgelabel")
+                    .data(gInstance._linkData)
+                    .enter()
+                    .append('text')
+                    .style("pointer-events", "none")
+                    .attrs({
+                        'class': 'edgelabel',
+                        'id': function (d, i) {
+                            return 'edgelabel' + i;
+                        },
+                        'font-size': 18,
+                        'fill': '#fff'
+                    });
 
                 this.edgelabels.append('textPath')
-                        .attr('xlink:href', function (d, i) {
-                            return '#edgepath' + i;
-                        })
-                        .style("text-anchor", "middle")
-                        .style("pointer-events", "none")
-                        .attr("startOffset", "50%")
-                        .text(function (d) {
-                            return (gInstance.shEdgeRank) ? d.R : d.L;
-                        });
+                    .attr('xlink:href', function (d, i) {
+                        return '#edgepath' + i;
+                    })
+                    .style("text-anchor", "middle")
+                    .style("pointer-events", "none")
+                    .attr("startOffset", "50%")
+                    .text(function (d) {
+                        return (gInstance.shEdgeRank) ? d.R : d.L;
+                    });
             }
 
             if (this.shEdgeArrow) {
@@ -3347,20 +3357,20 @@ $(function () {
             gInstance.simulation = d3.forceSimulation().nodes(gInstance._nodeData);
 
             var link_force = d3.forceLink(gInstance._linkData)
-                    .id(function (d) {
-                        return d.Id;
-                    });
+                .id(function (d) {
+                    return d.Id;
+                });
 
             var charge_force = d3.forceManyBody()
-                    .strength(gInstance.strength);
+                .strength(gInstance.strength);
 
             var center_force = d3.forceCenter(gInstance.width / 2, gInstance.height / 2);
 
             gInstance.simulation
-                    .force("charge_force", charge_force)
-                    .force("center_force", center_force)
-                    .force("links", link_force)
-                    ;
+                .force("charge_force", charge_force)
+                .force("center_force", center_force)
+                .force("links", link_force)
+                ;
 
             gInstance.simulation.on("tick", gInstance.ticked);
 
@@ -3381,7 +3391,7 @@ $(function () {
         },
 
         getPieData: function (d) {
-          //_logger.addLog("graph.js getPieData");
+            //_logger.addLog("graph.js getPieData");
             var pc = [];
             var kl = "";
             for (var i = 0; i < d.pie.length; i++) {
@@ -3390,10 +3400,10 @@ $(function () {
                 var _key = this._graph.indv[index];
                 var _ct = this.IndvPresence.get(_key);
 
-                if(_ct===null){
-                  this.IndvPresence.put(_key, 1);
-                }else{
-                  this.IndvPresence.put(_key, _ct+1);
+                if (_ct === null) {
+                    this.IndvPresence.put(_key, 1);
+                } else {
+                    this.IndvPresence.put(_key, _ct + 1);
                 }
 
                 var percentage = d.pie[i][1];
@@ -3401,14 +3411,14 @@ $(function () {
                 if (kl.length > 0)
                     kl += ",";
                 kl += this._graph.indv[index];
-                pc.push({"color": this._graph.color[index], "percent": percentage, "Pattern": "url(#pattern_" + (index + 1) + ")"});
+                pc.push({ "color": this._graph.color[index], "percent": percentage, "Pattern": "url(#pattern_" + (index + 1) + ")" });
             }
 
             return [kl, pc];
         },
 
         drawPie: function () {
-          _logger.addLog("graph.js drawPie");
+            _logger.addLog("graph.js drawPie");
             for (var i = 0; i < this._linkData.length; i++) {
                 if (this.EdgeDirChg && this._linkData[i].ED === 0) {
                     var tmp = this._linkData[i].source;
@@ -3428,90 +3438,90 @@ $(function () {
             this.g = this.svg.append("g").attr("class", "everything");
 
             this.link = this.g.append("g")
-                    .attr("class", "links")
-                    .selectAll("line")
-                    .data(this._linkData)
-                    .enter().append("line")
-                    .attr("stroke-width", function (d) {
-                        return gInstance.getFeatureWidth(d);
-                    })
-                    /*.attr("marker-end", function (d) {
-                     return "url(#arrowhead_" + ((d.W < 5) ? 1 : 2) + ")";
-                     })*/
-                    .style("stroke", function (d) {
-                        return gInstance.getFeatureColor(d);
-                    });
+                .attr("class", "links")
+                .selectAll("line")
+                .data(this._linkData)
+                .enter().append("line")
+                .attr("stroke-width", function (d) {
+                    return gInstance.getFeatureWidth(d);
+                })
+                /*.attr("marker-end", function (d) {
+                 return "url(#arrowhead_" + ((d.W < 5) ? 1 : 2) + ")";
+                 })*/
+                .style("stroke", function (d) {
+                    return gInstance.getFeatureColor(d);
+                });
             this.node = this.g.append("g")
-                    .attr("class", "nodes")
-                    .selectAll("g")
-                    .data(this._nodeData)
-                    .enter().append("g")
-                    .attr("r", function (d) {
-                        return d.Size;
-                    })
-                    .attr("id", function (d) {
-                        return "node_" + d.Id;
-                    })
-                    .on('contextmenu', function (d) {
-                        gInstance.nodeRightClick(d);
-                    })
-                    .on("mouseover", function (d) {
-                        gInstance.nodeMouseOver(d);
-                    })
-                    .on("mouseout", function (d) {
-                        gInstance.nodeMouseOut();
-                    })
-                    .call(d3.drag()
-                            .on("start", gInstance.dragstarted)
-                            .on("drag", gInstance.dragged)
-                            .on("end", gInstance.dragended));
+                .attr("class", "nodes")
+                .selectAll("g")
+                .data(this._nodeData)
+                .enter().append("g")
+                .attr("r", function (d) {
+                    return d.Size;
+                })
+                .attr("id", function (d) {
+                    return "node_" + d.Id;
+                })
+                .on('contextmenu', function (d) {
+                    gInstance.nodeRightClick(d);
+                })
+                .on("mouseover", function (d) {
+                    gInstance.nodeMouseOver(d);
+                })
+                .on("mouseout", function (d) {
+                    gInstance.nodeMouseOut();
+                })
+                .call(d3.drag()
+                    .on("start", gInstance.dragstarted)
+                    .on("drag", gInstance.dragged)
+                    .on("end", gInstance.dragended));
             this.node.append("title")
-                    .text(function (d) {
-                        return d.Label[0];
-                    });
+                .text(function (d) {
+                    return d.Label[0];
+                });
 
             // Enable below code to see edge label
             if (this.shEdgeRank || this.shEdgeSig) {
                 this.edgepaths = this.g.append("g")
-                        .attr("class", "edgepath").selectAll(".edgepath")
-                        .data(this._linkData)
-                        .enter()
-                        .append('path')
-                        .attrs({
-                            'class': 'edgepath',
-                            'fill-opacity': 0,
-                            'stroke-opacity': 0,
-                            'id': function (d, i) {
-                                return 'edgepath' + i;
-                            }
-                        })
-                        .style("pointer-events", "none");
+                    .attr("class", "edgepath").selectAll(".edgepath")
+                    .data(this._linkData)
+                    .enter()
+                    .append('path')
+                    .attrs({
+                        'class': 'edgepath',
+                        'fill-opacity': 0,
+                        'stroke-opacity': 0,
+                        'id': function (d, i) {
+                            return 'edgepath' + i;
+                        }
+                    })
+                    .style("pointer-events", "none");
 
                 this.edgelabels = this.g.append("g")
-                        .attr("class", "edgelabel").selectAll(".edgelabel")
-                        .data(this._linkData)
-                        .enter()
-                        .append('text')
-                        .style("pointer-events", "none")
-                        .attrs({
-                            'class': 'edgelabel',
-                            'id': function (d, i) {
-                                return 'edgelabel' + i;
-                            },
-                            'font-size': 18,
-                            'fill': '#fff'
-                        });
+                    .attr("class", "edgelabel").selectAll(".edgelabel")
+                    .data(this._linkData)
+                    .enter()
+                    .append('text')
+                    .style("pointer-events", "none")
+                    .attrs({
+                        'class': 'edgelabel',
+                        'id': function (d, i) {
+                            return 'edgelabel' + i;
+                        },
+                        'font-size': 18,
+                        'fill': '#fff'
+                    });
 
                 this.edgelabels.append('textPath')
-                        .attr('xlink:href', function (d, i) {
-                            return '#edgepath' + i;
-                        })
-                        .style("text-anchor", "middle")
-                        .style("pointer-events", "none")
-                        .attr("startOffset", "50%")
-                        .text(function (d) {
-                            return (d.W > 6) ? ((gInstance.shEdgeRank) ? d.R : d.L) : "";
-                        });
+                    .attr('xlink:href', function (d, i) {
+                        return '#edgepath' + i;
+                    })
+                    .style("text-anchor", "middle")
+                    .style("pointer-events", "none")
+                    .attr("startOffset", "50%")
+                    .text(function (d) {
+                        return (d.W > 6) ? ((gInstance.shEdgeRank) ? d.R : d.L) : "";
+                    });
             }
 
             if (this.shEdgeArrow) {
@@ -3522,20 +3532,20 @@ $(function () {
             gInstance.simulation = d3.forceSimulation().nodes(gInstance._nodeData);
 
             var link_force = d3.forceLink(gInstance._linkData)
-                    .id(function (d) {
-                        return d.Id;
-                    });
+                .id(function (d) {
+                    return d.Id;
+                });
 
             var charge_force = d3.forceManyBody()
-                    .strength(gInstance.strength);
+                .strength(gInstance.strength);
 
             var center_force = d3.forceCenter(gInstance.width / 2, gInstance.height / 2);
 
             gInstance.simulation
-                    .force("charge_force", charge_force)
-                    .force("center_force", center_force)
-                    .force("links", link_force)
-                    ;
+                .force("charge_force", charge_force)
+                .force("center_force", center_force)
+                .force("links", link_force)
+                ;
 
             gInstance.simulation.on("tick", gInstance.ticked);
 
@@ -3545,8 +3555,8 @@ $(function () {
 
             /* Draw the respective pie chart for each node */
             gInstance.createPallete();
-            if(this.IndvPresence===null){
-              this.IndvPresence = new HashMap();
+            if (this.IndvPresence === null) {
+                this.IndvPresence = new HashMap();
             }
             this.node.each(function (d) {
                 var pieData = gInstance.getPieData(d);
@@ -3566,23 +3576,23 @@ $(function () {
         },
 
         loadData: function () {
-          _logger.addLog("graph.js loadData");
+            _logger.addLog("graph.js loadData");
             var _path = _common.getPath([this.workspace.wd, "Data", "json", this.fl[this.fileIndex].split(".")[0], this.jfl[this.fileRIndex].files[this.fileCIndex]]);
             //alert(_path);
             var data = this._fs.readFileSync(_path, 'utf-8');
             this.initPage(JSON.parse(data));
         },
 
-        getFittedString: function(s, l){
-          if(s.length>l){
-            s = s.substr(0, l) + "...";
-          }
+        getFittedString: function (s, l) {
+            if (s.length > l) {
+                s = s.substr(0, l) + "...";
+            }
 
-          return s;
+            return s;
         },
 
         loadDD: function (filename) {
-          _logger.addLog("graph.js loadDD");
+            _logger.addLog("graph.js loadDD");
 
             $("#top-nav").css("display", "none");
             $("#jsonheader").css("display", "block");
@@ -3590,16 +3600,16 @@ $(function () {
             for (var i = 0; i < this.jfl.length; i++) {
                 if (this.jfl[i].name === filename) {
                     s = "";
-                    var sj = this.autoLoadData.length>0?this.autoLoadData[0].json:"", ji = this.jfl[i].files.indexOf(sj);
+                    var sj = this.autoLoadData.length > 0 ? this.autoLoadData[0].json : "", ji = this.jfl[i].files.indexOf(sj);
                     //if(sj.length>0) lj = this.autoLoadData[0].json;
 
                     for (var j = 0; j < this.jfl[i].files.length; j++) {
-                        if(ji === j){
-                          this.fileCIndex = j;//$opt.attr('seq');
-                          this.fileRIndex = i;//$opt.attr('row');
-                          s += "<option selected value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.getFittedString(this.jfl[i].files[j],90) + "</option>";
-                        }else{
-                          s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.getFittedString(this.jfl[i].files[j],90) + "</option>";
+                        if (ji === j) {
+                            this.fileCIndex = j;//$opt.attr('seq');
+                            this.fileRIndex = i;//$opt.attr('row');
+                            s += "<option selected value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.getFittedString(this.jfl[i].files[j], 90) + "</option>";
+                        } else {
+                            s += "<option value='[" + i + "," + j + "]' class='file-json-select' title='" + this.jfl[i].files[j] + "'>&nbsp; " + this.getFittedString(this.jfl[i].files[j], 90) + "</option>";
                         }
                     }
 
@@ -3612,8 +3622,8 @@ $(function () {
             }
             $("#myJsonDropdown").html(s);
 
-            if(this.autoLoadData.length>0){
-              this.loadData();
+            if (this.autoLoadData.length > 0) {
+                this.loadData();
             }
 
             $("#myJsonDropdown").on("change", function () {
@@ -3627,190 +3637,190 @@ $(function () {
             });
         },
 
-        getTDADetails: function(tcc){
-          _logger.addLog("graph.js getTDADetails");
+        getTDADetails: function (tcc) {
+            _logger.addLog("graph.js getTDADetails");
 
-          var brNodes = new HashMap();
+            var brNodes = new HashMap();
 
-          this.link.each(function(d){
-            var s = (d.source.Id) ? d.source.Id : d.source;
-            var t = (d.target.Id) ? d.target.Id : d.target;
-            var k = brNodes.get(s);
+            this.link.each(function (d) {
+                var s = (d.source.Id) ? d.source.Id : d.source;
+                var t = (d.target.Id) ? d.target.Id : d.target;
+                var k = brNodes.get(s);
 
-            if(k===null){
-              k = [t];
-            }else{
-              if(k.indexOf(t)<0){
-                k.push(t);
-              }
+                if (k === null) {
+                    k = [t];
+                } else {
+                    if (k.indexOf(t) < 0) {
+                        k.push(t);
+                    }
+                }
+
+                brNodes.put(s, k);
+            });
+
+            var bc = 0;
+            var keys = brNodes.getKeys();
+            for (var i = 0; i < keys.length; i++) {
+                if (brNodes.get(keys[i]).length > 0) bc++;
             }
 
-            brNodes.put(s, k);
-          });
+            var s = "<table id='tdaDiv'>" +
+                "<tr><td>Total nodes</td><td>" + this.node.length + "</td></tr>" +
+                "<tr><td>Total edges</td><td>" + this.link.length + "</td></tr>" +
+                "<tr><td>Total branching nodes</td><td>" + bc + "</td></tr>" +
+                "<tr><td>Branching nodes ratio</td><td>" + (bc / this.node.length) + "</td></tr>" +
+                "<tr><td>Total subgraphs</td><td>" + tcc + "</td></tr>";
 
-          var bc = 0;
-          var keys = brNodes.getKeys();
-          for(var i=0; i<keys.length; i++){
-            if(brNodes.get(keys[i]).length>0) bc++;
-          }
-
-          var s = "<table id='tdaDiv'>" +
-                   "<tr><td>Total nodes</td><td>"+this.node.length+"</td></tr>" +
-                   "<tr><td>Total edges</td><td>"+this.link.length+"</td></tr>" +
-                   "<tr><td>Total branching nodes</td><td>"+bc+"</td></tr>" +
-                   "<tr><td>Branching nodes ratio</td><td>"+(bc/this.node.length)+"</td></tr>" +
-                   "<tr><td>Total subgraphs</td><td>"+tcc+"</td></tr>";
-
-          return s;
+            return s;
         },
 
-        getJSONFileDetails: function(){
-          _logger.addLog("graph.js getJSONFileDetails");
-          //{"fc":[2],"wx":[30],"gx":[25.00],"cls":{"name":"DBSCAN", "param":[0.60,2]},"cla":[7],"sig":[],"rp":["GrowthRate"]}
-          if(this.fnParam){
+        getJSONFileDetails: function () {
+            _logger.addLog("graph.js getJSONFileDetails");
+            //{"fc":[2],"wx":[30],"gx":[25.00],"cls":{"name":"DBSCAN", "param":[0.60,2]},"cla":[7],"sig":[],"rp":["GrowthRate"]}
+            if (this.fnParam) {
 
-            // Get the header list  and create file name using that List
-            // If file alread exists then pull it otherwise run mapper
-            var _header_names = this.getColumnNames();
-            var scrpt = "<script>";
-            var s = "<fieldset><legend>Filter settings</legend>";
-            s += "<table id='ftrDiv'>";//"<tr><td></td><td></td><td></td></tr>";
-            for(var i=0; i<this.fnParam.fc.length; i++){
-              s += "<tr><td colspan='3'><label>Filter name: " + this.getHeaderName(this.fnParam.fc[i], _header_names) + "</label></td></tr>";
-              s += "<tr><td><label>Number of windows: </label></td>";
-              s += "<td colspan='2'><input type='text' id='txtWin_" + (i+1) + "' placeholder='" + this.fnParam.wx[i] + "' value='" + this.fnParam.wx[i] + "' type='number' onkeypress='return isNumberKey(event)' /></td></tr>";
-              s += "<tr><td><label>Overlap: </label></td>";
-              s += "<td><input type='range' min='1' max='50' value='" + this.fnParam.gx[i] + "' step='1' class='slider' id='myRangeOv_" + (i+1) + "' index='" + (i+1) + "'/></td>";
-              s += "<td><label id='ovLabel_" + (i+1) + "'>" + this.fnParam.gx[i] + "%</label></td>";
-              s += "</tr>";
+                // Get the header list  and create file name using that List
+                // If file alread exists then pull it otherwise run mapper
+                var _header_names = this.getColumnNames();
+                var scrpt = "<script>";
+                var s = "<fieldset><legend>Filter settings</legend>";
+                s += "<table id='ftrDiv'>";//"<tr><td></td><td></td><td></td></tr>";
+                for (var i = 0; i < this.fnParam.fc.length; i++) {
+                    s += "<tr><td colspan='3'><label>Filter name: " + this.getHeaderName(this.fnParam.fc[i], _header_names) + "</label></td></tr>";
+                    s += "<tr><td><label>Number of windows: </label></td>";
+                    s += "<td colspan='2'><input type='text' id='txtWin_" + (i + 1) + "' placeholder='" + this.fnParam.wx[i] + "' value='" + this.fnParam.wx[i] + "' type='number' onkeypress='return isNumberKey(event)' /></td></tr>";
+                    s += "<tr><td><label>Overlap: </label></td>";
+                    s += "<td><input type='range' min='1' max='50' value='" + this.fnParam.gx[i] + "' step='1' class='slider' id='myRangeOv_" + (i + 1) + "' index='" + (i + 1) + "'/></td>";
+                    s += "<td><label id='ovLabel_" + (i + 1) + "'>" + this.fnParam.gx[i] + "%</label></td>";
+                    s += "</tr>";
 
-              scrpt += "$('#myRangeOv_" + (i+1) + "').on('input',function(){$('#ovLabel_" + (i+1) + "').html($(this).val() + '%');});"
+                    scrpt += "$('#myRangeOv_" + (i + 1) + "').on('input',function(){$('#ovLabel_" + (i + 1) + "').html($(this).val() + '%');});"
+                }
+
+                scrpt += "</script>";
+                s += "</table>";
+                s += "</fieldset>";
+                s += "<fieldset><legend>Cluster settings</legend>";
+                s += "<table id='ctrDiv'>";
+                s += "<tr><td><label>Clustering algorithm: </label></td>";
+                s += "<td><select id='selCluster' class='clusterSel'><option value='-1'>Select a clustering method</option><option value='" + this.fnParam.cls.name + "' selected>" + this.fnParam.cls.name + "</option></select></td></tr>";
+                s += "<tr><td><label>Density: </label></td>";
+                s += "<td><input type='text' id='txtDensity' placeholder='" + this.fnParam.cls.param[1] + "' value='" + this.fnParam.cls.param[1] + "' onkeypress='return isFloatingNumberKey(event, this)' /></td></tr>";
+                s += "<tr><td><label>Radius: </label></td>";
+                s += "<td><input type='text' id='txtRadius' placeholder='" + parseFloat(this.fnParam.cls.param[0]).toFixed(4) + "' value='" + parseFloat(this.fnParam.cls.param[0]).toFixed(4) + "' onkeypress='return isFloatingNumberKey(event, this)' /></td></tr>";
+                s += "</table>";
+                s += "</fieldset>";
+                s += "<fieldset id='pieDiv'><legend>Pie chart features</legend>" + this.getPieAttributes(_header_names) + "</fieldset>";
+                s += "<fieldset id='memDiv'><legend>Flare membership features</legend>" + this.getFlareMemAttributes(_header_names) + "</fieldset>" +
+                    "<button id='generate_mapper' title='Generate mapper' style='display:none;'>Generate mapper</button>";
+                return s + scrpt;
             }
 
-            scrpt += "</script>";
-            s += "</table>";
-            s += "</fieldset>";
-            s += "<fieldset><legend>Cluster settings</legend>";
-            s += "<table id='ctrDiv'>";
-            s += "<tr><td><label>Clustering algorithm: </label></td>";
-            s += "<td><select id='selCluster' class='clusterSel'><option value='-1'>Select a clustering method</option><option value='" + this.fnParam.cls.name + "' selected>" + this.fnParam.cls.name + "</option></select></td></tr>";
-            s += "<tr><td><label>Density: </label></td>";
-            s += "<td><input type='text' id='txtDensity' placeholder='" + this.fnParam.cls.param[1] + "' value='" + this.fnParam.cls.param[1] + "' onkeypress='return isFloatingNumberKey(event, this)' /></td></tr>";
-            s += "<tr><td><label>Radius: </label></td>";
-            s += "<td><input type='text' id='txtRadius' placeholder='" + parseFloat(this.fnParam.cls.param[0]).toFixed(4) + "' value='" + parseFloat(this.fnParam.cls.param[0]).toFixed(4) + "' onkeypress='return isFloatingNumberKey(event, this)' /></td></tr>";
-            s += "</table>";
-            s += "</fieldset>";
-            s += "<fieldset id='pieDiv'><legend>Pie chart features</legend>" + this.getPieAttributes(_header_names) + "</fieldset>";
-            s += "<fieldset id='memDiv'><legend>Flare membership features</legend>" + this.getFlareMemAttributes(_header_names) + "</fieldset>" +
-              "<button id='generate_mapper' title='Generate mapper' style='display:none;'>Generate mapper</button>";
-            return s+scrpt;
-          }
-
-          return "";
+            return "";
         },
 
-        loadMapperWindow: function(){
-          _logger.addLog("graph.js loadMapperWindow");
-          const modalPath = this._path.join('file://', __dirname, 'mapper.html');
-          const mBound = this._electron.remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
+        loadMapperWindow: function () {
+            _logger.addLog("graph.js loadMapperWindow");
+            const modalPath = this._path.join('file://', __dirname, 'mapper.html');
+            const mBound = this._electron.remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
 
-          console.log("wp: " + this.workspace.wd);
-          if(this.workspace.wd.length===0){
+            console.log("wp: " + this.workspace.wd);
+            if (this.workspace.wd.length === 0) {
 
-            const { BrowserWindow } = require('electron').remote;
+                const { BrowserWindow } = require('electron').remote;
 
-          	//clog.transports.file.getFile();
-            cWin = new BrowserWindow({
-              width: mBound.width-80,
-              height: mBound.height-80,
-              parent: this._electron.remote.getCurrentWindow(),
-              title: "Create a mapper object",
-              modal: true,
-              webPreferences: {
-                //sandbox: true,
-                nodeIntegration: true
-              }
+                //clog.transports.file.getFile();
+                cWin = new BrowserWindow({
+                    width: mBound.width - 80,
+                    height: mBound.height - 80,
+                    parent: this._electron.remote.getCurrentWindow(),
+                    title: "Create a mapper object",
+                    modal: true,
+                    webPreferences: {
+                        //sandbox: true,
+                        nodeIntegration: true
+                    }
+                });
+                // Open the DevTools.
+                //cWin.webContents.openDevTools();
+
+                cWin.on('closed', function () {
+                    cWin = null;
+                    console.log("exit the modal");
+
+                    gInstance.reload();
+
+                });
+
+                cWin.loadURL(modalPath);
+                cWin.show();
+            }
+
+            $("#mapperModalBtn").on("click", () => {
+                if (cWin) cWin = null;
+
+                const { BrowserWindow } = require('electron').remote;
+                cWin = new BrowserWindow({
+                    width: mBound.width - 80,
+                    height: mBound.height - 80,
+                    parent: this._electron.remote.getCurrentWindow(),
+                    title: "Create a mapper object",
+                    webPreferences: {
+                        //sandbox: true,
+                        nodeIntegration: true
+                    }
+                });
+                // Open the DevTools.
+                //cWin.webContents.openDevTools();
+
+                cWin.on('close', function () {
+                    cWin = null;
+
+                    gInstance.reload();
+                });
+
+                cWin.loadURL(modalPath);
+                cWin.show();
             });
-            // Open the DevTools.
-            //cWin.webContents.openDevTools();
-
-            cWin.on('closed', function () {
-              cWin = null;
-              console.log("exit the modal");
-
-              gInstance.reload();
-
-            });
-
-            cWin.loadURL(modalPath);
-            cWin.show();
-          }
-
-          $("#mapperModalBtn").on("click", ()=>{
-            if(cWin) cWin=null;
-
-            const { BrowserWindow } = require('electron').remote;
-            cWin = new BrowserWindow({
-              width: mBound.width-80,
-              height: mBound.height-80,
-              parent: this._electron.remote.getCurrentWindow(),
-              title: "Create a mapper object",
-              webPreferences: {
-                //sandbox: true,
-                nodeIntegration: true
-              }
-            });
-            // Open the DevTools.
-            //cWin.webContents.openDevTools();
-
-            cWin.on('close', function () {
-              cWin = null;
-
-              gInstance.reload();
-            });
-
-            cWin.loadURL(modalPath);
-            cWin.show();
-          });
 
         },
 
-        getStoredData: function(ofn){
-          _logger.addLog("graph.js getStoredData");
-          try{
-            var data = this._fs.readFileSync(_common.getPath([__dirname, "tmp.sp"]), 'utf-8');
-            if(data.length>0) this.autoLoadData = JSON.parse(data);
+        getStoredData: function (ofn) {
+            _logger.addLog("graph.js getStoredData");
+            try {
+                var data = this._fs.readFileSync(_common.getPath([__dirname, "tmp.sp"]), 'utf-8');
+                if (data.length > 0) this.autoLoadData = JSON.parse(data);
 
-            this._fs.writeFileSync(_common.getPath([__dirname, "tmp.sp"]), '');
-          }catch(err){
-            console.log("Error to read data at getStoredData: " + err.message);
-          }
+                this._fs.writeFileSync(_common.getPath([__dirname, "tmp.sp"]), '');
+            } catch (err) {
+                console.log("Error to read data at getStoredData: " + err.message);
+            }
         },
 
         loadFiles: function (e) {
-          _logger.addLog("graph.js loadFiles");
-          this.autoLoadData = [];
-          if(e) this.loadMapperWindow();
-          else{
-            this.getStoredData();
-            this.workspace = _common.getWorkSpace();
-            this.fl = this.getAllCsvFiles();
-            this.jfl = this.getAllJsonFiles();
-          }
+            _logger.addLog("graph.js loadFiles");
+            this.autoLoadData = [];
+            if (e) this.loadMapperWindow();
+            else {
+                this.getStoredData();
+                this.workspace = _common.getWorkSpace();
+                this.fl = this.getAllCsvFiles();
+                this.jfl = this.getAllJsonFiles();
+            }
 
             $("#top-nav").css("display", "none");
             var s = "";
             for (var i = 0; i < this.fl.length; i++) {
-              if(this.autoLoadData.length>0){
-                if(this.autoLoadData[0].csv === this.fl[i]){
-                  gInstance.fileIndex = i;
-                  s += "<option value='" + i + "' class='file-select' selected seq='" + i + "'>&nbsp; " + this.fl[i] + "</option>";
-                }else{
-                  s += "<option value='" + i + "' class='file-select' seq='" + i + "'>&nbsp; " + this.fl[i] + "</option>";
+                if (this.autoLoadData.length > 0) {
+                    if (this.autoLoadData[0].csv === this.fl[i]) {
+                        gInstance.fileIndex = i;
+                        s += "<option value='" + i + "' class='file-select' selected seq='" + i + "'>&nbsp; " + this.fl[i] + "</option>";
+                    } else {
+                        s += "<option value='" + i + "' class='file-select' seq='" + i + "'>&nbsp; " + this.fl[i] + "</option>";
+                    }
+                } else {
+                    s += "<option value='" + i + "' class='file-select' seq='" + i + "'>&nbsp; " + this.fl[i] + "</option>";
                 }
-              }else{
-                s += "<option value='" + i + "' class='file-select' seq='" + i + "'>&nbsp; " + this.fl[i] + "</option>";
-              }
             }
 
             if (s.length > 0) {
@@ -3818,30 +3828,30 @@ $(function () {
             }
             $("#myDropdown").html(s);
 
-            if(this.autoLoadData.length>0 && gInstance.fileIndex > -1){
-              var _file = this.fl[this.fileIndex];
-              //$("#file_select").html(_file);
-              var _fileName = _file.split(".")[0];
-              //$("#myDropdown").hide();
-              this.loadDD(_fileName);
+            if (this.autoLoadData.length > 0 && gInstance.fileIndex > -1) {
+                var _file = this.fl[this.fileIndex];
+                //$("#file_select").html(_file);
+                var _fileName = _file.split(".")[0];
+                //$("#myDropdown").hide();
+                this.loadDD(_fileName);
             }
 
             $("#myDropdown").on("change", function () {
-                $("#map-details-details .jsonDetails table").css({"display":"none"});
-                $("#tda-details-details .jsonDetails table").css({"display":"none"});
+                $("#map-details-details .jsonDetails table").css({ "display": "none" });
+                $("#tda-details-details .jsonDetails table").css({ "display": "none" });
                 //$("#myDropdown a").removeClass("seldw");
 
                 // Hide other panels
-                $("#jsonheader").css({"display":"none"});
-                $("#map-details").css({"display":"none"});
-                $("#tda-details").css({"display":"none"});
-                $("#pie-legend").css({"display":"none"});
-                $("#thumbnails").css({"display":"none"});
-                $("#attr-ctrl").css({"display":"none"});
-                $("#int-path").css({"display":"none"});
-                $("#int-flare").css({"display":"none"});
-                $("#int-cc").css({"display":"none"});
-                $("#int-nodes").css({"display":"none"});
+                $("#jsonheader").css({ "display": "none" });
+                $("#map-details").css({ "display": "none" });
+                $("#tda-details").css({ "display": "none" });
+                $("#pie-legend").css({ "display": "none" });
+                $("#thumbnails").css({ "display": "none" });
+                $("#attr-ctrl").css({ "display": "none" });
+                $("#int-path").css({ "display": "none" });
+                $("#int-flare").css({ "display": "none" });
+                $("#int-cc").css({ "display": "none" });
+                $("#int-nodes").css({ "display": "none" });
 
                 var $opt = $(this).find('option:selected');
                 gInstance.fileIndex = $opt.attr('value');
@@ -3858,7 +3868,7 @@ $(function () {
 
     };
 
-// Close the dropdown menu if the user clicks outside of it
+    // Close the dropdown menu if the user clicks outside of it
     window.onclick = function (event) {
         if (!event.target.matches('.dropbtn')) {
 
@@ -3998,12 +4008,12 @@ var LZW = {
         "use strict";
         // Build the dictionary.
         var i,
-                dictionary = {},
-                c,
-                wc,
-                w = "",
-                result = [],
-                dictSize = 256;
+            dictionary = {},
+            c,
+            wc,
+            w = "",
+            result = [],
+            dictSize = 256;
         for (i = 0; i < 256; i += 1) {
             dictionary[String.fromCharCode(i)] = i;
         }
@@ -4035,12 +4045,12 @@ var LZW = {
         "use strict";
         // Build the dictionary.
         var i,
-                dictionary = [],
-                w,
-                result,
-                k,
-                entry = "",
-                dictSize = 256;
+            dictionary = [],
+            w,
+            result,
+            k,
+            entry = "",
+            dictSize = 256;
         for (i = 0; i < 256; i += 1) {
             dictionary[i] = String.fromCharCode(i);
         }
