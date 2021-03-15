@@ -27,7 +27,7 @@ Must need GCC version at least 5.0
 
 ## Create Node environment ##
 
-  1. Download and install [nodeJS __v12.13.1__](https://nodejs.org/download/release/v12.13.1/). Current __V8__ interface is campatible with this version.
+  1. Download and install [nodeJS __v15.11.0__](https://nodejs.org/download/release/v15.11.0/). Current __V8__ interface is campatible with this version.
   2. Need python >= 2.7
   3. Install visual studio (For windows user)
 
@@ -38,51 +38,51 @@ Open terminal and redirect to the [git folder]/app prior running the following c
 ```bash
   # Update npm
   sudo npm install -g npm
-  
+
   # Install node-gyp
   sudo npm install -g node-gyp
-  
+
   # Install nan package for node
   npm install --save nan
-  
+
   # Install bindings for external sources
   npm install --save bindings
   npm install -g bindings
-  
+
   # Install rebuild package
   npm install --save-dev rebuild
-  
+
   # Install electron package
   npm install --save-dev electron
-  
+
   # Install electron-packager package
   npm install --save-dev electron-packager
   npm install electron-packager -g
-  
+
   # Install electron-rebuild package
   npm install --save electron-rebuild
-  
+
   # Install jquery package
   npm install --save jquery
-  
+
   # Install asar package
   npm install --save-dev asar
-  
+
   # Install csv-parser
   npm install --save-dev csv-parser
   npm install csv-parser -g
-  
+
   # Install logger
   npm install --save electron-log
-  
+
   # For MAC OsX
   npm install electron-installer-dmg --save-dev
   npm install electron-installer-dmg -g
-  
+
   # For WINDOWS Os
   npm install --save-dev electron-installer-windows
   npm install -g electron-installer-windows
-  
+
   # For LINUX Os
   npm install --save-dev  electron-installer-debian
   npm install -g electron-installer-debian
@@ -237,4 +237,3 @@ npm run install
 Copyright &copy; 2019 Hyppo-XD Collaborators.
 
 Hyppo-XD is licensed under an MIT license. All rights not explicitly granted in the MIT license are reserved. See the included LICENSE file for more details.
-

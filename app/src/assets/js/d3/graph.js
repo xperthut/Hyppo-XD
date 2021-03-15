@@ -241,7 +241,7 @@ $(function () {
                                       break;
                                     }
                                   }
-          
+
                                   if(!m){
                                     _f.files.push({sj:fjson, lj:[_jList[j]]});
                                   }
@@ -1397,8 +1397,8 @@ $(function () {
             for (var i = 0; i < this.workspace.files.length; i++) {
                 if (this.workspace.files[i].csv === selectedCSVFile) {
                     if (this.workspace.files[i].col.header.length === 0) {
-                        var addon = require('bindings')('hyppo-xd');
-                        var srt = JSON.parse(addon.invoke("RCSVH", _common.getPath([this.workspace.wd, "Data", "csv", selectedCSVFile])));
+                        var addon = require('bindings')('hyppoxd');
+                        var srt = JSON.parse(addon.GetMessage("RCSVH", _common.getPath([this.workspace.wd, "Data", "csv", selectedCSVFile])));
 
                         for (var h = 0; h < srt.header.length; h++) {
                             this.workspace.files[i].col.header.push(srt.header[h]);
@@ -1823,8 +1823,8 @@ $(function () {
             if (this._fs.existsSync(chkFN)) {
                 this.storeData(chkFN);
             } else {
-                var addon = require('bindings')('hyppo-xd');
-                var srt = addon.invoke("CRTMAPR", param);
+                var addon = require('bindings')('hyppoxd');
+                var srt = addon.GetMessage("CRTMAPR", param);
 
                 this.storeData(srt);
             }
@@ -2693,7 +2693,7 @@ $(function () {
                                     .forEach(([key, value]) => {
                                         // key would be the column name
                                         // value would be the data of the row for that column
-                                        
+
                                         if (cols.indexOf(key) >= 0) {
                                             cData.push(value)
                                         }
@@ -3722,23 +3722,35 @@ $(function () {
         loadMapperWindow: function () {
             _logger.addLog("graph.js loadMapperWindow");
             const modalPath = this._path.join('file://', __dirname, 'mapper.html');
-            const mBound = this._electron.remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
+            console.log("modalPath: " + modalPath);
+
+            const ipc = require('electron').ipcRenderer;
+            let win = require('@electron/remote').getCurrentWindow();//ipc.sendSync('get-parent', '');
+
+
+            let mBound = win.webContents.getOwnerBrowserWindow().getBounds();
+
+            _logger.addLog('Width:'+mBound.width+', height:'+mBound.height);
 
             console.log("wp: " + this.workspace.wd);
             if (this.workspace.wd.length === 0) {
 
-                const { BrowserWindow } = require('electron').remote;
+                _logger.addLog("graph.js load new @electron/remote");
+                //const { BrowserWindow } = require('electron').remote;
+                const {BrowserWindow } = require('@electron/remote');
 
                 //clog.transports.file.getFile();
                 cWin = new BrowserWindow({
                     width: mBound.width - 80,
                     height: mBound.height - 80,
-                    parent: this._electron.remote.getCurrentWindow(),
+                    parent: win,//require('@electron/remote').getCurrentWindow(),
                     title: "Create a mapper object",
                     modal: true,
                     webPreferences: {
                         //sandbox: true,
-                        nodeIntegration: true
+                        nodeIntegration: true,
+                        contextIsolation: false,
+                        enableRemoteModule: true,
                     }
                 });
                 // Open the DevTools.
@@ -3752,22 +3764,28 @@ $(function () {
 
                 });
 
+                _logger.addLog("graph.js loading path: "+modalPath);
                 cWin.loadURL(modalPath);
+
+                _logger.addLog("graph.js loading show");
                 cWin.show();
             }
 
             $("#mapperModalBtn").on("click", () => {
                 if (cWin) cWin = null;
 
-                const { BrowserWindow } = require('electron').remote;
+                //const { BrowserWindow } = require('electron').remote;
+                const { BrowserWindow } = require('@electron/remote');
                 cWin = new BrowserWindow({
                     width: mBound.width - 80,
                     height: mBound.height - 80,
-                    parent: this._electron.remote.getCurrentWindow(),
+                    parent: require('@electron/remote').getCurrentWindow(),
                     title: "Create a mapper object",
                     webPreferences: {
                         //sandbox: true,
-                        nodeIntegration: true
+                        nodeIntegration: true,
+                        contextIsolation: false,
+                        enableRemoteModule: true,
                     }
                 });
                 // Open the DevTools.

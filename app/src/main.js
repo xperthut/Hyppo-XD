@@ -1,10 +1,17 @@
 const electron = require('electron');
-const { app, BrowserWindow } = electron;
+const { app, BrowserWindow, ipcMain } = electron;
 const path = require('path');
+
+process.noDeprecation = false;
+process.throwDeprecation = false;
+process.traceDeprecation = true;
+process.traceProcessWarnings = true;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
+
+require('@electron/remote/main').initialize();
 
 function createWindow () {
 	const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
@@ -17,9 +24,13 @@ function createWindow () {
     icon: path.resolve(path.join(".","logo", "Icon.icns")),
     webPreferences: {
 			//sandbox: true,
-      nodeIntegration: true
+			nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true,
     }
   });
+
+
 
   // and load the index.html of the app.
   win.loadFile('src/view/topoview.html');
@@ -39,7 +50,8 @@ function createWindow () {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+//app.on('ready', createWindow);
+app.whenReady().then(createWindow)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -53,7 +65,18 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (win === null) {
-    createWindow();
+	if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow()
   }
+});
+
+// Async return: event.sender.send(data)
+// Synchronus return
+ipcMain.handle('get-window-size', (event, arg)=>{
+	const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
+	event.returnValue= {'width':width, 'height':height};
+});
+
+ipcMain.handle('get-parent', (event, arg)=>{
+	event.returnValue= win;
 });

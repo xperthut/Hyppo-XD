@@ -59,9 +59,6 @@
       <fieldset style="display:none;">
         <legend>Test code</legend>
       <h1>Hello World!</h1>
-      We are using node <script>document.write(process.versions.node)</script>,
-      Chrome <script>document.write(process.versions.chrome)</script>,
-      and Electron <script>document.write(process.versions.electron)</script>.
 
       <p>
           <label>Enter a number:</label><input type='text' value='0' name='txtVal' id='txtVal' /><button onclick="txtClick(); return false;">Compute</button>
@@ -70,10 +67,16 @@
       </p>
 
       <script>
-        var addon = require('bindings')('hyppo-xd');
+        document.write('Before bindings');
+        try{
+          var addon = require('bindings')('hyppoxd');
+        }catch(err){
+          alert('Addon error: '+err.message);
+        }
+
         function txtClick(){
           var val = parseInt(document.getElementById("txtVal").value);
-          var srt = addon.invoke("SQRT", val);
+          var srt = addon.GetMessage("SQRT", val);
           document.getElementById("lblsrt").innerHTML = srt;
         }
       </script>
@@ -81,7 +84,7 @@
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script>window.$ = window.jQuery = require('jquery');</script>
+    <script>try{window.$ = window.jQuery = require('jquery');}catch(err){alert('JQuery load error: '+err.message);}</script>
     <script src="./../assets/js/selectize.js"></script>
     <script src="./../assets/js/d3/common.js"></script>
     <script src="./../assets/js/d3/logger.js"></script>

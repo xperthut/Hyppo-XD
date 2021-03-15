@@ -44,6 +44,7 @@ $(function () {
 
           this.loadAllCsvFiles();
           this.loadAllJsonFiles();
+          _logger.addLog("mapper.js reload Done");
       }
     },
 
@@ -209,8 +210,8 @@ $(function () {
       }
       // Reload if the data loads before 5 mins
       if(this.workspace.files[csvIndex].col.header.length ===0 || Math.round((((dt-ldt) % 86400000) % 3600000) / 60000) > 5){
-        var addon = require('bindings')('hyppo-xd');
-        var srt = JSON.parse(addon.invoke("RCSVH", this.fileNameWithPath));
+        var addon = require('bindings')('hyppoxd');
+        var srt = JSON.parse(addon.GetMessage("RCSVH", this.fileNameWithPath));
 
         this.hasIndexColumn = srt.index;
         var i=0;
@@ -520,8 +521,8 @@ $(function () {
       if(this._fs.existsSync(chkFN)){
         this.storeData(chkFN);
       }else{
-        var addon = require('bindings')('hyppo-xd');
-        var srt = addon.invoke("CRTMAPR", param);
+        var addon = require('bindings')('hyppoxd');
+        var srt = addon.GetMessage("CRTMAPR", param);
 
         this.storeData(srt);
       }
@@ -776,11 +777,30 @@ $(function () {
 
   $("#btnWrkSpace").click(function(){
     _logger.addLog("mapper.js Workspace select button pressed");
-    const {dialog} = require('electron').remote;
+    const {dialog} = require('@electron/remote');
     dialog.showOpenDialog({
           properties: ['openDirectory'],
           createDirectory: true
-      }, function (files) {
+      }).
+      then(result=>{
+        if(result.filePaths.length>0){
+          _mapper.workspace.wd = result.filePaths[0];
+
+          if(_mapper.createWorkingDir()){
+            _mapper.reload();
+
+            alert("Please store all input csv files at: \"" + _common.getPath([_mapper.workspace.wd, "Data", "csv"]) + "\"");
+          }else{
+            alert("Can not create working directory in this location. Please select a different location.");
+          }
+        }
+      }).
+      catch(err=>{
+        alert(err.message);
+      });
+
+      /*function (files) {
+          _logger.addLog(files);
           if (files === undefined) return;
           if(files.length===0) return;
 
@@ -793,42 +813,43 @@ $(function () {
           }else{
             alert("Can not create working directory in this location. Please select a different location.");
           }
-      });
+      });*/
   });
 
   $("#file-input").on("click", (e)=>{
     _logger.addLog("mapper.js File chooser button pressed");
     showBusyIndicator();
 
-    const {width, height, x, y} = require('electron').remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
+    const {width, height, x, y} = require('@electron/remote').getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds();
     //$("#busyDiv").css("height", height+"px");
     //$("#busyDiv").css("width", width+"px");
     $("#scrollDiv").css("height", (height-30)+"px");
 
-    const {dialog} = require('electron').remote;
+    const {dialog} = require('@electron/remote');
     dialog.showOpenDialog({
           properties: ['openFile'],
           filters: [{ name: 'CSV', extensions: ['csv'] }],
           defaultPath: _mapper._path.join(_mapper.workspace.wd, "Data", "csv")
-      }, function (files) {
+      }).then(result=>{
 
-          if (files === undefined ) {hideBusyIndicator(); return;}
-          if(files.length === 0) {hideBusyIndicator(); return;}
+          if(result.filePaths.length>0){
+            _mapper.reset();
+            _mapper.fileNameWithPath = result.filePaths[0];
+            _mapper.extractFileName();
 
-          _mapper.reset();
-          _mapper.fileNameWithPath = files[0];
-          _mapper.extractFileName();
-
-          $("#lblFileName").html(_mapper.fileName);
-          $("#fsFilterParams").css("display", "block");
-          $("#fsClusterParams").css("display", "block");
-          $("#advance").css("display", "block");
-          $("#btnCrMpr").css("display", "block");
-          $("#filterContainer").html("");
-          $("#clusterContainer").html(_mapper.getClusteringAttributes());
-          $("#advContainer").html(_mapper.getAdvanceAttributes());
+            $("#lblFileName").html(_mapper.fileName);
+            $("#fsFilterParams").css("display", "block");
+            $("#fsClusterParams").css("display", "block");
+            $("#advance").css("display", "block");
+            $("#btnCrMpr").css("display", "block");
+            $("#filterContainer").html("");
+            $("#clusterContainer").html(_mapper.getClusteringAttributes());
+            $("#advContainer").html(_mapper.getAdvanceAttributes());
+          }
 
           hideBusyIndicator();
+      }).catch(err=>{
+        alert('Error from mapper.js File chooser button pressed.\nError details: ' + err.message);
       });
   });
 
@@ -926,7 +947,7 @@ $(function () {
     nesVal.cluster_param.push($("#txtDensity").val());
 
     var errStatus = _mapper.checkMapperParams(nesVal);
-    const {dialog, nativeImage} = require('electron').remote;
+    const {dialog, nativeImage} = require('@electron/remote');
     const path = require('path');
 
     console.log(path.join(__dirname, 'Icon.png'));
@@ -946,7 +967,7 @@ $(function () {
 
               if(response===0){
                 _mapper.createMapper(nesVal);
-                var mWin = require('electron').remote.getCurrentWindow();
+                var mWin = require('@electron/remote').getCurrentWindow();
                 mWin.close();
               }
           });
@@ -979,5 +1000,5 @@ $(function () {
 
   $(".showhide").hide();
   $("#advContainer").hide();
-
+  _logger.addLog("Last at mapper");
 });

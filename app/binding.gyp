@@ -1,14 +1,15 @@
 {
   "targets": [
     {
-      "target_name": "hyppo-xd",
+      "target_name": "hyppoxd",
       "include_dirs": [
         "node_modules/nan",#"<!(node -e \"require('nan')\")",
         "src",
         "src/src"
       ],
       "sources": [
-        "src/interface.cpp"
+        #"src/interface.cpp"
+        "src/interfaceNaN.cpp"
       ],
       "libraries": [
         #"-lboost_filesystem", "-lboost_system"
