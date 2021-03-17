@@ -312,6 +312,8 @@ $(function () {
         }
       }
 
+      _logger.addLog("Error status: "+JSON.stringify(errStatus));
+
       return errStatus;
     },
 
@@ -942,6 +944,9 @@ $(function () {
       }
     }
 
+    _logger.addLog("Collected params from HTML");
+    _logger.addLog("Collected params: "+JSON.stringify(nesVal));
+
     // radius then density
     nesVal.cluster_param.push($("#txtRadius").val());
     nesVal.cluster_param.push($("#txtDensity").val());
@@ -956,21 +961,23 @@ $(function () {
     //const tray = new Tray(trayIcon);
 
     if(errStatus.status===true){
-      let options  = {
-         buttons: ["Yes", "No"],
-         message: "Do you want to create a mapper with this settings.",
-         icon: nativeIcon
-       };
+      dialog.showMessageBox({
+        buttons: ["Yes", "No"],
+        message: "Do you want to create a mapper with this settings.",
+        icon: nativeIcon
+      }).
+      then(obj=>{
+        _logger.addLog("Your response: "+JSON.stringify(obj));
 
-       dialog.showMessageBox(options,(response) => {
-              console.log(response);
-
-              if(response===0){
-                _mapper.createMapper(nesVal);
-                var mWin = require('@electron/remote').getCurrentWindow();
-                mWin.close();
-              }
-          });
+       if(obj.response===0){
+         _mapper.createMapper(nesVal);
+         var mWin = require('@electron/remote').getCurrentWindow();
+         mWin.close();
+       }
+      }).
+      catch(err=>{
+       alert(err.message);
+      });
     }else{
       var s = "Please fix following issues:\n";
       for(var i=0; i<errStatus.msg.length; i++){
