@@ -47,7 +47,7 @@ Open terminal and redirect to the [git folder]/app prior running the following c
 
   # Install bindings for external sources
   npm install --save bindings
-  npm install -g bindings
+  sudo npm install -g bindings
 
   # Install rebuild package
   npm install --save-dev rebuild
@@ -57,7 +57,7 @@ Open terminal and redirect to the [git folder]/app prior running the following c
 
   # Install electron-packager package
   npm install --save-dev electron-packager
-  npm install electron-packager -g
+  sudo npm install electron-packager -g
 
   # Install electron-rebuild package
   npm install --save electron-rebuild
@@ -70,40 +70,44 @@ Open terminal and redirect to the [git folder]/app prior running the following c
 
   # Install csv-parser
   npm install --save-dev csv-parser
-  npm install csv-parser -g
+  sudo npm install csv-parser -g
 
   # Install logger
   npm install --save electron-log
 
   # For MAC OsX
   npm install electron-installer-dmg --save-dev
-  npm install electron-installer-dmg -g
+  sudo npm install electron-installer-dmg -g
 
   # For WINDOWS Os
   npm install --save-dev electron-installer-windows
-  npm install -g electron-installer-windows
+  sudo npm install -g electron-installer-windows
 
   # For LINUX Os
   npm install --save-dev  electron-installer-debian
-  npm install -g electron-installer-debian
+  sudo npm install -g electron-installer-debian
 ```
 After running all the commands, open the __package.json__ file. At the end of this file there has two keys named __dependencies__ and __devDependencies__ as follows. Sometimes __jquery__ moves to __devDependencies__ during installation then please move it to __dependencies__. Otherwise, JQUERY will not work in the distribution.
 
 ```JSON
 "dependencies": {
+    "@electron/remote": "^1.0.4",
     "bindings": "^1.5.0",
+    "electron-installer-redhat": "^3.0.0",
     "electron-log": "^3.0.9",
-    "jquery": "^3.4.1",
-    "nan": "^2.14.0"
+    "jquery": "^3.6.0",
+    "nan": "^2.15.0"
   },
   "devDependencies": {
-    "asar": "^2.0.1",
-    "electron": "^6.1.4",
-    "electron-installer-debian": "^2.0.1",
+    "asar": "^2.1.0",
+    "csv-parser": "^2.3.5",
+    "electron": "^12.2.3",
+    "electron-installer-debian": "^3.1.0",
     "electron-installer-dmg": "^3.0.0",
-    "electron-installer-windows": "^2.0.0",
-    "electron-packager": "^14.1.0",
-    "electron-rebuild": "^1.8.8",
+    "electron-installer-windows": "^3.0.0",
+    "electron-packager": "^15.4.0",
+    "electron-rebuild": "^3.2.7",
+    "node-abi": "^2.21.0",
     "rebuild": "^0.1.2"
   }
 ```
