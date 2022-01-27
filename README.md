@@ -145,7 +145,9 @@ node-gyp rebuild
 # Build the app
 npm run rebuild
 
-# Shortcut: Just run following command to complete all the above actions to rebuild
+```
+Shortcut: Just run following command to complete all the above actions to rebuild
+```
 npm run builder
 ```
 
