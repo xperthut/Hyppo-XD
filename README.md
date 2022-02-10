@@ -27,7 +27,7 @@ Must need GCC version at least 5.0
 
 ## Create Node environment ##
 
-  1. Download and install [nodeJS __v15.11.0__](https://nodejs.org/download/release/v15.11.0/). Current __V8__ interface is campatible with this version.
+  1. Download and install [Latest node](https://nodejs.org/).
   2. Need python >= 2.7
   3. Install visual studio (For windows user)
 
