@@ -51,6 +51,7 @@ namespace file_handler{
             }
 
             fileReader.close();
+            std::cout<<"Total rows="<<rCnt<<std::endl;
           }else{
               line = "[\"Error to read file. Please check the file name and path.\"]";
           }
@@ -60,6 +61,7 @@ namespace file_handler{
       }
 
       if(header.length()>0 && rows.size()>0){
+        std::cout<<"Calling getHeaderWithColumns"<<std::endl;
         line = this->getHeaderWithColumns(header, rows);
       }
 
@@ -128,6 +130,7 @@ namespace file_handler{
 
     // Check whether the string is a valid number or not
     bool isValidNumber(std::string s){
+      //std::cout<<"isValidNumber("<<s<<")"<<std::endl;
       try{
           size_t i=0;
           std::stod(s, &i);
@@ -139,11 +142,16 @@ namespace file_handler{
             return false;
           }
       }catch (const std::invalid_argument& e) {
-          std::cout<<"invalid_argument: "<<e.what()<<std::endl<<"Data:"<<s<<std::endl;
+        //terminating with uncaught exception of type std::invalid_argument: stod: no conversion
+
+          std::cout<<"Error type=invalid_argument: "<<e.what()<<std::endl<<"Data:"<<s<<std::endl;
           return false;
       }catch (std::exception &e) {
           std::cout<<"Other: "<<e.what()<<std::endl<<"Data:"<<s<<std::endl;
           return false;
+      }catch (...){
+        std::cout<<"unknown exception: "<<s<<std::endl;
+        return false;
       }
     }
 
@@ -214,6 +222,8 @@ namespace file_handler{
       this->getData(header, vHeader, true);
       std::vector<bool> numericHeader(vHeader.size(), true);
 
+      std::cout<<"first row"<<firstRow.size()<<std::endl;
+
       for(size_t i=0; i<firstRow.size(); i++){
         this->getRowData(firstRow[i], numericHeader);
       }
@@ -221,6 +231,7 @@ namespace file_handler{
       line += (this->hasIndexColumn)?"true":"false";
       line += ", \"header\":[";
 
+      std::cout<<"Header size: "<<vHeader.size()<<std::endl;
       bool f=true;
       for(size_t i=0; i<vHeader.size(); i++){
         if(f) f = false;
@@ -230,7 +241,7 @@ namespace file_handler{
 
       line += "]}";
 
-      std::cout<<line<<std::endl;
+      std::cout<<"Line="<<line<<std::endl;
 
       return line;
     }
