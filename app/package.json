@@ -39,16 +39,16 @@
     "electron-installer-redhat": "^3.0.0",
     "electron-log": "^3.0.9",
     "jquery": "^3.6.0",
-    "nan": "^2.15.0"
+    "nan": "^2.16.0"
   },
   "devDependencies": {
     "asar": "^2.1.0",
     "csv-parser": "^2.3.5",
-    "electron": "^12.2.3",
+    "electron": "^19.0.6",
     "electron-installer-debian": "^3.1.0",
     "electron-installer-dmg": "^3.0.0",
     "electron-installer-windows": "^3.0.0",
-    "electron-packager": "^15.4.0",
+    "electron-packager": "^13.1.1",
     "electron-rebuild": "^3.2.7",
     "node-abi": "^2.21.0",
     "rebuild": "^0.1.2"
