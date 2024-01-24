@@ -55,6 +55,10 @@ Open terminal and redirect to the [git folder]/app prior running the following c
   # Install electron package
   npm install --save-dev electron
 
+  # Install
+  npm install --save @electron/remote
+  sudo npm install -g @electron/remote
+
   # Install electron-packager package
   npm install --save-dev electron-packager
   sudo npm install electron-packager -g
