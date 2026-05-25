@@ -26,7 +26,7 @@
 #define BIT_SET_SIZE 10
 #define COEFF_FIELD_CHARACTERISTICS 13 // Any prime number
 #define MIN_PERSISTENCE 0.0 // Always set to zero
-#define ABS(x) (x<0?x*-1:x)
+#define ABS(x) (((x)<0)?(-(x)):(x))
 #define MAX_ALLOW_FILTER 2
 
 //enum OUTPUT {__STD=0, __FILE, __PHP};
@@ -83,12 +83,18 @@ bool convert_to (const std::string &str, CType& val){
  Copied from: http://stackoverflow.com/questions/997946/how-to-get-current-time-and-date-in-c
  ***/
 const std::string GetCurrentDateTime() {
-    time_t     now = time(0);
+    time_t     now = time(nullptr);
     struct tm  tstruct;
     char       buf[80];
-    tstruct = *localtime(&now);
 
-    strftime(buf, sizeof(buf), "%Y-%m-%d_%X", &tstruct);
+    // Use the thread-safe variant on POSIX; fall back to localtime on Windows.
+#if defined(_WIN32) || defined(_WIN64)
+    localtime_s(&tstruct, &now);
+#else
+    localtime_r(&now, &tstruct);
+#endif
+
+    strftime(buf, sizeof(buf), "%Y-%m-%d_%H-%M-%S", &tstruct);
 
     return buf;
 }

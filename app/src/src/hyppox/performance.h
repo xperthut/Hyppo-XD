@@ -78,10 +78,10 @@ namespace hyppox {
             }
             
             FilterType getFilter(short index){
-                if(index<0||(size_t)index>=this->filter_value.size()){
-                    return -999999;
+                if(index < 0 || static_cast<size_t>(index) >= this->filter_value.size()){
+                    return static_cast<FilterType>(-999999);
                 }
-                
+
                 return this->filter_value[index];
             }
             
@@ -91,10 +91,10 @@ namespace hyppox {
             }
             
             ClusterType getClusterValue(short index){
-                if(index<0||(size_t)index>=this->cluster_value.size()){
-                    return -999999;
+                if(index < 0 || static_cast<size_t>(index) >= this->cluster_value.size()){
+                    return static_cast<ClusterType>(-999999);
                 }
-                
+
                 return this->cluster_value[index];
             }
             
@@ -116,12 +116,11 @@ namespace hyppox {
             
             std::string getOtherValues(short index){
                 std::string s = "";
-                
-                for(auto _cv:this->cluster_value){
-                    if(s.length()>0) s += "#";
-                    s += to_string(_cv);
+
+                if(index >= 0 && static_cast<size_t>(index) < this->other.size()){
+                    return this->other[index];
                 }
-                
+
                 return s;
             }
             

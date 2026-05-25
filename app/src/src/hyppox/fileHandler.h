@@ -53,13 +53,12 @@ namespace hyppox {
             }
             void formatColumnName(std::string& s, char subs=':'){
                 size_t i=0, j=0;
-                std::cout<<"Old name:"<<s<<std::endl;
 
                 while(i<s.length()){
                     if(!this->isAlphaNumeric(s[i])){
                         j = i;
-                        while(i<s.length() && !this->isAlphaNumeric(s[i]))i++;
-                        if(s[i]>='a'&&s[i]<='z') s[i]-=32;
+                        while(i<s.length() && !this->isAlphaNumeric(s[i])) i++;
+                        if(i<s.length() && s[i]>='a' && s[i]<='z') s[i] -= 32;
                         if(i>j){
                             s = s.substr(0, j) + s.substr(i, s.length()-i);
                         }
@@ -67,7 +66,6 @@ namespace hyppox {
                     }
                     i++;
                 }
-                std::cout<<"New name:"<<s<<std::endl;
             }
             int ReadFileData(QTType* tree, std::vector<NodePosType> &_minPos, std::vector<NodePosType> &_maxPos, std::unordered_map<std::string, size_t>& mapMap, std::unordered_map<std::string, size_t>& pieMap);
             void readNodePosition(std::string fileName, std::unordered_map<ClusterIDType, float*> *positionMap);
@@ -99,7 +97,9 @@ namespace hyppox {
 
                     while (getline(fileReader, line)) {
                         size_t pos = 0;
-                        float position[]={0,0};
+                        // Heap-allocate so the pointer remains valid after this iteration.
+                        // Caller owns this memory (same lifetime as positionMap entries).
+                        float* position = new float[2]{0.0f, 0.0f};
 
                         // Store data
                         pos = line.find(",");
@@ -115,10 +115,14 @@ namespace hyppox {
                         if(pos==std::string::npos){
                             pos=line.length();
                         }
-                        position[1] = 777-stof(line.substr(0,pos));
+                        // 777 is the canvas height constant used to flip Y-axis for screen coords.
+                        position[1] = 777.0f - stof(line.substr(0,pos));
 
                         if(positionMap->find(nodeID) == positionMap->end()){
                             positionMap->insert(std::make_pair(nodeID, position));
+                        } else {
+                            // Duplicate node ID — discard the allocation to avoid a leak.
+                            delete[] position;
                         }
                     }
 
@@ -139,7 +143,6 @@ namespace hyppox {
         int FileHandler<PerfType,PosType,NodePosType,RowIDType,ClusterIDType,GenType,DatetimeType,ClusterType,FilterType>::ReadFileData(QTType* tree, std::vector<NodePosType> &_minPos, std::vector<NodePosType> &_maxPos, std::unordered_map<std::string, size_t>& memMap, std::unordered_map<std::string, size_t>& pieMap){
 
             std::string line;
-            size_t lineCounter=0;
             std::string compLast="",compThis, key;
             std::unordered_map<std::string, std::list<PerfType*> > pointMap;
             bool first = true;
@@ -150,7 +153,6 @@ namespace hyppox {
             try {
                 std::ifstream fileReader(hyppox::Config::READ_DIR+this->fileName);
 
-                std::cout<<"File name with path: "<<hyppox::Config::READ_DIR+this->fileName<<std::endl;
 
                 if(fileReader.is_open()){
 
@@ -190,7 +192,6 @@ namespace hyppox {
 
                                 for(int fc:hyppox::Config::COL_CLUSTER){
                                     if(fc==col){
-                                        std::cout<<"cc1:"<<fc<<std::endl;
                                         hyppox::Config::CLUSTER_NAMES.push_back(s);
                                         break;
                                     }
@@ -217,7 +218,6 @@ namespace hyppox {
 
                         for(int fc:hyppox::Config::COL_CLUSTER){
                             if(fc==col){
-                                std::cout<<"cc2:"<<fc<<std::endl;
                                 hyppox::Config::CLUSTER_NAMES.push_back(s);
                                 break;
                             }
@@ -240,13 +240,9 @@ namespace hyppox {
                         _location.clear();
                         datetime.clear();
 
-                        lineCounter++;
-
                         bool start = false;
                         bool validRec = true;
-                        size_t chPos = 0;
                         for(char ch:line){
-                            chPos++;
                             if(ch=='\n'||ch=='\r'){
                                 break;
                             }else if(ch=='"'){
@@ -468,7 +464,6 @@ namespace hyppox {
                         }
 
                         PerfType *phType = new PerfType(pID, genotype, _location, datetime, _clsValue, _filter, _otherInfo, memKey, pieKey);
-                        if(phType==nullptr) return -1;
 
                         auto pItr=pointMap.find(key);
                         if(pItr==pointMap.end()){
@@ -608,13 +603,17 @@ namespace hyppox {
 #if defined(_WIN32)
             TCHAR full_path[BUFSIZE];
             if (GetFullPathName(_T(fileName.c_str()), BUFSIZE, full_path, nullptr)) {
-                std::string filePath = full_path;
-                return filePath;
+                return std::string(full_path);
             }
 #else
-            return realpath(fileName.c_str(), nullptr);
+            // realpath() returns a malloc'd buffer; free it after copying into std::string.
+            char* resolved = realpath(fileName.c_str(), nullptr);
+            if (resolved != nullptr) {
+                std::string result(resolved);
+                free(resolved);
+                return result;
+            }
 #endif
-
             return fileName;
         }
     }

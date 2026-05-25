@@ -307,13 +307,12 @@ namespace hyppox {
                 // Either data fit in this child
                 // Or not
                 if(child->SearchInArea(data)){
-                    bool sameChild,firstChild, secondChild;
+                    bool firstChild, secondChild;
                     int fci=-1, sci=-1;
                     bool first = false, second = false;
-                    
+
                     // For each of the child check whether data will fit or not
                     for(unsigned int i=0; i<(unsigned int)hyppox::Config::QUAD_TREE_CHILDREN; i++){
-                        sameChild = true;
                         firstChild = !(first);
                         secondChild = !(second);
                         
@@ -548,28 +547,27 @@ namespace hyppox {
                 _dPos[j] = query->getPosition(j);
             }
             
-            bool sameChild,firstChild, secondChild;
+            bool firstChild, secondChild;
             int fci=-1, sci=-1;
-            
+
             for(unsigned int i=0; i<(unsigned int)hyppox::Config::QUAD_TREE_CHILDREN; i++){
-                sameChild = true;
                 firstChild = true;
                 secondChild = true;
-                
+
                 for(short j=0; j<hyppox::Config::FILTER; j++){
                     _start[j] = t_childLocations[i][j];
                     _len[j] = t_length[j]/2;
                     _end[j] = _start[j] + _len[j];
-                    
+
                     firstChild &= (_start[j]<=_dPos[j] && _dPos[j]<=_end[j]);
                     secondChild &= (_start[j]<=_cdPos[j] && _cdPos[j]<=_end[j]);
-                    
+
                     if(!firstChild&&!secondChild) break;
                 }
-                
+
                 if(firstChild) fci = i;
                 if(secondChild) sci = i;
-                
+
                 if(fci>=0 && sci>=0){
                     if(fci==sci){
                         return FindResolution(child, query, _start, _len);
@@ -614,28 +612,27 @@ namespace hyppox {
                 _dPos[j] = query2->getPosition(j);
             }
             
-            bool sameChild,firstChild, secondChild;
+            bool firstChild, secondChild;
             int fci=-1, sci=-1;
-            
+
             for(unsigned int i=0; i<(unsigned int)hyppox::Config::QUAD_TREE_CHILDREN; i++){
-                sameChild = true;
                 firstChild = true;
                 secondChild = true;
-                
+
                 for(short j=0; j<hyppox::Config::FILTER; j++){
                     _start[j] = t_childLocations[i][j];
                     _len[j] = t_length[j]/2;
                     _end[j] = _start[j] + _len[j];
-                    
+
                     firstChild &= (_start[j]<=_dPos[j] && _dPos[j]<=_end[j]);
                     secondChild &= (_start[j]<=_cdPos[j] && _cdPos[j]<=_end[j]);
-                    
+
                     if(!firstChild&&!secondChild) break;
                 }
-                
+
                 if(firstChild) fci = i;
                 if(secondChild) sci = i;
-                
+
                 if(fci>=0 && sci>=0){
                     if(fci==sci){
                         return FindResolution(query1, query2, _start, _len);

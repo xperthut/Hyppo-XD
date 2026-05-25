@@ -89,15 +89,15 @@ namespace hyppox {
         template <typename ClusterIDType>
         std::string ClusterInformation<ClusterIDType>::GetType(){
             std::string idList = "";
-            
-            for(short i=0; i<=this->type.size(); i++){
+
+            for(size_t i=0; i<this->type.size(); i++){
                 if(idList.length() > 0){
                     idList += ",";
                 }
-                
+
                 idList += this->type[i];
             }
-            
+
             return idList;
         }
         
@@ -135,7 +135,7 @@ namespace hyppox {
         
         template <typename ClusterIDType>
         void ClusterInformation<ClusterIDType>::UpdateType(short index, std::string ch){
-            if(index>=0 && index<this->type.size()){
+            if(index>=0 && static_cast<size_t>(index)<this->type.size()){
                 this->type[index] = ch;
             }
         }
@@ -174,14 +174,14 @@ namespace hyppox {
         
         template <typename ClusterIDType>
         bool ClusterInformation<ClusterIDType>::HasClusterID(ClusterIDType cID){
-            
-            for(short i=0; i<=this->clusterID.size(); i++){
-                
+
+            for(size_t i=0; i<this->clusterID.size(); i++){
+
                 if(this->clusterID[i] == cID){
                     return true;
                 }
             }
-            
+
             return false;
         }
         
@@ -214,7 +214,7 @@ namespace hyppox {
                 }
             }
             
-            if(index >= 0 && index <this->type.size()){
+            if(index >= 0 && static_cast<size_t>(index) < this->type.size()){
                 if(this->type[index].compare("C") == 0){
                     return (hyppox::Config::CORE_POINT_WEIGHT);
                 }else if(this->type[index].compare("P") == 0){

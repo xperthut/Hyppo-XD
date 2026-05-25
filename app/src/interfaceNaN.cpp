@@ -1,17 +1,14 @@
 #include <nan.h>
 #include <hyppox.h>
 
-using namespace v8;
-
+// AddonData holds per-addon-instance state and is cleaned up via an
+// environment cleanup hook so it is safe with context-aware (NAPI) loading.
 class AddonData {
  public:
-  explicit AddonData(Isolate* isolate):
-      call_count(0) {
-    // Ensure this per-addon-instance data is deleted at environment cleanup.
+  explicit AddonData(v8::Isolate* isolate) : call_count(0) {
     node::AddEnvironmentCleanupHook(isolate, DeleteInstance, this);
   }
 
-  // Per-addon data.
   int call_count;
 
   static void DeleteInstance(void* data) {
@@ -19,115 +16,98 @@ class AddonData {
   }
 };
 
-// For details reference, search here: https://v8docs.nodesource.com/node-12.0/index.html
-// v8 version: node -p process.versions.v8
-
+// ---------------------------------------------------------------------------
+// Main entry point called from JavaScript: addon.GetMessage(instruction, arg)
+// ---------------------------------------------------------------------------
 void GetMessage(const v8::FunctionCallbackInfo<v8::Value>& info) {
-  std::cout<<"In adons"<<std::endl;
   v8::Isolate* isolate = info.GetIsolate();
 
-  // Validate the number of arguments.
   if (info.Length() < 1) {
-    Nan::ThrowTypeError("Arity mismatch");
+    Nan::ThrowTypeError("Arity mismatch: expected at least 1 argument");
     return;
   }
 
-  // First argument is always an instruction string
-  //v8::Local<v8::String> tvs = v8::Local<v8::String>::Cast(info[0]);
-  v8::String::Utf8Value vs(isolate, info[0]); // take the string arg and convert it to v8::string
-  std::string str(*vs); // take the v8::string convert it to c++ class string
+  // First argument is always an instruction string.
+  v8::String::Utf8Value vs(isolate, info[0]);
+  if (*vs == nullptr) {
+    Nan::ThrowTypeError("First argument must be a string");
+    return;
+  }
+  std::string str(*vs);
 
-  // Variables for operation
   std::string s = "Invalid arguments";
   hyppox_interface::Hyppox_Interface hi;
 
-  /* Instruction codes are:
-      SQRT: compute squre root
-      RCSVH: Read the csv file headerNames
-      CCSVADD: Copy CSV file after adding the first row as index columns
-      CRTMAPR: Create mapper object
+  /* Instruction codes:
+      SQRT    – compute square root
+      RCSVH   – read CSV file header names
+      CCSVADD – (reserved) copy CSV file adding index column
+      CRTMAPR – create mapper object
   */
-  if(str.compare("SQRT")==0){
-    // Validate the type of the second argument.
+  if (str == "SQRT") {
     if (!info[1]->IsNumber()) {
-      Nan::ThrowTypeError("Argument must be a number");
+      Nan::ThrowTypeError("SQRT: second argument must be a number");
       return;
     }
-
-    // Get the number value of the first argument. A JavaScript `number` will be a `double` in C++.
-    //double arg = info[0]->NumberValue();
     int32_t arg = info[1]->Int32Value(Nan::GetCurrentContext()).FromJust();
     s = hi.getSrt(arg);
 
-  }else if(str.compare("RCSVH")==0){
-    // Validate the type of the second argument.
+  } else if (str == "RCSVH") {
     if (!info[1]->IsString()) {
-      Nan::ThrowTypeError("Argument must be a string");
+      Nan::ThrowTypeError("RCSVH: second argument must be a string (file path)");
       return;
     }
-
-    v8::String::Utf8Value tfnwp(isolate, info[1]); // take the string arg and convert it to v8::string
-    std::string fnwp(*tfnwp);
-
-    s = hi.getFileHeader(fnwp);
-  }else if(str.compare("CCSVADD")==0){
-
-  }else if(str.compare("CRTMAPR")==0){
-    // Validate the type of the second argument.
-    /*if (!info[1]->IsNumber()) {
-      Nan::ThrowTypeError("Argument must be a number");
+    v8::String::Utf8Value tfnwp(isolate, info[1]);
+    if (*tfnwp == nullptr) {
+      Nan::ThrowTypeError("RCSVH: could not read file path string");
       return;
-    }*/
+    }
+    s = hi.getFileHeader(std::string(*tfnwp));
 
+  } else if (str == "CCSVADD") {
+    // Reserved – not yet implemented.
+    s = "{}";
+
+  } else if (str == "CRTMAPR") {
     if (!info[1]->IsArray()) {
-      Nan::ThrowTypeError("Argument must be a number");
+      Nan::ThrowTypeError("CRTMAPR: second argument must be an array of parameters");
       return;
     }
 
     v8::Local<v8::Array> jsArr = v8::Local<v8::Array>::Cast(info[1]);
-
     std::vector<std::string> param;
-    //std::cout<<"Entering loop of length:"<<jsArr->Length()<<std::endl;
+    param.reserve(jsArr->Length());
+
     for (uint32_t i = 0; i < jsArr->Length(); i++) {
-      // For Node 10X
-      //v8::Local<v8::Value> jsElement = jsArr->Get(i);
       v8::Local<v8::Value> jsElement = Nan::Get(jsArr, i).ToLocalChecked();
-
-      v8::String::Utf8Value tps(isolate, jsElement); // take the string arg and convert it to v8::string
-      std::string ps(*tps);
-
-      std::cout<<ps<<std::endl;
-
-      param.push_back(ps);
+      v8::String::Utf8Value tps(isolate, jsElement);
+      if (*tps != nullptr) {
+        param.emplace_back(*tps);
+      }
     }
 
     s = hi.callHyppoX(param);
   }
 
-  v8::MaybeLocal<v8::String> retval = v8::String::NewFromUtf8(isolate, s.c_str(), v8::NewStringType::kNormal, static_cast<int>(s.length()));
+  v8::MaybeLocal<v8::String> retval = v8::String::NewFromUtf8(
+      isolate, s.c_str(), v8::NewStringType::kNormal,
+      static_cast<int>(s.length()));
 
-  // Set the return value.
   info.GetReturnValue().Set(retval.ToLocalChecked());
 }
 
-// Check https://nodejs.org/dist/latest-v12.x/docs/api/addons.html for correct syntex
-// Initialize this addon to be context-aware.
-NODE_MODULE_INIT(/*Local<Object> exports, Local<Value> module, Local<Context> context*/) {
-  Isolate* isolate = context->GetIsolate();
+// ---------------------------------------------------------------------------
+// Context-aware module initialisation (supports multi-context / worker threads)
+// ---------------------------------------------------------------------------
+NODE_MODULE_INIT() {
+  v8::Isolate* isolate = context->GetIsolate();
 
-  // Create a new instance of `AddonData` for this instance of the addon and
-  // tie its life cycle to that of the Node.js environment.
   AddonData* data = new AddonData(isolate);
 
-  // Wrap the data in a `v8::External` so we can pass it to the method we
-  // expose.
-  Local<External> external = External::New(isolate, data);
+  v8::Local<v8::External> external = v8::External::New(isolate, data);
 
-  // Expose the method `Method` to JavaScript, and make sure it receives the
-  // per-addon-instance data we created above by passing `external` as the
-  // third parameter to the `FunctionTemplate` constructor.
   exports->Set(context,
-               String::NewFromUtf8(isolate, "GetMessage").ToLocalChecked(),
-               FunctionTemplate::New(isolate, GetMessage, external)
-                  ->GetFunction(context).ToLocalChecked()).FromJust();
+               v8::String::NewFromUtf8(isolate, "GetMessage").ToLocalChecked(),
+               v8::FunctionTemplate::New(isolate, GetMessage, external)
+                   ->GetFunction(context).ToLocalChecked()).FromJust();
 }

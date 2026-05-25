@@ -45,13 +45,13 @@ namespace file_handler{
 
             short rCnt = 0;
             while(getline(fileReader, line)){
-              if(rCnt == 100) break;
+              if(rCnt >= 100) break;
 
               rows.push_back(line);
+              rCnt++;
             }
 
             fileReader.close();
-            std::cout<<"Total rows="<<rCnt<<std::endl;
           }else{
               line = "[\"Error to read file. Please check the file name and path.\"]";
           }
@@ -61,7 +61,6 @@ namespace file_handler{
       }
 
       if(header.length()>0 && rows.size()>0){
-        std::cout<<"Calling getHeaderWithColumns"<<std::endl;
         line = this->getHeaderWithColumns(header, rows);
       }
 
@@ -136,22 +135,13 @@ namespace file_handler{
           std::stod(s, &i);
 
           // i holds the number of characters that stod method can parse.
-          if(i==s.length()) return true;
-          else{
-            std::cout<<s<<"::"<<s.length()<<", "<<i<<std::endl;
-            return false;
-          }
-      }catch (const std::invalid_argument& e) {
-        //terminating with uncaught exception of type std::invalid_argument: stod: no conversion
-
-          std::cout<<"Error type=invalid_argument: "<<e.what()<<std::endl<<"Data:"<<s<<std::endl;
+          return (i == s.length());
+      }catch (const std::invalid_argument&) {
           return false;
-      }catch (std::exception &e) {
-          std::cout<<"Other: "<<e.what()<<std::endl<<"Data:"<<s<<std::endl;
+      }catch (const std::out_of_range&) {
           return false;
       }catch (...){
-        std::cout<<"unknown exception: "<<s<<std::endl;
-        return false;
+          return false;
       }
     }
 
@@ -222,7 +212,6 @@ namespace file_handler{
       this->getData(header, vHeader, true);
       std::vector<bool> numericHeader(vHeader.size(), true);
 
-      std::cout<<"first row"<<firstRow.size()<<std::endl;
 
       for(size_t i=0; i<firstRow.size(); i++){
         this->getRowData(firstRow[i], numericHeader);
@@ -231,7 +220,6 @@ namespace file_handler{
       line += (this->hasIndexColumn)?"true":"false";
       line += ", \"header\":[";
 
-      std::cout<<"Header size: "<<vHeader.size()<<std::endl;
       bool f=true;
       for(size_t i=0; i<vHeader.size(); i++){
         if(f) f = false;
@@ -241,7 +229,6 @@ namespace file_handler{
 
       line += "]}";
 
-      std::cout<<"Line="<<line<<std::endl;
 
       return line;
     }
@@ -255,14 +242,11 @@ namespace hyppox_interface{
     Hyppox_Interface()=default;
     ~Hyppox_Interface()=default;
 
-    std::string callHyppoX(const std::vector<std::string> argv){
+    std::string callHyppoX(const std::vector<std::string>& argv){
+      // new throws std::bad_alloc on failure — no null check needed.
       hyppox::HInterface* _hyppox = new hyppox::Hyppox();
-      if(_hyppox==nullptr){
-          std::cout<<"There has no enough memory"<<std::endl;
-      }
       std::string _p = _hyppox->getD3GraphObject(argv);
       delete _hyppox;
-
       return _p;
     }
 

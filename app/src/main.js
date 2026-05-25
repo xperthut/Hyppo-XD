@@ -70,13 +70,13 @@ app.on('activate', () => {
   }
 });
 
-// Async return: event.sender.send(data)
-// Synchronus return
-ipcMain.handle('get-window-size', (event, arg)=>{
+// IPC: synchronous screen-size query (called via ipcRenderer.sendSync)
+ipcMain.on('get-window-size', (event) => {
 	const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
-	event.returnValue= {'width':width, 'height':height};
+	event.returnValue = { width, height };
 });
 
-ipcMain.handle('get-parent', (event, arg)=>{
-	event.returnValue= win;
+// IPC: synchronous parent-window query (called via ipcRenderer.sendSync)
+ipcMain.on('get-parent', (event) => {
+	event.returnValue = win;
 });

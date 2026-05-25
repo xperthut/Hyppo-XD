@@ -1,68 +1,60 @@
 
 /* global d3, NodePieBuilder */
 
-const { isArray } = require('util');
-
 $(function () {
-    // Hash map class
-    // The idea has collected from: https://stackoverflow.com/questions/4246980/how-to-create-a-simple-map-using-javascript-jquery
+    /**
+     * Thin wrapper around the native ES6 Map that preserves the original
+     * HashMap API used throughout this file, while fixing the bugs in the
+     * hand-rolled version:
+     *   - entrys() was reading this.data[i] (numeric index) instead of
+     *     this.data[key], so it always returned undefined values.
+     *   - remove() set data[key]=null instead of deleting it, leaking memory.
+     *   - Array.prototype.remove does not exist natively; keys were never
+     *     actually removed from the key list.
+     */
     function HashMap() {
-        this.keys = new Array();
-        this.data = new Object();
+        this._map = new Map();
     }
 
     HashMap.prototype = {
         put: function (key, value) {
-            if (this.keys.indexOf(key) < 0) {
-                this.keys.push(key);
-            }
-
-            this.data[key] = value;
+            this._map.set(key, value);
         },
 
         get: function (key) {
-            if (this.keys.indexOf(key) < 0) return null;
-            return this.data[key];
+            return this._map.has(key) ? this._map.get(key) : null;
         },
 
         getKeys: function () {
-            return this.keys;
+            return Array.from(this._map.keys());
         },
 
         remove: function (key) {
-            this.keys.remove(key);
-            this.data[key] = null;
+            this._map.delete(key);
         },
 
         each: function (fn) {
-            if (typeof fn != 'function') {
-                return;
-            }
-            var len = this.keys.length;
-            for (var i = 0; i < len; i++) {
-                var k = this.keys[i];
-                fn(k, this.data[k], i);
-            }
+            if (typeof fn !== 'function') return;
+            var i = 0;
+            this._map.forEach(function (value, key) {
+                fn(key, value, i++);
+            });
         },
 
         entrys: function () {
-            var len = this.keys.length;
-            var entrys = new Array(len);
-            for (var i = 0; i < len; i++) {
-                entrys[i] = {
-                    key: this.keys[i],
-                    value: this.data[i]
-                };
-            }
-            return entrys;
+            var result = [];
+            this._map.forEach(function (value, key) {
+                result.push({ key: key, value: value });
+            });
+            return result;
         },
 
         isEmpty: function () {
-            return this.keys.length == 0;
+            return this._map.size === 0;
         },
 
         size: function () {
-            return this.keys.length;
+            return this._map.size;
         }
     };
 

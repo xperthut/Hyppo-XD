@@ -20,9 +20,9 @@
 #include <string>
 #include <math.h>
 
-#define MAX2(A, B) ((A>B)?A:B)
-#define MAX3(A, B, C) ((MAX2(A, B) > C)?MAX2(A, B):C)
-#define MIN2(A, B) (A>B?B:A)
+#define MAX2(A, B) (((A)>(B))?(A):(B))
+#define MAX3(A, B, C) ((MAX2(A, B) > (C))?MAX2(A, B):(C))
+#define MIN2(A, B) (((A)>(B))?(B):(A))
 
 namespace hyppox {
     class RGBCode{
@@ -150,15 +150,16 @@ namespace hyppox {
         int idx2;        // |
         float fractBetween = 0;  // Fraction between "idx1" and "idx2" where our value is.
         
-        //if(value <= 0)      {  idx1 = idx2 = 0;            }    // accounts for an input <=0
-        //else if(value >= 1)  {  idx1 = idx2 = NUM_COLORS-1; }    // accounts for an input >=0
-        //else
-        //{
-        value = value * (NUM_COLORS-1);        // Will multiply value by 3.
-        idx1  = floor(value);                  // Our desired color will be after this index.
-        idx2  = idx1+1;                        // ... and before this index (inclusive).
-        fractBetween = value - float(idx1);    // Distance between the two indexes (0-1).
-        //}
+        if(value <= 0.0f){
+            idx1 = idx2 = 0;                 // clamp to blue end
+        } else if(value >= 1.0f){
+            idx1 = idx2 = NUM_COLORS - 1;   // clamp to red end
+        } else {
+            value = value * (NUM_COLORS - 1);
+            idx1  = (int)floor(value);
+            idx2  = idx1 + 1;
+            fractBetween = value - float(idx1);
+        }
         
         *red   = 255*((color[idx2][0] - color[idx1][0])*fractBetween + color[idx1][0]);
         *green = 255*((color[idx2][1] - color[idx1][1])*fractBetween + color[idx1][1]);
@@ -243,7 +244,7 @@ namespace hyppox {
         
         std::string hexValue = "#" + DecimalToHexConverter((R-R%16)/16) + DecimalToHexConverter(R%16);
         hexValue += DecimalToHexConverter((G-G%16)/16) + DecimalToHexConverter(G%16);
-        hexValue += DecimalToHexConverter((B-G%16)/16) + DecimalToHexConverter(B%16);
+        hexValue += DecimalToHexConverter((B-B%16)/16) + DecimalToHexConverter(B%16);
         
         return hexValue;
     }

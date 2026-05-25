@@ -1,33 +1,25 @@
-<script>
-if(!navigator.onLine){
-  alert("No internet connection. Please connect to internet for smooth operation.");
-}
-setInterval(function(){
-  if(!navigator.onLine){
-    alert("No internet connection. Please connect to internet for smooth operation.");
-  }
-}, 3000);
-</script>
 <!DOCTYPE HTML>
 <html>
     <head>
         <title>Hyppo-XD</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta http-equiv="Content-Security-Policy" content="script-src * data: https://ssl.gstatic.com 'unsafe-inline' 'unsafe-eval';" />
-        <!--[if lte IE 8]><script src="./../assets/js/ie/html5shiv.js"></script><![endif]-->
+        <!--
+            CSP note: 'unsafe-inline' is required by D3 and jQuery for inline
+            event handlers and style manipulation. 'unsafe-eval' is required by
+            the Electron contextIsolation:false + nodeIntegration:true setup.
+            Tighten further if contextIsolation is enabled in the future.
+        -->
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com https://ssl.gstatic.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://use.fontawesome.com 'unsafe-inline'; font-src 'self' https://use.fontawesome.com data:; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com;" />
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" />
         <link rel="stylesheet" href="./../assets/css/main.css" />
         <link rel="stylesheet" href="./../assets/css/dropdown.css" />
         <link rel="stylesheet" href="./../assets/css/spectrum.css" />
         <link rel="shortcut icon" href="./../assets/logo.png"  />
-        <!--[if lte IE 8]><link rel="stylesheet" href="./../assets/css/ie8.css" /><![endif]-->
-        <!--[if lte IE 9]><link rel="stylesheet" href="./../assets/css/ie9.css" /><![endif]-->
-        <!--[if IE 8]><script src="./../assets/js/es5.js"></script><![endif]-->
         <link rel="stylesheet" href="./../assets/css/selectize.default.css" />
         <noscript><link rel="stylesheet" href="./../assets/css/noscript.css" /></noscript>
 
-        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <!-- Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178022652-1"></script>
         <script>
           window.dataLayer = window.dataLayer || [];
@@ -212,5 +204,23 @@ setInterval(function(){
         <script src="https://unpkg.com/d3-view@0.9.3/build/d3-view.js"></script>
         <script src="./../assets/js/d3/modal.js"></script>
         <script src="./../assets/js/d3/sankey.js"></script>
+
+        <script>
+          // Online-status check: placed here (after DOM is ready) so it can
+          // be cleared on unload. The interval id is stored so the browser
+          // can reclaim it when the window closes.
+          (function () {
+            function warnOffline() {
+              if (!navigator.onLine) {
+                alert("No internet connection. Some features may not work.");
+              }
+            }
+            warnOffline();
+            var _onlineCheckInterval = setInterval(warnOffline, 10000);
+            window.addEventListener('unload', function () {
+              clearInterval(_onlineCheckInterval);
+            });
+          }());
+        </script>
     </body>
 </html>

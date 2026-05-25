@@ -27,7 +27,10 @@
 #include <stdlib.h>
 #include <fstream>
 
-#define MIN2(A, B) (A>B?B:A)
+// MIN2 is also defined in RGBColor.h with the same semantics; guard to prevent redefinition.
+#ifndef MIN2
+#define MIN2(A, B) (((A)>(B))?(B):(A))
+#endif
 #define NOISE -1
 
 template<typename PerfType>
@@ -132,41 +135,40 @@ namespace hyppox {
             std::vector<ClusterType> value;
             this->performanceList[index]->getClusterValue(value);
 
-            std::vector<std::set<RowIDType> > s(hyppox::Config::CLUSTER);
+            std::vector<std::set<RowIDType>> s(hyppox::Config::CLUSTER);
 
-            // Get all points those are in L1 phenotypic distance of the point of index
+            // Get all points within L1 phenotypic distance of the point at index.
             for(short i=0; i<hyppox::Config::CLUSTER; i++){
                 s[i] = this->getAllPerformances(value, i);
             }
 
-            std::vector<RowIDType> *v = new std::vector<RowIDType>[hyppox::Config::CLUSTER];
+            // Use a vector-of-vectors instead of a raw array to avoid manual delete[].
+            std::vector<std::vector<RowIDType>> v(hyppox::Config::CLUSTER);
             RowIDType _max = 0;
 
-            // Copy the points to a vector for set operation
+            // Copy each set to a sorted vector for set_intersection.
             for(short i=0; i<hyppox::Config::CLUSTER; i++){
-                if(s[i].size()>0){
-                    v[i].insert(v[i].begin(), s[i].begin(), s[i].end());
-                    //sort(v[i].begin(), v[i].end());
-                    if(_max<s[i].size()) _max = s[i].size();
+                if(!s[i].empty()){
+                    v[i].assign(s[i].begin(), s[i].end());
+                    if(_max < static_cast<RowIDType>(s[i].size())) _max = static_cast<RowIDType>(s[i].size());
                     s[i].clear();
                 }
             }
 
-            // Perform set intersection to find the common set of points
+            // Perform set intersection to find the common set of points.
             vPoints.clear();
 
             if(hyppox::Config::CLUSTER==1){
-                vPoints.insert(vPoints.begin(), v[0].begin(), v[0].end());
+                vPoints.assign(v[0].begin(), v[0].end());
             }else{
                 vPoints.assign(_max, 0);
-                for(int i=0;i<hyppox::Config::CLUSTER; i++){
-                    if(v[i].size()>0){
+                for(int i=0; i<hyppox::Config::CLUSTER; i++){
+                    if(!v[i].empty()){
                         std::vector<RowIDType> tv(v[i]);
 
-                        for(int j=i+1;j<hyppox::Config::CLUSTER;j++){
-                            if(v[j].size()>0){
+                        for(int j=i+1; j<hyppox::Config::CLUSTER; j++){
+                            if(!v[j].empty()){
                                 std::set_intersection(tv.begin(), tv.end(), v[j].begin(), v[j].end(), vPoints.begin());
-
                                 tv = vPoints;
                             }
                         }
@@ -175,8 +177,6 @@ namespace hyppox {
                     }
                 }
             }
-
-            delete[] v;
 
             // Remove all item whose value is 0
             vPoints.erase(remove(vPoints.begin(), vPoints.end(), 0), vPoints.end());
@@ -273,24 +273,10 @@ namespace hyppox {
 
                 if(hyppox::Config::CLUSTER<=1){
                     std::sort(this->performanceList.begin(), this->performanceList.end(), comparePerf<PerfType>);
-
-                    /*for(RowIDType i=0; i<this->performanceList.size(); i++){
-                        if(this->performanceList[i]->getID()==207){
-                            std::cout<<"";
-                            break;
-                        }
-                    }*/
-                    //std::ofstream fp;
-                    //fp.open("/Users/methun/Sites/Data/tmp/clstst.csv", std::ios::out | std::ios::app);
-                    //this->computeSeedsForTesting(fp);
-                    //fp.close();
-
                     this->computeSeeds();
                 }else{
                     std::sort(this->performanceList.begin(), this->performanceList.end(), comparePID<PerfType>);
 
-                    /// This block for version 1
-                    /// Starts here
                     for(short i=0;i<hyppox::Config::CLUSTER;i++){
                         this->pIDMap[i].clear();
 
@@ -313,16 +299,6 @@ namespace hyppox {
 
                     this->prepareDistanceBasedDensityMatrix();
                 }
-                /// Ends here
-
-                // This block for version 2
-                //this->prepareDensityMatrix_version_2();
-
-                /*cout<<endl;
-                 for(auto itr=this->densityMatrix.begin(); itr!=this->densityMatrix.end(); itr++){
-                 cout<<itr->first<<"("<<itr->second.size()<<") ";
-                 }
-                 cout<<endl;*/
 
                 phList->clear();
 
@@ -331,8 +307,6 @@ namespace hyppox {
 
                 // Reassign the clustering performances
                 phList->insert(phList->begin(), this->performanceList.begin(), this->performanceList.end());
-
-                //std::cout<<"Cluster ID:"<<Cluster<PerfType,ClusterIDType>::GetClusterID()<<std::endl;
             }
         }
 
@@ -342,31 +316,11 @@ namespace hyppox {
             RowIDType clusterID = 0;
 
             for(RowIDType i=0; i<this->size; i++){
-
                 if(this->performanceList[i]->GetStatus() == false){
-
                     clusterID = Cluster<PerfType,ClusterIDType>::GetNextID();
-
                     this->ExpandCluster(i, clusterID);
-
                 }
             }
-
-            /*if(!this->setUniqueId){
-                cout<<endl;
-                for(size_t i=0; i<this->size; i++){
-
-                    vector<long> tmpIL;
-                    this->performanceList[i]->GetIDList(tmpIL);
-
-                    for(long _id:tmpIL){
-                        if(_id==77){
-                            cout<<this->performanceList[i]->getID()<<",";
-                        }
-                    }
-                }
-                cout<<endl;
-            }*/
         }
 
         // This method removes all points those are already clustered
@@ -427,14 +381,6 @@ namespace hyppox {
                     if(!this->setUniqueId){
                         this->performanceList[index]->SetType("C");
                     }
-
-                    /*if(this->setUniqueId){
-                        this->performanceList[index]->SetUniqueId(clusterID);
-                        this->performanceList[index]->SetStatus(true);
-                    }else{
-                        this->performanceList[index]->AddClusterID(clusterID);
-                        this->performanceList[index]->SetType("C");
-                    }*/
 
                     seeds.erase(index);
 
@@ -516,17 +462,12 @@ namespace hyppox {
                                 this->performanceList[currIndex]->SetType("C");
                             }
                         }else{
-                            /*if(this->performanceList[currIndex]->getID()==176274){
-                             cout<<"";
-                             }*/
                             if(!this->setUniqueId){
                                 this->performanceList[currIndex]->SetType("P");
                             }
                         }
 
                         seeds.erase(currIndex);
-
-                        //results.clear();
                     }
                 }
             }else{
@@ -588,9 +529,6 @@ namespace hyppox {
                                 }
                             }
                         }else{
-                            /*if(this->performanceList[currIndex]->getID()==176274){
-                             cout<<"";
-                             }*/
                             if(!this->setUniqueId){
                                 this->performanceList[currIndex]->SetType("P");
                             }
@@ -785,37 +723,6 @@ namespace hyppox {
 
                 this->phSeedMap.insert(std::make_pair(i, std::make_pair(tmpLeft, tmpRight)));
             }
-
-            /*for(RowIDType i=0; i<this->size; i++){
-                ptValue = this->performanceList[i]->getClusterValue(0);
-
-                /////////////////////////////////
-                tmpLeft = i; tmpRight = i;
-                while(tmpLeft>0){
-                    dist = ptValue -this->performanceList[tmpLeft]->getClusterValue(0);
-                    if(dist>this->Eps){tmpLeft++; break;}
-                    tmpLeft--;
-
-                    // Special case to handle non-signed number
-                    if(tmpLeft==0){
-                        dist = ptValue -this->performanceList[tmpLeft]->getClusterValue(0);
-                        if(dist>this->Eps) tmpLeft++;
-
-                        break;
-                    }
-                }
-
-                // Checking right limit
-                while(tmpRight<this->size){
-                    dist = this->performanceList[tmpRight]->getClusterValue(0)-ptValue;
-                    if(dist>this->Eps)break;
-                    tmpRight++;
-                }
-                tmpRight--;
-                ////////////////////////
-
-                this->phSeedMap.insert(std::make_pair(i, std::make_pair(tmpLeft, tmpRight)));
-            }*/
         }
 
         template<typename PerfType, typename ClusterIDType, typename RowIDType, typename ClusterType>
