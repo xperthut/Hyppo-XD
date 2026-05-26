@@ -14,6 +14,12 @@ let win;
 const remote = require('@electron/remote/main');
 remote.initialize();
 
+// Resolve app icons.
+// .icns   — used by BrowserWindow on macOS (title-bar / taskbar on other OSes).
+// .png    — required by app.dock.setIcon() and Linux/Windows BrowserWindow.
+const iconIcns = path.join(__dirname, '..', 'logo', 'icon.icns');
+const iconPng  = path.join(__dirname, '..', 'logo', '1024x1024.png');
+
 // Enable @electron/remote for every WebContents that is created — including
 // child BrowserWindows opened from the renderer via remote.BrowserWindow.
 // This must be registered before any window is created so the event fires
@@ -24,13 +30,12 @@ app.on('web-contents-created', (_event, webContents) => {
 
 function createWindow () {
 	const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
-	console.log("Icon path:" + path.resolve(path.join(".","logo", "Icon.icns")));
 
   // Create the browser window.
   win = new BrowserWindow({
     width: width,
     height: height,
-    icon: path.resolve(path.join(".","logo", "Icon.icns")),
+    icon: process.platform === 'darwin' ? iconIcns : iconPng,
     webPreferences: {
 			//sandbox: true,
 			nodeIntegration: true,
@@ -58,7 +63,14 @@ function createWindow () {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 //app.on('ready', createWindow);
-app.whenReady().then(createWindow)
+app.whenReady().then(() => {
+  // Set the macOS dock icon to the app icon (Electron shows its own icon
+  // during development otherwise).
+  if (process.platform === 'darwin' && app.dock) {
+    app.dock.setIcon(iconPng);
+  }
+  createWindow();
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
