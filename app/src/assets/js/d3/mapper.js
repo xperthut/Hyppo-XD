@@ -34,17 +34,29 @@ $(function () {
         $("#btnWrkSpace").html("Change working directory");
         $("#lblWrkSpace").html("Selected working directory: <strong>" + this.workspace.wd + "</strong>");
         $("#fsFileSelect").css("display", "block");
-        $("#fsLabel").html("Selected an input csv file from: <strong>" +
+        $("#fsLabel").html(
+          "Selected an input csv file from: <strong>" +
           _common.getPath([this.workspace.wd,"Data","csv"]) +
-          "</strong>. If there has no csv file then place your csv file in this location first then click on the button <strong>Choose a csv file</strong>. " +
-          "Make the csv file <strong>correct formated</strong> to get proper mapper object. " +
-          "Correct formats are as follows: <strong id='shCF'>show</strong><script>" +
-            "$(\"#shCF\").click(function(){if($(this).html()===\"show\"){$(this).html(\"hide\");$(\".showhide\").show(1000);}else{$(this).html(\"show\");$(\".showhide\").hide(1000);}});" +
-          "</script>");
+          "</strong>. If there are no csv files, place your csv file in that location first, then click " +
+          "<strong>Choose a csv file</strong>. Make the csv file " +
+          "<strong>correctly formatted</strong> to get a proper mapper object. " +
+          "Correct formats are as follows: <strong id='shCF'>show</strong>"
+        );
 
-          this.loadAllCsvFiles();
-          this.loadAllJsonFiles();
-          _logger.addLog("mapper.js reload Done");
+        // Attach show/hide toggle via event delegation (no inline <script> needed)
+        $(document).off("click.shcf", "#shCF").on("click.shcf", "#shCF", function(){
+          if($(this).html() === "show"){
+            $(this).html("hide");
+            $(".showhide").show(1000);
+          } else {
+            $(this).html("show");
+            $(".showhide").hide(1000);
+          }
+        });
+
+        this.loadAllCsvFiles();
+        this.loadAllJsonFiles();
+        _logger.addLog("mapper.js reload Done");
       }
     },
 
@@ -169,7 +181,6 @@ $(function () {
       }
 
       if(!ff){
-        console.log(_common.getPath([__dirname, "dummy","Sample.csv"]));
         this.workspace.files.push({csv:"Sample.csv", col:{index:true, header:[], dt:new Date().toString()}, json:[]});
         //this._fs.writeFileSync(_common.getPath([__dirname, "wp.sp"]), JSON.stringify(this.workspace), 'utf8');
 
@@ -270,14 +281,14 @@ $(function () {
             if(this.workspace.files[i].json.indexOf(this._path.basename(ofn))===-1){
               this.workspace.files[i].json.push(this._path.basename(ofn));
             }
-
             break;
           }
         }
 
-        this._fs.writeFileSync(_common.getPath([__dirname,"wp.sp"]), JSON.stringify(this.workspace));
+        // Use the shared abstraction instead of writing wp.sp directly
+        _common.saveWorkSpace(this.workspace);
       }catch(err){
-        console.log("Error to write data at storeData: " + err.message);
+        _logger.addLog("Error in storeData: " + err.message);
       }
     },
 
@@ -517,7 +528,7 @@ $(function () {
       fName += ".json";
 
       var chkFN = _common.getPath([this.workspace.wd,"Data", "json", this.fileName.split(".")[0], fName]);
-      console.log(chkFN);
+      _logger.addLog("createMapper target: " + chkFN);
       _logger.addLog(param);
 
       if(this._fs.existsSync(chkFN)){
@@ -611,7 +622,6 @@ $(function () {
       _logger.addLog("mapper.js getPieAttributes");
       var s = "<div class='ddiv' id='pieDiv'><label>Select attributes for pie chart</label>" +
               "<select id='pie-select-state' multiple name='state[]' class='demo-default' style='width:50%'>";
-              console.log("total cols: " + this.colNames.length);
       for(var i=0; i<this.colNames.length; i++){
         s += "<option value='" + this.colIndex[i] + "'>" + this.colNames[i] + "</option>";
       }
@@ -781,8 +791,7 @@ $(function () {
     _logger.addLog("mapper.js Workspace select button pressed");
     const {dialog} = require('@electron/remote');
     dialog.showOpenDialog({
-          properties: ['openDirectory'],
-          createDirectory: true
+          properties: ['openDirectory', 'createDirectory']
       }).
       then(result=>{
         if(result.filePaths.length>0){
@@ -955,7 +964,6 @@ $(function () {
     const {dialog, nativeImage} = require('@electron/remote');
     const path = require('path');
 
-    console.log(path.join(__dirname, 'Icon.png'));
     let nativeIcon = nativeImage.createFromPath(path.join(__dirname, 'Icon.png'));
     nativeIcon = nativeIcon.resize({ width: 16, height: 16 });
     //const tray = new Tray(trayIcon);
@@ -991,9 +999,7 @@ $(function () {
          icon: nativeIcon
        };
 
-       dialog.showMessageBox(options,(response) => {
-          console.log(response);
-      });
+       dialog.showMessageBox(options);
     }
 
     hideBusyIndicator();

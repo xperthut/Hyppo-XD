@@ -5,6 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "start": "ELECTRON_RUN_AS_NODE= electron .",
+    "postinstall": "patch-package",
     "rebuild": "electron-rebuild -f -w Hyppo-XD",
     "clean": "node-gyp clean && rm -rf release* bin/ src/view/wp.sp src/view/tmp.sp",
     "clean-win": "node-gyp clean && DEL /S/Q src\\view\\wp.sp src\\view\\tmp.sp && RD /S/Q bin release-builds",
@@ -27,7 +28,7 @@
     "type": "git",
     "url": "git+https://github.com/xperthut/Hyppo-XD.git"
   },
-  "author": "Methun",
+  "author": "Methun Kamruzzaman",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/xperthut/Hyppo-XD/issues"
@@ -42,16 +43,17 @@
     "nan": "^2.16.0"
   },
   "devDependencies": {
-    "asar": "^2.1.0",
+    "@electron/rebuild": "^3.7.2",
+    "asar": "^3.2.0",
     "csv-parser": "^2.3.5",
-    "electron": "^19.0.6",
+    "electron": "^42.2.0",
     "electron-installer-debian": "^3.1.0",
     "electron-installer-dmg": "^3.0.0",
     "electron-installer-windows": "^3.0.0",
-    "electron-packager": "^13.1.1",
-    "electron-rebuild": "^3.2.7",
+    "electron-packager": "^17.1.2",
     "node-abi": "^2.21.0",
-    "node-gyp": "^10.3.1",
+    "node-gyp": "^12.3.0",
+    "patch-package": "^8.0.1",
     "rebuild": "^0.1.2"
   },
   "gypfile": true,

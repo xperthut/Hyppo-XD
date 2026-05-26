@@ -58,6 +58,10 @@ $(function () {
         }
     };
 
+    // Child BrowserWindow used by loadMapperWindow(); declared here so all
+    // prototype methods share the same reference without polluting the global scope.
+    var cWin = null;
+
     // Graph management class
     function Graph() {
         this._electron = require('electron');
@@ -215,29 +219,11 @@ $(function () {
                         }
 
                         for (var j = 0; j < _jList.length; j++) {
-                            if (_jList[j].substring(0, 6) != "coord_" && (_jList[j].indexOf('.json') >= 0 || _jList[j].indexOf('.JSON') >= 0)) {
+                            if (_jList[j].substring(0, 6) !== "coord_" && (_jList[j].indexOf('.json') >= 0 || _jList[j].indexOf('.JSON') >= 0)) {
                                 if (csvIndex > -1 && this.workspace.files[csvIndex].json.indexOf(_jList[j]) === -1) {
                                     this.workspace.files[csvIndex].json.push(_jList[j]);
                                 }
-
                                 _f.files.push(_jList[j]);
-
-                                /*var fjson = _jList[j].split("__")[0];
-                                if(_f.files.length === 0) _f.files.push(_jList[j]);
-                                else {
-                                  var m=false;
-                                  for(var k=0; k<_f.files.length; k++){
-                                    if(_f.files.sj === fjson){
-                                      _f.files.lj.push(_jList[j]);
-                                      m = true;
-                                      break;
-                                    }
-                                  }
-
-                                  if(!m){
-                                    _f.files.push({sj:fjson, lj:[_jList[j]]});
-                                  }
-                                }*/
                             }
                         }
 
@@ -318,7 +304,6 @@ $(function () {
 
         initPage: function (gData) {
             _logger.addLog("graph.js initPage");
-            console.log("Call initPage");
             this.fileName = gInstance.jfl[gInstance.fileRIndex].files[gInstance.fileCIndex];
             this.zoom_handler(this.svg);
             this.zoom_handler.scaleExtent([1 / 50, 50])
@@ -506,7 +491,7 @@ $(function () {
                 context.drawImage(image, 0, 0);
                 var canvasdata = canvas.toDataURL("image/png", 1.0);
 
-                d3.select("canvasdata_save").remove();
+                d3.select("#canvasdata_save").remove();
                 var a = document.createElement("a");
                 a.download = "sample_" + (new Date().getTime()) + ".png";
                 a.href = canvasdata;
@@ -554,7 +539,7 @@ $(function () {
         // Show only flare edges
         showIFs: function () {
             _logger.addLog("graph.js showIFs");
-            if ($(this).prop("checked") === true) {
+            if (this.checked) {
                 var activeFlares = 0;
                 gInstance.hideIFRank = [];
 
@@ -573,11 +558,6 @@ $(function () {
                         });
                 }
 
-
-                // Checked all interesting paths
-                /*for (var i = 0; i < gInstance.intFlareRank.length; i++) {
-                 $("#if_" + gInstance.intFlareRank[i]).prop("checked", true);
-                 }*/
 
                 gInstance._nodeData = [];
                 gInstance._linkData = [];
@@ -608,22 +588,16 @@ $(function () {
                             thr.push(i);
                     }
 
-                    // Remove link which has no FR
+                    // Remove links that have no remaining FR ranks.
+                    // Use filter so index shifting after each splice is never an issue.
                     if (thr.length > 0) {
-                        for (var i = 0; i < thr.length; i++) {
-                            gInstance._linkData.splice(thr[i], 1);
-                        }
+                        var thrSet = {};
+                        for (var i = 0; i < thr.length; i++) { thrSet[thr[i]] = true; }
+                        gInstance._linkData = gInstance._linkData.filter(function(_, idx) {
+                            return !thrSet[idx];
+                        });
                     }
                 }
-
-                /*for (var i = 0; i < gInstance._linkData.length; i++) {
-                    if (_nid.indexOf((gInstance._graph.links[i].source.Id) ? gInstance._graph.links[i].source.Id : gInstance._graph.links[i].source) === -1) {
-                        _nid.push((gInstance._graph.links[i].source.Id) ? gInstance._graph.links[i].source.Id : gInstance._graph.links[i].source);
-                    }
-                    if (_nid.indexOf((gInstance._graph.links[i].target.Id) ? gInstance._graph.links[i].target.Id : gInstance._graph.links[i].target) === -1) {
-                        _nid.push((gInstance._graph.links[i].target.Id) ? gInstance._graph.links[i].target.Id : gInstance._graph.links[i].target);
-                    }
-                }*/
 
                 for (var i = 0; i < gInstance._linkData.length; i++) {
                     if (_nid.indexOf((gInstance._linkData[i].source.Id) ? gInstance._linkData[i].source.Id : gInstance._linkData[i].source) === -1) {
@@ -810,23 +784,6 @@ $(function () {
                     if (gInstance.hideIFRank.indexOf(c) === -1)
                         gInstance.hideIFRank.push(c);
 
-                    // remove link
-                    /*var dc = [];
-                     for (var i = 0; i < gInstance._linkData.length; i++) {
-                     if (gInstance._linkData[i].FR.indexOf(c) >= 0) {
-                     // Delete the link if it contains only one rank other wise remove this rank from the list
-                     if (gInstance._linkData[i].FR.length === 1)
-                     dc.push(i);
-                     else
-                     gInstance._linkData[i].FR.splice(gInstance._linkData[i].FR.indexOf(c) - 1);
-                     }
-                     }
-
-                     for (var i = 0, j = 0; i < dc.length; i++, j++) {
-                     gInstance._linkData.splice(dc[i] - j, 1);
-                     }*/
-
-
                 }
 
                 if (gInstance.hideIFRank.length > 0) {
@@ -843,9 +800,14 @@ $(function () {
                     }
                 }
 
-                // Remove links which has either rank=0 or rank={unselected rank set}
-                for (var i = 0; i < nfs.length; i++) {
-                    gInstance._linkData.splice(nfs[i], 1);
+                // Remove links with rank=0 or belonging only to unselected rank sets.
+                // Build a set for O(1) lookup so filter is safe against index shifting.
+                if (nfs.length > 0) {
+                    var nfsSet = {};
+                    for (var i = 0; i < nfs.length; i++) { nfsSet[nfs[i]] = true; }
+                    gInstance._linkData = gInstance._linkData.filter(function(_, idx) {
+                        return !nfsSet[idx];
+                    });
                 }
 
                 for (var i = 0; i < gInstance._linkData.length; i++) {
@@ -951,8 +913,8 @@ $(function () {
             $(".flare_legend").html(s);
 
             for (var i = 0; i < this.intFlareRank.length; i++) {
-                $("#f_color_" + this.intFlareRank[i]).spectrum({ color: pc_map.get(this.intFlareRank[i]) });
                 $("#f_color_" + this.intFlareRank[i]).spectrum({
+                    color: pc_map.get(this.intFlareRank[i]),
                     change: function (c) {
                         gInstance.changeFlarecolor(this, c.toHexString());
                     }
@@ -989,10 +951,7 @@ $(function () {
 
         showHidePattern: function () {
             _logger.addLog("graph.js showHidePattern");
-            gInstance.piePattern = false;
-            if ($(this).prop("checked") === true) {
-                gInstance.piePattern = true;
-            }
+            gInstance.piePattern = this.checked;
 
             if (gInstance.dpie) {
                 gInstance.drawPie();
@@ -1027,8 +986,8 @@ $(function () {
             $(".pattern").html("<li><input type='checkbox' name='pattern' id='pattern' /><label class='fa' for='pattern'>Show as a pattern</label></li>");
 
             for (var i = 0; i < gInstance._graph.indv.length; i++) {
-                $("#fcolor_" + (i + 1)).spectrum({ color: gInstance._graph.color[i] });
                 $("#fcolor_" + (i + 1)).spectrum({
+                    color: gInstance._graph.color[i],
                     change: function (c) {
                         gInstance.changeIndvcolor(this, c.toHexString());
                     }
@@ -1043,25 +1002,25 @@ $(function () {
         },
 
         getFontColor: function (d, i) {
-            //_logger.addLog("graph.js getFontColor");
-            var c = d.Color[i];
+            var c = d.Color[i]; // hex string, e.g. "#a4ff00"
 
             if (gInstance.grayNode) {
                 c = gInstance.convertToGrayScale(d.Color[i]);
-                var a = parseInt("" + c[1] + c[2]);
-                if (a < 90)
-                    return "#fff";
-                return "black";
+                // Parse the gray component (chars 1-2) as hex so dark nodes get white text
+                var grayVal = parseInt(c[1] + c[2], 16);
+                return (grayVal < 90) ? "#fff" : "black";
             }
 
+            // Blue channel is 0xff → very bright blue; dark red/green → use yellow for contrast
             if (c[5] === 'f' && c[6] === 'f') {
                 if (c[1] === '0' && c[2] <= '6' && c[3] <= '8')
                     return "yellow";
             }
 
+            // Red channel 0xff, green channel low, blue channel 0x00 → dark green → use dark text
             if (c[3] <= '8' && c[5] === '0' && c[6] === '0') {
                 if (c[1] === 'f' && c[2] === 'f')
-                    return "dark gray";
+                    return "darkgray"; // was "dark gray" — not a valid CSS color name
             }
             return "black";
         },
@@ -1081,11 +1040,13 @@ $(function () {
 
         grayScaleNode: function () {
             _logger.addLog("graph.js grayScaleNode");
-            gInstance.grayNode = false;
+            gInstance.grayNode = this.checked;
 
-            if ($(this).prop("checked") === true)
-                gInstance.grayNode = true;
-
+            if (gInstance.dpie) {
+                gInstance.drawPie();
+            } else {
+                gInstance.draw(gInstance.labelIndex);
+            }
         },
 
         changeNodeColor: function (index, e) {
@@ -1154,7 +1115,7 @@ $(function () {
                     $("#color_bar").css("display", "block");
                 }
             } else {
-                console.log(_path + " not found.");
+                _logger.addLog("getNodeCoordinate: coord file not found at " + _path);
             }
             //(err, data) => {
             /*if (err){
@@ -1170,7 +1131,6 @@ $(function () {
                   }
               });
             }
-            //console.log(data);
           });*/
         },
 
@@ -1191,6 +1151,7 @@ $(function () {
         },
 
         clickGetCoordinates: function () {
+
             _logger.addLog("graph.js clickGetCoordinates");
             gInstance.selectButton("other-btn", $(this));
             gInstance.getCoordinates();
@@ -1300,10 +1261,9 @@ $(function () {
             });*/
 
             //w=pos[pos.length - 1][0] - pos[0][0];
-            if (d3.selectAll("#legends")) {
-                d3.selectAll("#legends").remove();
-                d3.selectAll("linearGradient").remove();
-            }
+            // .remove() on an empty selection is a no-op, so no guard needed.
+            d3.selectAll("#legends").remove();
+            d3.selectAll("linearGradient").remove();
             var _g = gInstance.svg.append("g").attr("id", "legends");
 
             var legend = gInstance.marker
@@ -1335,9 +1295,8 @@ $(function () {
                 _tickValues.push(posC[i][2]);
             }
 
-            //var extent = d3.extent(_tickValues),
-            _dom = [posC[posC.length - 1][2] + 1],
-                _rng = [w];
+            var _dom = [posC[posC.length - 1][2] + 1];
+            var _rng = [w];
 
             for (var i = posC.length - 1; i >= 0; i -= _step) {
                 _dom.push(posC[i][2]); // Node value
@@ -1419,7 +1378,7 @@ $(function () {
             }
 
             var s = "<select id='pie-select-state' multiple name='state[]' class='demo-default' style='width:100%'>";
-            console.log("total cols: " + colNames.length);
+            _logger.addLog("total cols: " + colNames.length);
             for (var i = 0; i < colNames.length; i++) {
                 if (this.fnParam.pie.length > 0 && this.fnParam.pie.indexOf(parseInt(colIndex[i])) > -1) {
                     s += "<option value='" + colIndex[i] + "' selected>" + colNames[i] + "</option>";
@@ -1453,7 +1412,7 @@ $(function () {
             }
 
             var s = "<select id='mem-select-state' multiple name='state[]' class='demo-default' style='width:100%'>";
-            console.log("total cols: " + colNames.length);
+            _logger.addLog("total cols: " + colNames.length);
             for (var i = 0; i < colNames.length; i++) {
                 if (this.fnParam.mem.length > 0 && this.fnParam.mem.indexOf(parseInt(colIndex[i])) > -1) {
                     s += "<option value='" + colIndex[i] + "' selected>" + colNames[i] + "</option>";
@@ -1489,11 +1448,8 @@ $(function () {
 
 
             for (var i = 0; i < label.length; i++) {
-                label[i] = label[i].replace(".", "_");
-                label[i] = label[i].replace(" ", "_");
-                label[i] = label[i].replace("+", "_");
-                label[i] = label[i].replace("-", "_");
-                label[i] = label[i].replace("$", "_");
+                // Replace all special characters with underscores (global flag required)
+                label[i] = label[i].replace(/[. +\-$]/g, "_");
             }
 
             this.hasPieChart = false;
@@ -1505,9 +1461,8 @@ $(function () {
 
             this.hasMemberShip = (this._graph.param.mem.length > 0);
 
-
-            for (var l in label) {
-                s += "<button id='btn_" + label[l] + "' seq='" + l + "'>" + label[l].replace("_", " ") + "</button>&nbsp;";
+            for (var l = 0; l < label.length; l++) {
+                s += "<button id='btn_" + label[l] + "' seq='" + l + "'>" + label[l].replace(/_/g, " ") + "</button>&nbsp;";
             }
             $("#attr-btn").html(s + "</div><div style='clear:left;float:left'>" +
                 "<input type='checkbox' class='gsn-select' id='grayScaleNode' /><label class='fa' for='grayScaleNode'>Show in gray scale</label>" +
@@ -1542,8 +1497,8 @@ $(function () {
             d3.select("#save_image").style("color", "wheat").on("click", gInstance.saveImage);
             d3.select("#btn_Pie").style("color", "wheat").on("click", gInstance.createPieColorLegend);
 
-            for (var l in label) {
-                if (parseInt(l) === 0) {
+            for (var l = 0; l < label.length; l++) {
+                if (l === 0) {
                     $("#btn_" + label[l]).addClass("button_bc");
                 }
                 $("#btn_" + label[l]).css("color", "wheat").on("click", function () {
@@ -1555,7 +1510,7 @@ $(function () {
             d3.select("#get_coord").style("color", "wheat").on("click", gInstance.clickGetCoordinates);
             d3.select("#set_coord").style("color", "wheat").on("click", gInstance.setCoordinates);
             d3.select("#set_color").style("color", "wheat").on("click", gInstance.saveColors);
-            if (d3.select("#color_bar")) d3.select("#color_bar").style("color", "wheat").on("click", gInstance.createColorBar);
+            d3.select("#color_bar").style("color", "wheat").on("click", gInstance.createColorBar);
             d3.select("#node_analysis").style("color", "wheat").on("click", gInstance.analyzeNodes);
             d3.select("#wdtf-btn").style("color", "wheat").on("click", gInstance.writeDataToFile);
             d3.select("#clearNIDs").style("color", "wheat").on("click", gInstance.removeSelection);
@@ -1570,13 +1525,6 @@ $(function () {
 
             $("#colDropdown ul.items").html(s);
             $(".attr-select").on("click", function () {
-                var val = $(this).attr('seq');
-
-                if ($("ancb_" + val).prop("checked") === true)
-                    $("ancb_" + val).prop("checked", false);
-                else
-                    $("ancb_" + val).prop("checked", true);
-
                 gInstance.adjustSelectedAttr();
             });
 
@@ -1660,9 +1608,9 @@ $(function () {
             }
             */
 
-            // Get the header list  and create file name using that List
-            // If file alread exists then pull it otherwise run mapper
-            _header_names = [];
+            // Get the header list and create file name using that list.
+            // If the file already exists, pull it; otherwise run mapper.
+            var _header_names = [];
             for (var i = 0; i < this.workspace.files.length; i++) {
                 if (this.workspace.files[i].csv === this.fl[this.fileIndex]) {
                     _header_names = this.workspace.files[i].col.header;
@@ -1809,7 +1757,7 @@ $(function () {
             fName += ".json";
 
             var chkFN = _common.getPath([this.workspace.wd, "Data", "json", this.fileName.split(".")[0], fName]);
-            console.log(chkFN);
+            _logger.addLog("createMapper target: " + chkFN);
             _logger.addLog(param);
 
             if (this._fs.existsSync(chkFN)) {
@@ -1829,7 +1777,7 @@ $(function () {
             try {
                 this._fs.writeFileSync(_common.getPath([__dirname, "tmp.sp"]), JSON.stringify([{ 'csv': this.fl[this.fileIndex], 'json': this._path.basename(ofn) }]));
             } catch (err) {
-                console.log("Error to write data at storeData: " + err.message);
+                _logger.addLog("Error in storeData: " + err.message);
             }
         },
 
@@ -1918,10 +1866,7 @@ $(function () {
 
         showEdgeArrow: function () {
             _logger.addLog("graph.js showEdgeArrow");
-            gInstance.shEdgeArrow = false;
-            if ($(this).prop("checked") === true) {
-                gInstance.shEdgeArrow = true;
-            }
+            gInstance.shEdgeArrow = this.checked;
 
             if (gInstance.dpie) {
                 gInstance.drawPie();
@@ -1932,10 +1877,9 @@ $(function () {
 
         showEdgeRank: function () {
             _logger.addLog("graph.js showEdgeRank");
-            gInstance.shEdgeRank = false;
+            gInstance.shEdgeRank = this.checked;
             gInstance.shEdgeSig = false;
-            if ($(this).prop("checked") === true) {
-                gInstance.shEdgeRank = true;
+            if (this.checked) {
                 $("#eSig").prop("checked", false);
             }
 
@@ -1948,10 +1892,9 @@ $(function () {
 
         showEdgeSig: function () {
             _logger.addLog("graph.js showEdgeSig");
-            gInstance.shEdgeSig = false;
+            gInstance.shEdgeSig = this.checked;
             gInstance.shEdgeRank = false;
-            if ($(this).prop("checked") === true) {
-                gInstance.shEdgeSig = true;
+            if (this.checked) {
                 $("#eRank").prop("checked", false);
             }
 
@@ -1992,7 +1935,7 @@ $(function () {
 
         showAllEdges: function () {
             _logger.addLog("graph.js showAllEdges");
-            if ($(this).prop("checked") === true) {
+            if (this.checked) {
                 $("#ips").prop("checked", false);
             }
 
@@ -2008,7 +1951,7 @@ $(function () {
 
         showIPs: function () {
             _logger.addLog("graph.js showIPs");
-            if ($(this).prop("checked") === true) {
+            if (this.checked) {
                 $("#sa").prop("checked", false);
             }
 
@@ -2279,8 +2222,8 @@ $(function () {
 
                 gInstance.csvData = data;
                 for (var i = 0; i < data.length; i++) {
-                    var _id = Number(eval("data[i]." + "pID"));
-                    var _cov = eval("data[i]." + "PlantID");
+                    var _id = Number(data[i].pID);
+                    var _cov = data[i].PlantID;
                     if (rawIDs.includes(_id)) {
                         if (!_data.includes(_cov)) {
                             _data.push(_cov);
@@ -2292,8 +2235,8 @@ $(function () {
 
             if (_data.length === 0 && gInstance.csvData !== null) {
                 for (var i = 0; i < gInstance.csvData.length; i++) {
-                    var _id = Number(eval("gInstance.csvData[i]." + "pID"));
-                    var _cov = eval("gInstance.csvData[i]." + "PlantID");
+                    var _id = Number(gInstance.csvData[i].pID);
+                    var _cov = gInstance.csvData[i].PlantID;
                     if (rawIDs.includes(_id)) {
                         if (!_data.includes(_cov)) {
                             _data.push(_cov);
@@ -2307,16 +2250,13 @@ $(function () {
 
         nodeAnalysis: function () {
             _logger.addLog("graph.js nodeAnalysis");
-            var _l = $("#txtPA").val();
+            var _l = $("#txtPA").val().trim();
             if (_l.toUpperCase() === 'ALL') {
-                _l = "";
-                for (var i = 1; i <= gInstance.totalpaths; i++) {
-                    if (_l.length > 0)
-                        _l += ",";
-                    _l += i;
-                }
+                var parts = [];
+                for (var i = 1; i <= gInstance.totalpaths; i++) { parts.push(i); }
+                _l = parts.join(",");
             }
-            var IP_ids = eval("[" + _l + "]");
+            var IP_ids = _l.split(",").map(function(x){ return parseInt(x.trim(), 10); }).filter(function(n){ return !isNaN(n); });
             if (IP_ids.length === 0)
                 return false;
 
@@ -2355,16 +2295,13 @@ $(function () {
 
         pathAnalysis: function () {
             _logger.addLog("graph.js pathAnalysis");
-            var _l = $("#txtPA").val();
+            var _l = $("#txtPA").val().trim();
             if (_l.toUpperCase() === 'ALL') {
-                _l = "";
-                for (var i = 1; i <= gInstance.totalpaths; i++) {
-                    if (_l.length > 0)
-                        _l += ",";
-                    _l += i;
-                }
+                var parts = [];
+                for (var i = 1; i <= gInstance.totalpaths; i++) { parts.push(i); }
+                _l = parts.join(",");
             }
-            var IP_ids = eval("[" + _l + "]");
+            var IP_ids = _l.split(",").map(function(x){ return parseInt(x.trim(), 10); }).filter(function(n){ return !isNaN(n); });
             if (IP_ids.length === 0)
                 return false;
 
@@ -2455,8 +2392,8 @@ $(function () {
             $(".path_legend").html(s);
 
             for (var i = 0; i < this.intPathRank.length; i++) {
-                $("#color_" + this.intPathRank[i]).spectrum({ color: pc_map.get(this.intPathRank[i]) });
                 $("#color_" + this.intPathRank[i]).spectrum({
+                    color: pc_map.get(this.intPathRank[i]),
                     change: function (c) {
                         gInstance.changePathcolor(this, c.toHexString());
                     }
@@ -2528,20 +2465,20 @@ $(function () {
 
         showHideToolTip: function () {
             _logger.addLog("graph.js showHideToolTip");
-            gInstance.showToolTip = false;
-            d3.select("#tooltip").style("display", "none");
-
-            if ($(this).prop("checked") === true) {
-                gInstance.showToolTip = true;
+            gInstance.showToolTip = this.checked;
+            if (!gInstance.showToolTip) {
+                d3.select("#tooltip").style("display", "none");
             }
         },
 
         showHideNodeValues: function () {
             _logger.addLog("graph.js showHideNodeValues");
-            gInstance.showNodeValues = false;
+            gInstance.showNodeValues = this.checked;
 
-            if ($(this).prop("checked") === true) {
-                gInstance.showNodeValues = true;
+            if (gInstance.dpie) {
+                gInstance.drawPie();
+            } else {
+                gInstance.draw(gInstance.labelIndex);
             }
         },
 
@@ -2559,8 +2496,8 @@ $(function () {
 
             $(".view_attr_legend").html("<li><input type='text' class='color_pick' id='viewBC' value='" + this.svgBGColor + "'/>&nbsp;Background color</li>");
 
-            $("#viewBC").spectrum({ color: this.svgBGColor });
             $("#viewBC").spectrum({
+                color: this.svgBGColor,
                 change: function (c) {
                     d3.select("#svg-container").style("background-color", c.toHexString());
                     d3.select("#viewer").style("background-color", c.toHexString());
@@ -2585,8 +2522,8 @@ $(function () {
 
             $(".attr_legend").html(s);
 
-            $("#edgeDC").spectrum({ color: this.defaultEdgeColor });
             $("#edgeDC").spectrum({
+                color: this.defaultEdgeColor,
                 change: function (c) {
                     gInstance.changeEdgeColor(c.toHexString());
                 }
@@ -2668,7 +2605,7 @@ $(function () {
                     gInstance._fs.createReadStream(_path)
                         .pipe(csv())
                         .on('headers', (headers) => {
-                            console.log(`First header: ${headers[0]}`)
+                            _logger.addLog("writeDataToFile first header: " + headers[0]);
                             for (var i = 2; i <= headers.length; i++) {
                                 if ($("#ancb_" + i).prop("checked") === true) {
                                     cols.push(headers[i - 1]);
@@ -2873,7 +2810,6 @@ $(function () {
             //_logger.addLog("graph.js ticked");
             gInstance.link
                 .attr("x1", function (d) {
-                    var a = d.source;
                     return d.source.x;
                 })
                 .attr("y1", function (d) {
@@ -3064,38 +3000,26 @@ $(function () {
             d3.select("#tooltip").style("display", "block");
             gInstance.tooltipDiv.html(tt);
 
-            if (d3.select("#tooltip")) {
-                var maxW = $(window).width() - 100;
-                var maxH = $(window).height() - 100;
-                var element = d3.select('#tooltip').node();
-                var tt_right = element.getBoundingClientRect().right;
-                var tt_left = element.getBoundingClientRect().left;
-                var tt_top = element.getBoundingClientRect().top;
-                var tt_bottom = element.getBoundingClientRect().bottom;
-                var tt_width = tt_right - tt_left;
-                var tt_height = tt_bottom - tt_top;
+            // Clamp tooltip so it never overflows the viewport.
+            var maxW   = $(window).width()  - 100;
+            var maxH   = $(window).height() - 100;
+            var ttRect = d3.select('#tooltip').node().getBoundingClientRect();
+            var tt_width  = ttRect.right  - ttRect.left;
 
-                if (tt_right >= maxW) {
-                    d3.select("#tooltip").style("left", (newX - (2 * offsetX) - tt_width) + "px");
-                }
-
-                if (tt_bottom >= maxH) {
-                    d3.select("#tooltip").style("top", (newY - (tt_bottom - maxH)) + "px");
-                }
+            if (ttRect.right >= maxW) {
+                d3.select("#tooltip").style("left", (newX - (2 * offsetX) - tt_width) + "px");
+            }
+            if (ttRect.bottom >= maxH) {
+                d3.select("#tooltip").style("top", (newY - (ttRect.bottom - maxH)) + "px");
             }
         },
 
         nodeMouseOut: function () {
-            //_logger.addLog("graph.js nodeMouseOut");
             if (!gInstance.showToolTip) {
                 return false;
             }
-
             d3.select("#tooltip").style("display", "none");
-            gInstance.tooltipDiv.transition()
-                .duration(500);
             gInstance.tooltipDiv.html("");
-            //gInstance.selectedNodeId = -1;
         },
 
         getFeatureWidth: function (d) {
@@ -3140,20 +3064,25 @@ $(function () {
         convertHexToRGB: function (hex_col) {
             _logger.addLog("graph.js convertHexToRGB");
             if (hex_col[0] === '#')
-                hex_col = hex_col.slice(1, hex_col.length);
+                hex_col = hex_col.slice(1);
 
-            if (hex_col.length < 6 && hex_col.length !== 3)
-                return [0, 0, 0];
-            else if (hex_col.length > 3 && hex_col.length !== 6)
-                return [0, 0, 0];
-            else if (hex_col.length < 3 || hex_col.length > 6)
+            // Only 3-char and 6-char hex colours are valid
+            if (hex_col.length !== 3 && hex_col.length !== 6)
                 return [0, 0, 0];
 
             if (hex_col.length === 3) {
-                return [this.convertHexToDec("" + hex_col[0] + hex_col[0]), this.convertHexToDec("" + hex_col[1] + hex_col[1]), this.convertHexToDec("" + hex_col[2] + hex_col[2])];
+                return [
+                    this.convertHexToDec(hex_col[0] + hex_col[0]),
+                    this.convertHexToDec(hex_col[1] + hex_col[1]),
+                    this.convertHexToDec(hex_col[2] + hex_col[2])
+                ];
             }
 
-            return [this.convertHexToDec("" + hex_col[0] + hex_col[1]), this.convertHexToDec("" + hex_col[2] + hex_col[3]), this.convertHexToDec("" + hex_col[4] + hex_col[5])];
+            return [
+                this.convertHexToDec(hex_col[0] + hex_col[1]),
+                this.convertHexToDec(hex_col[2] + hex_col[3]),
+                this.convertHexToDec(hex_col[4] + hex_col[5])
+            ];
         },
 
         convertDecToHex: function (dec_val) {
@@ -3184,10 +3113,9 @@ $(function () {
             this.dpie = false;
             this.labelIndex = index;
 
-            if (d3.selectAll("#legends")) {
-                d3.selectAll("#legends").remove();
-                d3.selectAll("linearGradient").remove();
-            }
+            // .remove() on an empty selection is a no-op, so no guard needed.
+            d3.selectAll("#legends").remove();
+            d3.selectAll("linearGradient").remove();
 
             this.g.remove();
             this.g = this.svg.append("g").attr("class", "everything");
@@ -3621,9 +3549,9 @@ $(function () {
             $("#myJsonDropdown").on("change", function () {
                 //$("#myJsonDropdown a").removeClass("seldw");
                 var $opt = $(this).find('option:selected');
-                var atr = eval($opt.attr('value'));
-                gInstance.fileCIndex = atr[1];//$opt.attr('seq');
-                gInstance.fileRIndex = atr[0];//$opt.attr('row');
+                var atr = JSON.parse($opt.attr('value'));
+                gInstance.fileCIndex = atr[1];
+                gInstance.fileRIndex = atr[0];
 
                 gInstance.loadData();
             });
@@ -3713,86 +3641,44 @@ $(function () {
 
         loadMapperWindow: function () {
             _logger.addLog("graph.js loadMapperWindow");
-            const modalPath = this._path.join('file://', __dirname, 'mapper.html');
-            console.log("modalPath: " + modalPath);
+            var modalPath = this._path.join('file://', __dirname, 'mapper.html');
+            var win    = require('@electron/remote').getCurrentWindow();
+            var mBound = win.webContents.getOwnerBrowserWindow().getBounds();
+            var winW   = mBound.width  - 80;
+            var winH   = mBound.height - 80;
 
-            const ipc = require('electron').ipcRenderer;
-            let win = require('@electron/remote').getCurrentWindow();//ipc.sendSync('get-parent', '');
+            _logger.addLog('Width:' + mBound.width + ', height:' + mBound.height);
 
-
-            let mBound = win.webContents.getOwnerBrowserWindow().getBounds();
-
-            _logger.addLog('Width:'+mBound.width+', height:'+mBound.height);
-
-            console.log("wp: " + this.workspace.wd);
-            if (this.workspace.wd.length === 0) {
-
-                _logger.addLog("graph.js load new @electron/remote");
-                //const { BrowserWindow } = require('electron').remote;
-                const {BrowserWindow } = require('@electron/remote');
-
-                //clog.transports.file.getFile();
+            var openMapper = function () {
+                if (cWin) { cWin.destroy(); cWin = null; }
+                var BrowserWindow = require('@electron/remote').BrowserWindow;
                 cWin = new BrowserWindow({
-                    width: mBound.width - 80,
-                    height: mBound.height - 80,
-                    parent: win,//require('@electron/remote').getCurrentWindow(),
+                    width: winW,
+                    height: winH,
+                    parent: require('@electron/remote').getCurrentWindow(),
                     title: "Create a mapper object",
                     modal: true,
                     webPreferences: {
-                        //sandbox: true,
                         nodeIntegration: true,
                         contextIsolation: false,
-                        enableRemoteModule: true,
+                        enableRemoteModule: true
                     }
                 });
-                // Open the DevTools.
-                //cWin.webContents.openDevTools();
-
                 cWin.on('closed', function () {
                     cWin = null;
-                    console.log("exit the modal");
-
                     gInstance.reload();
-
                 });
-
-                _logger.addLog("graph.js loading path: "+modalPath);
                 cWin.loadURL(modalPath);
-
-                _logger.addLog("graph.js loading show");
                 cWin.show();
+            };
+
+            // Open immediately when no workspace is set yet
+            if (this.workspace.wd.length === 0) {
+                openMapper();
             }
 
-            $("#mapperModalBtn").on("click", () => {
-                if (cWin) cWin = null;
-
-                //const { BrowserWindow } = require('electron').remote;
-                const { BrowserWindow } = require('@electron/remote');
-                cWin = new BrowserWindow({
-                    width: mBound.width - 80,
-                    height: mBound.height - 80,
-                    parent: require('@electron/remote').getCurrentWindow(),
-                    title: "Create a mapper object",
-                    webPreferences: {
-                        //sandbox: true,
-                        nodeIntegration: true,
-                        contextIsolation: false,
-                        enableRemoteModule: true,
-                    }
-                });
-                // Open the DevTools.
-                //cWin.webContents.openDevTools();
-
-                cWin.on('close', function () {
-                    cWin = null;
-
-                    gInstance.reload();
-                });
-
-                cWin.loadURL(modalPath);
-                cWin.show();
-            });
-
+            // Use .off/.on to prevent duplicate handlers if loadMapperWindow is called again
+            $("#mapperModalBtn").off("click.mapperWin").on("click.mapperWin", openMapper);
         },
 
         getStoredData: function (ofn) {
@@ -3803,7 +3689,7 @@ $(function () {
 
                 this._fs.writeFileSync(_common.getPath([__dirname, "tmp.sp"]), '');
             } catch (err) {
-                console.log("Error to read data at getStoredData: " + err.message);
+                _logger.addLog("Error in getStoredData: " + err.message);
             }
         },
 
@@ -3896,19 +3782,6 @@ $(function () {
     $("#colDropdown span.anchor").on("click", function () {
         $("#colDropdown ul.items").toggle();
     });
-
-
-
-    /*$(".dropbtn").on("click", function () {
-     $("#myJsonDropdown").hide();
-     $("#myDropdown").toggle();
-     });
-
-     $(".dropjbtn").on("click", function () {
-     $("#myDropdown").hide();
-     $("#myJsonDropdown").toggle();
-     //$("#myJsonDropdown .dropdown-content").toggleClass("show");
-     });*/
 
     $(".path-show").click(function (e) {
         e.preventDefault();

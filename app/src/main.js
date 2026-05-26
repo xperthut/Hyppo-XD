@@ -11,7 +11,16 @@ process.traceProcessWarnings = true;
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
 
-require('@electron/remote/main').initialize();
+const remote = require('@electron/remote/main');
+remote.initialize();
+
+// Enable @electron/remote for every WebContents that is created — including
+// child BrowserWindows opened from the renderer via remote.BrowserWindow.
+// This must be registered before any window is created so the event fires
+// for the very first window too.
+app.on('web-contents-created', (_event, webContents) => {
+  remote.enable(webContents);
+});
 
 function createWindow () {
 	const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
@@ -29,8 +38,6 @@ function createWindow () {
       enableRemoteModule: true,
     }
   });
-
-
 
   // and load the index.html of the app.
   win.loadFile('src/view/topoview.html');

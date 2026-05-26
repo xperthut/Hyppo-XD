@@ -5,12 +5,15 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <!--
-            CSP note: 'unsafe-inline' is required by D3 and jQuery for inline
-            event handlers and style manipulation. 'unsafe-eval' is required by
-            the Electron contextIsolation:false + nodeIntegration:true setup.
+            CSP note:
+            - 'unsafe-inline'/'unsafe-eval' required by D3/jQuery and Electron
+              (contextIsolation:false + nodeIntegration:true).
+            - d3js.org  — D3 v4 core library.
+            - unpkg.com — d3-require / d3-let / d3-view (modal rendering).
+            - fonts.googleapis.com / fonts.gstatic.com — Roboto font used by d3-view.
             Tighten further if contextIsolation is enabled in the future.
         -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com https://ssl.gstatic.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://use.fontawesome.com 'unsafe-inline'; font-src 'self' https://use.fontawesome.com data:; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com;" />
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://d3js.org https://unpkg.com https://www.googletagmanager.com https://www.google-analytics.com https://ssl.gstatic.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://use.fontawesome.com https://fonts.googleapis.com http://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://use.fontawesome.com https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://fonts.gstatic.com https://unpkg.com;" />
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" />
         <link rel="stylesheet" href="./../assets/css/main.css" />
         <link rel="stylesheet" href="./../assets/css/dropdown.css" />
@@ -30,6 +33,10 @@
 
     </head>
     <body class="is-loading-0 is-loading-1 is-loading-2">
+        <!-- Offline notification banner (hidden by default) -->
+        <div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#c0392b;color:#fff;text-align:center;padding:6px 12px;font-size:13px;">
+          <i class="fas fa-wifi" style="margin-right:6px;"></i>No internet connection — some features may not work.
+        </div>
         <form style="display: none" id="frm">
             <input type="hidden" id="type" name="type" />
             <input type="hidden" id="data" name="data" />
@@ -155,7 +162,6 @@
                 <div class="details">
                     <span>Instructions</span>
                     <ol>
-                        <li style='color:red'>I Will place a set of video turotials here.</li>
                         <li>Select a CSV data file from available list</li>
                         <li>Select a graph file to visualize</li>
                         <li>Mark/unmark to show/hide a connected component</li>
@@ -173,53 +179,106 @@
             <!-- Footer -->
             <footer id="footer">
                 <ul class="copyright text-center">
-                    <li>&copy; 2018&ndash;<script>document.write((new Date()).getFullYear());</script> Methun</li>
+                    <li>&copy; 2018&ndash;<span id="copyright-year"></span> Methun</li>
                     <li>Kamruzzaman</li>
 
                 </ul>
             </footer>
         </div>
-        <!-- Scripts -->
+        <!-- ═══════════════════════════════════════════════════════════════════
+             Script loading strategy
+             ───────────────────────────────────────────────────────────────────
+             Electron (nodeIntegration:true) exposes `module`/`exports` in the
+             renderer. UMD bundles (D3, selectize, d3-selection-multi, d3-view)
+             detect this and try require() for their sub-packages — which are
+             not in node_modules — and crash.  We stash/restore `module` around
+             each UMD block so those bundles use the browser-global code path.
+
+             Load order:
+               1. jQuery / skel / main  (module intact — jquery IS installed)
+               2. module = undefined    → UMD bundles set window globals
+               3. d3, selectize, d3-selection-multi, spectrum, node-pie
+               4. module = restore      → set window.d3 for app scripts
+               5. common / logger / graph  (need require() AND window.d3)
+               6. module = undefined    → d3-view UMD chain
+               7. d3-require / d3-let / d3-view
+               8. module = restore
+               9. modal / sankey        (use window.d3 and d3-view globals)
+             ═══════════════════════════════════════════════════════════════════ -->
+
+        <!-- 1. Bootstrap: jQuery and layout helpers (require works fine here) -->
         <script src="./../assets/js/jquery.min.js"></script>
         <script src="./../assets/js/skel.min.js"></script>
-        <!--[if lte IE 8]><script src="./../assets/js/ie/respond.min.js"></script><![endif]-->
         <script>window.$ = window.jQuery = require('jquery');</script>
         <script src="./../assets/js/main.js"></script>
-        <script type="text/javascript">
-                        $('.toggle').click(function () {
-                            $('.caption').toggle();
-                        })
+        <script>$('.toggle').click(function () { $('.caption').toggle(); });</script>
+
+        <!-- 2. Hide `module` so UMD bundles take the browser-global code path -->
+        <script>
+          window.__electronModule = (typeof module !== 'undefined') ? module : undefined;
+          if (window.__electronModule !== undefined) { module = undefined; }
         </script>
+
+        <!-- 3. UMD bundles: set window.d3, window.Selectize, window.Spectrum -->
         <script src="https://d3js.org/d3.v4.js"></script>
         <script src="./../assets/js/d3/node-pie.js"></script>
         <script src="./../assets/js/selectize.js"></script>
-        <script src="./../assets/js/d3/common.js"></script>
-        <script src="./../assets/js/d3/logger.js"></script>
-        <script src="./../assets/js/d3/graph.js"></script>
         <script src="./../assets/js/d3-selection-multi.v1.js"></script>
         <script src="./../assets/js/spectrum.js"></script>
 
+        <!-- 4. Restore `module`; expose window.d3 for app scripts that follow -->
+        <script>
+          if (window.__electronModule !== undefined) {
+            module = window.__electronModule;
+            delete window.__electronModule;
+          }
+          // Belt-and-suspenders: ensure window.d3 is set in all Electron builds.
+          if (typeof window.d3 === 'undefined' && typeof d3 !== 'undefined') {
+            window.d3 = d3;
+          }
+        </script>
+
+        <!-- 5. App scripts: use require() for Electron APIs AND window.d3 for visualisation -->
+        <script src="./../assets/js/d3/common.js"></script>
+        <script src="./../assets/js/d3/logger.js"></script>
+        <script src="./../assets/js/d3/graph.js"></script>
+
+        <!-- 6. Hide `module` again for the d3-view UMD chain from unpkg -->
+        <script>
+          window.__electronModule = (typeof module !== 'undefined') ? module : undefined;
+          if (window.__electronModule !== undefined) { module = undefined; }
+        </script>
+
+        <!-- 7. d3-view UMD chain (d3-require must load before d3-let, d3-let before d3-view) -->
         <script src="https://unpkg.com/d3-require@0.4.5/build/d3-require.js"></script>
         <script src="https://unpkg.com/d3-let@0.3.2/build/d3-let.js"></script>
         <script src="https://unpkg.com/d3-view@0.9.3/build/d3-view.js"></script>
+
+        <!-- 8. Restore `module` for final app scripts -->
+        <script>
+          if (window.__electronModule !== undefined) {
+            module = window.__electronModule;
+            delete window.__electronModule;
+          }
+        </script>
+
+        <!-- 9. App scripts that depend on d3-view (modal) and window.d3 (sankey) -->
         <script src="./../assets/js/d3/modal.js"></script>
         <script src="./../assets/js/d3/sankey.js"></script>
 
         <script>
-          // Online-status check: placed here (after DOM is ready) so it can
-          // be cleared on unload. The interval id is stored so the browser
-          // can reclaim it when the window closes.
+          // Set copyright year without document.write
+          document.getElementById('copyright-year').textContent = new Date().getFullYear();
+
+          // Non-blocking offline indicator: show/hide a banner instead of alert().
           (function () {
-            function warnOffline() {
-              if (!navigator.onLine) {
-                alert("No internet connection. Some features may not work.");
-              }
+            var banner = document.getElementById('offline-banner');
+            function updateBanner() {
+              banner.style.display = navigator.onLine ? 'none' : 'block';
             }
-            warnOffline();
-            var _onlineCheckInterval = setInterval(warnOffline, 10000);
-            window.addEventListener('unload', function () {
-              clearInterval(_onlineCheckInterval);
-            });
+            updateBanner();
+            window.addEventListener('offline', updateBanner);
+            window.addEventListener('online',  updateBanner);
           }());
         </script>
     </body>

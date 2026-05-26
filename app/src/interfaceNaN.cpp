@@ -1,25 +1,10 @@
 #include <nan.h>
 #include <hyppox.h>
 
-// AddonData holds per-addon-instance state and is cleaned up via an
-// environment cleanup hook so it is safe with context-aware (NAPI) loading.
-class AddonData {
- public:
-  explicit AddonData(v8::Isolate* isolate) : call_count(0) {
-    node::AddEnvironmentCleanupHook(isolate, DeleteInstance, this);
-  }
-
-  int call_count;
-
-  static void DeleteInstance(void* data) {
-    delete static_cast<AddonData*>(data);
-  }
-};
-
 // ---------------------------------------------------------------------------
 // Main entry point called from JavaScript: addon.GetMessage(instruction, arg)
 // ---------------------------------------------------------------------------
-void GetMessage(const v8::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(GetMessage) {
   v8::Isolate* isolate = info.GetIsolate();
 
   if (info.Length() < 1) {
@@ -97,17 +82,12 @@ void GetMessage(const v8::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 // ---------------------------------------------------------------------------
-// Context-aware module initialisation (supports multi-context / worker threads)
+// Module initialisation — NAN_MODULE_WORKER_ENABLED makes the addon safe for
+// use in Worker threads and abstracts V8 API version differences across
+// Electron/Node.js releases.
 // ---------------------------------------------------------------------------
-NODE_MODULE_INIT() {
-  v8::Isolate* isolate = context->GetIsolate();
-
-  AddonData* data = new AddonData(isolate);
-
-  v8::Local<v8::External> external = v8::External::New(isolate, data);
-
-  exports->Set(context,
-               v8::String::NewFromUtf8(isolate, "GetMessage").ToLocalChecked(),
-               v8::FunctionTemplate::New(isolate, GetMessage, external)
-                   ->GetFunction(context).ToLocalChecked()).FromJust();
+NAN_MODULE_INIT(InitAll) {
+  Nan::Export(target, "GetMessage", GetMessage);
 }
+
+NAN_MODULE_WORKER_ENABLED(NODE_GYP_MODULE_NAME, InitAll)

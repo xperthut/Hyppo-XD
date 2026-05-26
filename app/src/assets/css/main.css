@@ -1,5 +1,5 @@
 @import url("https://use.fontawesome.com/releases/v5.0.8/css/all.css");
-@import url("http://fonts.googleapis.com/css?family=Roboto:100");
+@import url("https://fonts.googleapis.com/css?family=Roboto:100");
 
 /*
 Theme Name:Lens
@@ -29,6 +29,7 @@ article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, 
 
 body {
     line-height: 1;
+    -webkit-text-size-adjust: none;
 }
 .logohead img {
     border-radius: 50%;
@@ -49,10 +50,6 @@ blockquote:before, blockquote:after, q:before, q:after {
 table {
     border-collapse: collapse;
     border-spacing: 0;
-}
-
-body {
-    -webkit-text-size-adjust: none;
 }
 
 /* Box Model */
@@ -81,13 +78,9 @@ body {
 }
 
 body.is-loading-0 *, body.is-loading-0 *:before, body.is-loading-0 *:after {
-    -moz-animation: none !important;
     -webkit-animation: none !important;
-    -ms-animation: none !important;
     animation: none !important;
-    -moz-transition: none !important;
     -webkit-transition: none !important;
-    -ms-transition: none !important;
     transition: none !important;
 }
 
@@ -548,27 +541,16 @@ input[type="checkbox"]+label{
     position: relative;
 }
 
+/* ── Radio button pseudo-element ── */
 input[type="radio"] + label:before{
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
-    font-family: FontAwesome;
+    font-family: "Font Awesome 5 Free";
     font-style: normal;
-    font-weight: normal;
+    font-weight: 400;
     text-transform: none !important;
-}
-
-input[type="checkbox"] + label:before{
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-font-smoothing: antialiased;
-    font-family: FontAwesome;
-    font-style: normal;
-    font-weight: normal;
-    text-transform: none !important;
-}
-
-input[type="radio"] + label:before{
     background: transparent;
-    border-radius: 4px;
+    border-radius: 100%;
     border: solid 1px #ccc;
     content: '';
     display: inline-block;
@@ -581,11 +563,30 @@ input[type="radio"] + label:before{
     width: 1.65em;
 }
 
+input[type="radio"]:checked + label:before{
+    background-color: #555;
+    border-color: #555;
+    color: #fff;
+    content: '\f00c';   /* fa-check — Solid */
+    font-weight: 900;
+}
+
+input[type="radio"]:focus + label:before{
+    border-color: #00D3B7;
+}
+
+/* ── Checkbox pseudo-element ── */
 input[type="checkbox"] + label:before{
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    font-family: "Font Awesome 5 Free";
+    font-style: normal;
+    font-weight: 400;
+    text-transform: none !important;
     background: transparent;
     border-radius: 4px;
     border: none;
-    content: '\f096';
+    content: '\f0c8';   /* fa-square Regular = outline square */
     display: inline-block;
     height: 1.65em;
     left: 0;
@@ -596,31 +597,13 @@ input[type="checkbox"] + label:before{
     width: 1.65em;
 }
 
-input[type="radio"]:checked + label:before{
-    background-color: #555;
-    border-color: #555;
-    color: #fff;
-    content: '\f00c';
-}
-
 input[type="checkbox"]:checked + label:before{
-    content: '\f046';
-}
-
-input[type="radio"]:focus + label:before{
-    border-color: #00D3B7;
+    content: '\f14a';   /* fa-check-square Regular = outline square with check */
+    color: #00D3B7;
 }
 
 input[type="checkbox"]:focus + label:before{
-    border-color: #00D3B7;
-}
-
-input[type="radio"] + label:before{
-    border-radius: 100%;
-}
-
-input[type="checkbox"] + label:before{
-    border-radius: 100%;
+    outline: 1px dotted #00D3B7;
 }
 
 ::-webkit-input-placeholder {

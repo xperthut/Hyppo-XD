@@ -14,7 +14,7 @@ CommonOps.prototype={
     try {
       return JSON.parse(this._fs.readFileSync(this.getPath([__dirname, "wp.sp"]), 'utf-8'));
     }catch(err) {
-      console.log("getWorkSpace error:"+ err.message);
+      this._logger.addLog("getWorkSpace error: " + err.message);
       return {wd:"", files:[]};
     }
   },
@@ -23,10 +23,8 @@ CommonOps.prototype={
     this._logger.addLog("common.js saveWorkSpace");
     try {
       this._fs.writeFileSync(this.getPath([__dirname, "wp.sp"]), JSON.stringify(wp));
-
-      console.log("wp.sp exists: " + this._fs.existsSync(this._path.resolve(__dirname + "/wp.sp")));
     }catch(err) {
-      console.log("Can not write working directory JSON: " + err.message);
+      this._logger.addLog("saveWorkSpace error: " + err.message);
     }
   },
 
@@ -38,20 +36,16 @@ CommonOps.prototype={
       _tp = this._path.join(_tp, p[i]);
     }
 
-    console.log(_tp);
-
     return this._path.resolve(_tp);
   }
 };
 
 function showBusyIndicator(){
   $("#busyDiv").css("display", "block");
-  console.log("Start busy indicator");
 }
 
 function hideBusyIndicator(){
   $("#busyDiv").css("display", "none");
-  console.log("Stop busy indicator");
 }
 
 function isNumberKey(evt){
