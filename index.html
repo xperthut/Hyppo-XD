@@ -1,73 +1,182 @@
 <!DOCTYPE html>
-<html><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href="css/css.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="css/style.css" media="screen" type="text/css">
-    <link rel="stylesheet" href="css/print.css" media="print" type="text/css">
-    <link rel="shortcut icon" href="logo/logo.ico">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-    <title>Hyppo-XD: A desktop based application to build mapper complex.</title>
-  </head>
+  <title>Hyppo-XD — Desktop Mapper Complex Builder</title>
+  <meta name="description" content="Hyppo-XD is a desktop application to build mapper complexes for topological data analysis.">
 
-  <body>
-    <header>
-      <div class="inner">
-        <a href="https://github.com/xperthut/HYPPO-XD">
-          <img src="images/git-header.png" width="80%" alt="Hyppo-XD">
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="logo/logo.ico">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css" media="screen">
+  <link rel="stylesheet" href="css/print.css" media="print">
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+
+<body>
+
+  <!-- ===== Sticky Navigation ===== -->
+  <nav class="site-nav">
+    <a href="#" class="nav-logo">Hyppo&#8209;XD</a>
+    <ul class="nav-links">
+      <li><a href="#data-pre-processing">Data Prep</a></li>
+      <li><a href="#setup-installation">Installation</a></li>
+      <li><a href="#user-guide">UI Guide</a></li>
+      <li>
+        <a href="https://github.com/xperthut/HYPPO-XD" target="_blank" rel="noopener" class="nav-btn">
+          <!-- GitHub icon -->
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+              0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+              -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87
+              2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+              0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82
+              a7.67 7.67 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82
+              2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87
+              3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2
+              0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          GitHub
         </a>
-        <a href="https://github.com/xperthut/HYPPO-XD" class="button"></a>
-      </div>
-    </header>
+      </li>
+    </ul>
+  </nav>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h2>Headlines</h2>
-          <ul>
-            <li><a href="#data-pre-processing">Data pre&ndash;processing</a></li>
-            <li><a href="#setup-installation">Setup and installation</a></li>
-              <li><a href="#user-guide">Hyppo&ndash;XD UI</a></li>
-          </ul>
-          <h2 id="data-pre-processing">Data pre&ndash;processing</h2>
-          <p>Our solution only accept comma separated CSV file as input. The csv file should have following properties:</p>
-          <ol>
-            <li>
-              <p>
-                <strong>Column name</strong>: The first row should contain the column name. Do not place <i>space</i> with in a column name. Try to avoid long name and use meaningful name.
-              </p>
-            </li>
-            <li>
-              <p>
-                <strong>First column</strong>: The first column should be a row index column. If the data set does not contain any row index column then add this column. This column should be the very first column.
-                <img src="images/img1.png" width="80%"/>
-              </p>
-            </li>
-            <li>
-              <p>
-                <strong>Cleanup</strong>: Follow standard data imputation techniques for missing data.
-              </p>
-            </li>
-          </ol>
-          <h2 id="setup-installation">Setup and installation</h2>
-          <p>
-            At first download the software from <a href="https://github.com/xperthut/Hyppo-XD/releases" target="_blank">here</a>. You also need to complete following steps before installing the software in your machine.<br />
-            <ol>
-              <li> Check your current GCC version, we need GCC at least 5.0</li>
-              <li> Download <a href="https://www.boost.org/" target="_blank">boost</a> library and install it. (Mac users: please do not use homebrew or Macport to install this library.)</li>
-              <!--<li> Install Python at least 3.0 </li>
-              <li> Install Java </li> -->
-            </ol>
-          </p>
-          <h2 id="user-guide">Hyppo&ndash;XD UI</h2>
-          <p>
-              <img src="images/tool.png" width="90%"/>
-          </p>
+  <!-- ===== Hero / Full-Width Banner ===== -->
+  <section class="hero">
+    <img src="images/git-header.png" alt="Hyppo-XD — Build Mapper Complexes" class="hero-img">
+    <div class="hero-overlay">
+      <h1 class="hero-title">Hyppo&#8209;XD</h1>
+      <p class="hero-subtitle">
+        A powerful desktop application for building Mapper complexes and
+        exploring topological data analysis.
+      </p>
+      <div class="hero-actions">
+        <a href="https://github.com/xperthut/Hyppo-XD/releases" target="_blank" rel="noopener" class="btn-primary">
+          ⬇&nbsp; Download
+        </a>
+        <a href="https://github.com/xperthut/HYPPO-XD" target="_blank" rel="noopener" class="btn-outline">
+          View on GitHub
+        </a>
       </div>
     </div>
-</body></html>
+  </section>
+
+  <!-- ===== Quick-Jump TOC ===== -->
+  <nav class="toc-strip" aria-label="Page sections">
+    <span class="toc-label">Jump to:</span>
+    <a href="#data-pre-processing">📋 Data Pre-processing</a>
+    <a href="#setup-installation">⚙️ Setup &amp; Installation</a>
+    <a href="#user-guide">🖥️ Hyppo-XD UI</a>
+  </nav>
+
+  <!-- ===== Main Content ===== -->
+  <main class="page-content">
+
+    <!-- Data Pre-processing -->
+    <section id="data-pre-processing" class="section-card">
+      <h2>
+        <span class="icon">📋</span>
+        Data Pre&#8209;processing
+      </h2>
+      <p>
+        Hyppo-XD accepts <strong>comma-separated CSV files</strong> as input.
+        Prepare your dataset according to the following rules before loading it into the application.
+      </p>
+      <ol class="steps">
+        <li>
+          <div>
+            <strong>Column names</strong> — The first row must contain column headers.
+            Avoid spaces within a column name and keep names short and meaningful.
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>First column: row index</strong> — The very first column must be a
+            row-index column. If your dataset does not already have one, add it manually.
+            <img src="images/img1.png" alt="CSV format example" class="content-img">
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Data cleanup</strong> — Apply standard
+            <a href="https://en.wikipedia.org/wiki/Imputation_(statistics)" target="_blank" rel="noopener">
+              data imputation
+            </a>
+            techniques to handle any missing values before import.
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Setup & Installation -->
+    <section id="setup-installation" class="section-card">
+      <h2>
+        <span class="icon">⚙️</span>
+        Setup &amp; Installation
+      </h2>
+      <p>
+        Download the latest release from the
+        <a href="https://github.com/xperthut/Hyppo-XD/releases" target="_blank" rel="noopener">
+          Releases page
+        </a>
+        and complete the prerequisites below before installing.
+      </p>
+      <ol class="steps">
+        <li>
+          <div>
+            <strong>GCC ≥ 5.0</strong> — Check your compiler version with
+            <code>gcc --version</code>. Upgrade if it is below 5.0.
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Boost library</strong> — Download and install the
+            <a href="https://www.boost.org/" target="_blank" rel="noopener">Boost</a>
+            C++ library from the official website.
+            <em>macOS users: do <strong>not</strong> use Homebrew or MacPorts for this — install from source.</em>
+          </div>
+        </li>
+      </ol>
+
+      <!-- Download callout -->
+      <div class="callout">
+        <div class="callout-text">
+          <strong>Ready to install?</strong>
+          <span>Grab the latest Hyppo-XD binary for your platform.</span>
+        </div>
+        <a href="https://github.com/xperthut/Hyppo-XD/releases" target="_blank" rel="noopener" class="btn-white">
+          ⬇&nbsp; Download Release
+        </a>
+      </div>
+    </section>
+
+    <!-- UI Guide -->
+    <section id="user-guide" class="section-card">
+      <h2>
+        <span class="icon">🖥️</span>
+        Hyppo&#8209;XD UI
+      </h2>
+      <p>
+        The screenshot below shows the main Hyppo-XD interface.
+        Load your CSV, configure the mapper parameters, and visualize the resulting complex directly within the application.
+      </p>
+      <img src="images/tool.png" alt="Hyppo-XD application interface" class="content-img">
+    </section>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <p>
+      &copy; 2024 Hyppo-XD &mdash; Open-source project hosted on
+      <a href="https://github.com/xperthut/HYPPO-XD" target="_blank" rel="noopener">GitHub</a>.
+    </p>
+  </footer>
+
+</body>
+</html>
