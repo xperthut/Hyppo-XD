@@ -43,7 +43,7 @@
     "nan": "^2.16.0"
   },
   "devDependencies": {
-    "@electron/rebuild": "^3.7.2",
+    "@electron/rebuild": "^4.0.4",
     "asar": "^3.2.0",
     "csv-parser": "^2.3.5",
     "electron": "^42.2.0",
