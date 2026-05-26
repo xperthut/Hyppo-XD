@@ -56,9 +56,6 @@
         exploring topological data analysis.
       </p>
       <div class="hero-actions">
-        <a href="https://github.com/xperthut/Hyppo-XD/releases" target="_blank" rel="noopener" class="btn-primary">
-          ⬇&nbsp; Download
-        </a>
         <a href="https://github.com/xperthut/HYPPO-XD" target="_blank" rel="noopener" class="btn-outline">
           View on GitHub
         </a>
@@ -120,11 +117,11 @@
         Setup &amp; Installation
       </h2>
       <p>
-        Download the latest release from the
-        <a href="https://github.com/xperthut/Hyppo-XD/releases" target="_blank" rel="noopener">
-          Releases page
+        Complete the prerequisites below before installing. A release will be available on
+        <a href="https://github.com/xperthut/HYPPO-XD" target="_blank" rel="noopener">
+          GitHub
         </a>
-        and complete the prerequisites below before installing.
+        soon.
       </p>
       <ol class="steps">
         <li>
@@ -143,14 +140,14 @@
         </li>
       </ol>
 
-      <!-- Download callout -->
+      <!-- Coming soon callout -->
       <div class="callout">
         <div class="callout-text">
-          <strong>Ready to install?</strong>
-          <span>Grab the latest Hyppo-XD binary for your platform.</span>
+          <strong>Release coming soon</strong>
+          <span>Watch the GitHub repository to get notified when the first release drops.</span>
         </div>
-        <a href="https://github.com/xperthut/Hyppo-XD/releases" target="_blank" rel="noopener" class="btn-white">
-          ⬇&nbsp; Download Release
+        <a href="https://github.com/xperthut/HYPPO-XD" target="_blank" rel="noopener" class="btn-white">
+          ★&nbsp; Star on GitHub
         </a>
       </div>
     </section>
@@ -173,10 +170,14 @@
   <!-- ===== Footer ===== -->
   <footer class="site-footer">
     <p>
-      &copy; 2024 Hyppo-XD &mdash; Open-source project hosted on
+      &copy; <span id="copy-year"></span> Hyppo-XD &mdash; Open-source project hosted on
       <a href="https://github.com/xperthut/HYPPO-XD" target="_blank" rel="noopener">GitHub</a>.
     </p>
   </footer>
+
+  <script>
+    document.getElementById('copy-year').textContent = new Date().getFullYear();
+  </script>
 
 </body>
 </html>
