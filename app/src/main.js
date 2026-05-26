@@ -15,10 +15,12 @@ const remote = require('@electron/remote/main');
 remote.initialize();
 
 // Resolve app icons.
-// .icns   — used by BrowserWindow on macOS (title-bar / taskbar on other OSes).
-// .png    — required by app.dock.setIcon() and Linux/Windows BrowserWindow.
-const iconIcns = path.join(__dirname, '..', 'logo', 'icon.icns');
-const iconPng  = path.join(__dirname, '..', 'logo', '1024x1024.png');
+// .icns   — used by BrowserWindow on macOS.
+// .png    — required by app.dock.setIcon() and Linux BrowserWindow.
+// .ico    — used by BrowserWindow on Windows.
+const iconIcns = path.join(__dirname, '..', 'logo', 'logo.icns');
+const iconPng  = path.join(__dirname, '..', 'logo', 'logo.png');
+const iconIco  = path.join(__dirname, '..', 'logo', 'logo.ico');
 
 // Enable @electron/remote for every WebContents that is created — including
 // child BrowserWindows opened from the renderer via remote.BrowserWindow.
@@ -35,7 +37,7 @@ function createWindow () {
   win = new BrowserWindow({
     width: width,
     height: height,
-    icon: process.platform === 'darwin' ? iconIcns : iconPng,
+    icon: process.platform === 'darwin' ? iconIcns : process.platform === 'win32' ? iconIco : iconPng,
     webPreferences: {
 			//sandbox: true,
 			nodeIntegration: true,

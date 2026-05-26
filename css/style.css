@@ -259,7 +259,7 @@ a { color: #2879d0; }
 
 a:hover { color: #2268b2; }
 
-header { padding-top: 5px; padding-bottom: 5px; font-family: 'fontAwesome', 'Helvetica Neue', Helvetica, Arial, serif; background: rgb(255, 202, 0); border-bottom: solid 1px rgb(255, 202, 0); }
+header { padding-top: 5px; padding-bottom: 5px; font-family: 'fontAwesome', 'Helvetica Neue', Helvetica, Arial, serif; background: rgb(255, 255, 255); border-bottom: solid 1px rgb(255, 255, 255); }
 
 header h1 { width: 100%; margin-top: 0; margin-bottom: 0.2em; font-size: 72px; font-weight: normal; line-height: 1; color: #fff; letter-spacing: -1px; }
 

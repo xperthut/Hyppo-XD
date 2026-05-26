@@ -3666,7 +3666,9 @@ $(function () {
                 });
                 cWin.on('closed', function () {
                     cWin = null;
-                    gInstance.reload();
+                    // Guard: the parent renderer may already be gone if the main
+                    // window was closed while the mapper dialog was still open.
+                    try { gInstance.reload(); } catch (e) { /* parent gone */ }
                 });
                 cWin.loadURL(modalPath);
                 cWin.show();

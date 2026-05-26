@@ -1,0 +1,13 @@
+diff --git a/node_modules/electron-log/lib/transports/file/findLogPath.js b/node_modules/electron-log/lib/transports/file/findLogPath.js
+index 5005782..0ad6f64 100644
+--- a/node_modules/electron-log/lib/transports/file/findLogPath.js
++++ b/node_modules/electron-log/lib/transports/file/findLogPath.js
+@@ -67,7 +67,7 @@ function prepareDir(dirPath) {
+     mkDir(dirPath);
+ 
+     try {
+-      fs.accessSync(dirPath, fs.W_OK);
++      fs.accessSync(dirPath, fs.constants.W_OK);
+     } catch (e) {
+       return { or: prepareDir };
+     }
